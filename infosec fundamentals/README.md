@@ -2,7 +2,7 @@
 
 A lightweight, dependency-free interactive animation explaining the fundamentals of Information Security.
 
-![Information Security Animation Preview](preview.png)
+![Information Security Animation Preview](infosec.gif)
 
 ## Features
 
