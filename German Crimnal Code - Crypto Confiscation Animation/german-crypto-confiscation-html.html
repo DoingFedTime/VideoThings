@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>German Criminal Code: Cryptocurrency Confiscation</title>
+  <style>
+    .social-icons {
+      text-align: center;
+      margin-top: 20px;
+    }
+
+    .social-icons a {
+      display: inline-block;
+      margin: 0 10px;
+      font-size: 24px;
+      color: #333;
+      transition: color 0.3s;
+      text-decoration: none; /* Remove underline */
+    }
+
+    .social-icons i {
+      margin-right: 5px; /* Add spacing between icon and text */
+    }
+
+    .social-icons span {
+      display: none; /* Hide text by default */
+    }
+
+    /* Show text only when Font Awesome is not supported */
+    .social-icons a:not(:has(i)) span {
+      display: inline;
+    }
+
+    .social-icons a:hover {
+      color: #007bff;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    
+    body {
+      background-color: #f8f9fa;
+      color: #212529;
+      padding: 2rem;
+      overflow-x: hidden;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      position: relative;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(-20px);
+      animation: fadeDown 0.8s ease-out forwards;
+    }
+    
+    .title {
+      color: #1a237e;
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .subtitle {
+      color: #303f9f;
+      font-size: 1.5rem;
+      font-weight: 500;
+    }
+    
+    .section {
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+      margin-bottom: 2rem;
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    
+    .section-title {
+      color: #303f9f;
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .section-icon {
+      margin-right: 0.75rem;
+      font-size: 1.5rem;
+    }
+    
+    .point {
+      display: flex;
+      margin-bottom: 1rem;
+      opacity: 0;
+      transform: translateX(-10px);
+    }
+    
+    .point-bullet {
+      color: #303f9f;
+      font-weight: bold;
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+    
+    .point-text {
+      color: #37474f;
+      line-height: 1.5;
+    }
+    
+    .highlight {
+      font-weight: 600;
+      color: #303f9f;
+    }
+    
+    .crypto-section {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+    
+    .crypto-content {
+      flex: 1;
+      min-width: 300px;
+    }
+    
+    .crypto-visual {
+      flex: 0 0 150px;
+      margin-left: 2rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .crypto-icon {
+      width: 120px;
+      height: 120px;
+      background-color: #f0f8ff;
+      border-radius: 50%;
+      border: 2px solid #90caf9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 3rem;
+      color: #1565c0;
+      animation: spin 20s linear infinite;
+      opacity: 0;
+    }
+    
+    .key-points {
+      background-color: #e3f2fd;
+      border: 2px solid #90caf9;
+    }
+    
+    .key-point {
+      font-weight: 600;
+      color: #0d47a1;
+    }
+    
+    .example {
+      background-color: #e8f5e9;
+      border: 2px solid #81c784;
+    }
+    
+    .example-text {
+      color: #1b5e20;
+      font-weight: 500;
+    }
+    
+    .bitcoin-amount {
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #f57c00;
+    }
+    
+    .scale-icon {
+      font-size: 2rem;
+      margin-right: 0.75rem;
+      color: #303f9f;
+    }
+    
+    .wallet-row {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 1.5rem;
+      opacity: 0;
+    }
+    
+    .wallet {
+      flex: 0 0 48%;
+      background-color: white;
+      border-radius: 8px;
+      padding: 1rem;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+      border-left: 4px solid;
+      transition: transform 0.3s ease;
+    }
+    
+    .wallet:hover {
+      transform: translateY(-5px);
+    }
+    
+    .wallet.seize {
+      border-left-color: #f44336;
+    }
+    
+    .wallet.confiscate {
+      border-left-color: #9c27b0;
+    }
+    
+    .wallet-title {
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .wallet-icon {
+      margin-right: 0.5rem;
+    }
+    
+    .wallet-text {
+      font-size: 0.9rem;
+      color: #37474f;
+    }
+    
+    @keyframes fadeDown {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+    
+    @keyframes spin {
+      from {
+        transform: rotate(0deg);
+      }
+      to {
+        transform: rotate(360deg);
+      }
+    }
+    
+    @keyframes pulse {
+      0% {
+        transform: scale(1);
+      }
+      50% {
+        transform: scale(1.02);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+    
+    @keyframes highlight {
+      0% {
+        background-color: #e3f2fd;
+      }
+      50% {
+        background-color: #bbdefb;
+      }
+      100% {
+        background-color: #e3f2fd;
+      }
+    }
+    
+    @keyframes glow {
+      0% {
+        box-shadow: 0 0 5px rgba(13, 71, 161, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 15px rgba(13, 71, 161, 0.5);
+      }
+      100% {
+        box-shadow: 0 0 5px rgba(13, 71, 161, 0.3);
+      }
+    }
+  </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">
+        <span class="scale-icon">⚖️</span>
+        Strafgesetzbuch (StGB) – German Criminal Code
+      </h1>
+      <h2 class="subtitle">§§ 73 ff. – Einziehung (Confiscation)</h2>
+    </header>
+    
+    <section id="law-section" class="section">
+      <h3 class="section-title">
+        <span class="section-icon">📜</span>
+        Confiscation Laws
+      </h3>
+      
+      <div id="point1" class="point">
+        <div class="point-bullet">•</div>
+        <div class="point-text">
+          <span class="highlight">§ 73 (1):</span> Property can be confiscated if it was <span class="highlight">gained through or used in a criminal offense</span>.
+        </div>
+      </div>
+      
+      <div id="point2" class="point">
+        <div class="point-bullet">•</div>
+        <div class="point-text">
+          <span class="highlight">§ 73a:</span> Allows for confiscation even if the specific asset can't be directly traced — if there's sufficient belief it was acquired through criminal means.
+        </div>
+      </div>
+      
+      <div id="point3" class="point">
+        <div class="point-bullet">•</div>
+        <div class="point-text">
+          <span class="highlight">§ 76a (4):</span> Even <span class="highlight">without a conviction</span>, seizure is allowed <span class="highlight">if prosecution is not possible</span>, e.g., if the suspect is anonymous, fled, or is outside jurisdiction.
+        </div>
+      </div>
+    </section>
+    
+    <section id="crypto-section" class="section crypto-section">
+      <div class="crypto-content">
+        <h3 class="section-title">
+          <span class="section-icon">🪙</span>
+          Application to Cryptocurrency
+        </h3>
+        
+        <div id="crypto-desc" class="point" style="opacity: 0;">
+          <div class="point-text">
+            Crypto is treated as <span class="highlight">a property-like asset</span> under German law. If law enforcement has <span class="highlight">reasonable suspicion</span> that crypto was used for or acquired via illegal means (e.g., darknet sales, money laundering), they can:
+          </div>
+        </div>
+        
+        <div class="wallet-row" id="wallet-actions">
+          <div class="wallet seize">
+            <h4 class="wallet-title">
+              <span class="wallet-icon">🔒</span>
+              SEIZE
+            </h4>
+            <p class="wallet-text">
+              The wallet or exchange balance (with cooperation or technical access).
+            </p>
+          </div>
+          
+          <div class="wallet confiscate">
+            <h4 class="wallet-title">
+              <span class="wallet-icon">⛔</span>
+              CONFISCATE
+            </h4>
+            <p class="wallet-text">
+              The funds permanently if the case meets forfeiture criteria.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      <div class="crypto-visual">
+        <div id="crypto-icon" class="crypto-icon">₿</div>
+      </div>
+    </section>
+    
+    <section id="key-section" class="section key-points">
+      <h3 class="section-title">
+        <span class="section-icon">🛑</span>
+        Key Points
+      </h3>
+      
+      <div id="key1" class="point">
+        <div class="point-bullet">•</div>
+        <div class="point-text key-point">
+          No conviction required — suspicion is enough for pre-trial seizure.
+        </div>
+      </div>
+      
+      <div id="key2" class="point">
+        <div class="point-bullet">•</div>
+        <div class="point-text key-point">
+          Applies even if the identity of the suspect is unknown.
+        </div>
+      </div>
+      
+      <div id="key3" class="point">
+        <div class="point-bullet">•</div>
+        <div class="point-text key-point">
+          Authorities often get court approval for seizure in absentia (e.g., in darknet cases).
+        </div>
+      </div>
+      
+      <div id="key4" class="point">
+        <div class="point-bullet">•</div>
+        <div class="point-text key-point">
+          Wallets stored on exchanges (like Binance or Kraken) are easier targets due to custodial control.
+        </div>
+      </div>
+    </section>
+    
+    <section id="example-section" class="section example">
+      <h3 class="section-title">
+        <span class="section-icon">💡</span>
+        Real Example
+      </h3>
+      
+      <div id="example-text" class="point" style="opacity: 0;">
+        <div class="point-text example-text">
+          In 2024, Germany seized <span class="bitcoin-amount">50,000 BTC</span> from Movie2k.to suspects without a final conviction. The law supported this based on proceeds of crime under § 73.
+        </div>
+      </div>
+    </section>
+  </div>
+  <div class="social-icons">
+    <a href="https://twitter.com/DoingFedTime" target="_blank">
+      <i class="fab fa-twitter"></i>
+      <span style="font-family: Arial, sans-serif;">Twitter</span>
+    </a>
+    <a href="https://www.linkedin.com/in/doingfedtime/" target="_blank">
+      <i class="fab fa-linkedin"></i>
+      <span style="font-family: Arial, sans-serif;">LinkedIn</span>
+    </a>
+    <a href="https://github.com/DoingFedTime" target="_blank">
+      <i class="fab fa-github"></i>
+      <span style="font-family: Arial, sans-serif;">GitHub</span>
+    </a>
+    <a href="https://www.facebook.com/TheOfficialSamBent/" target="_blank">
+      <i class="fab fa-facebook"></i>
+      <span style="font-family: Arial, sans-serif;">Facebook</span>
+    </a>
+    <a href="https://www.instagram.com/sambentoffical/" target="_blank">
+      <i class="fab fa-instagram"></i>
+      <span style="font-family: Arial, sans-serif;">Instagram</span>
+    </a>
+    <a href="https://www.youtube.com/@sam_bent" target="_blank">
+      <i class="fab fa-youtube"></i>
+      <span style="font-family: Arial, sans-serif;">YouTube</span>
+    </a>
+    <a href="https://www.reddit.com/user/reservesteel9/" target="_blank">
+      <i class="fab fa-reddit"></i>
+      <span style="font-family: Arial, sans-serif;">Reddit</span>
+    </a>
+    <a href="https://doingfedtime.com" target="_blank">
+      <i class="fab fa-mastodon"></i>
+      <span style="font-family: Arial, sans-serif;">Mastodon</span>
+    </a>
+  </div>
+  
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Law section animation
+      setTimeout(() => {
+        document.getElementById('law-section').style.animation = 'fadeDown 0.8s ease-out forwards';
+        
+        setTimeout(() => {
+          document.getElementById('point1').style.animation = 'fadeIn 0.6s ease-out forwards';
+          
+          setTimeout(() => {
+            document.getElementById('point2').style.animation = 'fadeIn 0.6s ease-out forwards';
+            
+            setTimeout(() => {
+              document.getElementById('point3').style.animation = 'fadeIn 0.6s ease-out forwards';
+              
+              // Crypto section animation
+              setTimeout(() => {
+                document.getElementById('crypto-section').style.animation = 'fadeDown 0.8s ease-out forwards';
+                
+                setTimeout(() => {
+                  document.getElementById('crypto-desc').style.animation = 'fadeIn 0.6s ease-out forwards';
+                  document.getElementById('crypto-icon').style.animation = 'fadeIn 0.6s ease-out forwards, spin 20s linear infinite 0.6s';
+                  
+                  setTimeout(() => {
+                    document.getElementById('wallet-actions').style.animation = 'fadeIn 0.6s ease-out forwards';
+                    
+                    // Key points section animation
+                    setTimeout(() => {
+                      document.getElementById('key-section').style.animation = 'fadeDown 0.8s ease-out forwards, highlight 4s infinite 3s';
+                      
+                      setTimeout(() => {
+                        document.getElementById('key1').style.animation = 'fadeIn 0.6s ease-out forwards';
+                        
+                        setTimeout(() => {
+                          document.getElementById('key2').style.animation = 'fadeIn 0.6s ease-out forwards';
+                          
+                          setTimeout(() => {
+                            document.getElementById('key3').style.animation = 'fadeIn 0.6s ease-out forwards';
+                            
+                            setTimeout(() => {
+                              document.getElementById('key4').style.animation = 'fadeIn 0.6s ease-out forwards';
+                              
+                              // Example section animation
+                              setTimeout(() => {
+                                document.getElementById('example-section').style.animation = 'fadeDown 0.8s ease-out forwards, pulse 4s infinite 3s';
+                                
+                                setTimeout(() => {
+                                  document.getElementById('example-text').style.animation = 'fadeIn 0.6s ease-out forwards';
+                                  document.querySelector('.bitcoin-amount').style.animation = 'glow 2s infinite 1s';
+                                }, 500);
+                              }, 500);
+                            }, 300);
+                          }, 300);
+                        }, 300);
+                      }, 500);
+                    }, 500);
+                  }, 500);
+                }, 500);
+              }, 500);
+            }, 300);
+          }, 300);
+        }, 300);
+      }, 500);
+    });
+  </script>
+</body>
+</html>

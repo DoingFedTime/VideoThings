@@ -124,8 +124,36 @@
             text-align: center;
             color: #666;
             font-size: 0.9rem;
+            margin-top: 20px;
+        }
+
+        .social-icons a {
+            display: inline-block;
+            margin: 0 10px;
+            font-size: 24px;
+            color: #333;
+            transition: color 0.3s;
+            text-decoration: none; /* Remove underline */
+        }
+
+        .social-icons i {
+            margin-right: 5px; /* Add spacing between icon and text */
+        }
+
+        .social-icons span {
+            display: none; /* Hide text by default */
+        }
+
+        /* Show text only when Font Awesome is not supported */
+        .social-icons a:not(:has(i)) span {
+            display: inline;
+        }
+
+        .social-icons a:hover {
+            color: #007bff;
         }
     </style>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 <body>
     <div class="container">
@@ -235,6 +263,40 @@
         <footer>
             <p>This document is for educational purposes only and does not constitute legal advice.</p>
         </footer>
+        <div class="social-icons">
+            <a href="https://twitter.com/DoingFedTime" target="_blank">
+                <i class="fab fa-twitter"></i>
+                <span style="font-family: Arial, sans-serif;">Twitter</span>
+            </a>
+            <a href="https://www.linkedin.com/in/doingfedtime/" target="_blank">
+                <i class="fab fa-linkedin"></i>
+                <span style="font-family: Arial, sans-serif;">LinkedIn</span>
+            </a>
+            <a href="https://github.com/DoingFedTime" target="_blank">
+                <i class="fab fa-github"></i>
+                <span style="font-family: Arial, sans-serif;">GitHub</span>
+            </a>
+            <a href="https://www.facebook.com/TheOfficialSamBent/" target="_blank">
+                <i class="fab fa-facebook"></i>
+                <span style="font-family: Arial, sans-serif;">Facebook</span>
+            </a>
+            <a href="https://www.instagram.com/sambentoffical/" target="_blank">
+                <i class="fab fa-instagram"></i>
+                <span style="font-family: Arial, sans-serif;">Instagram</span>
+            </a>
+            <a href="https://www.youtube.com/@sam_bent" target="_blank">
+                <i class="fab fa-youtube"></i>
+                <span style="font-family: Arial, sans-serif;">YouTube</span>
+            </a>
+            <a href="https://www.reddit.com/user/reservesteel9/" target="_blank">
+                <i class="fab fa-reddit"></i>
+                <span style="font-family: Arial, sans-serif;">Reddit</span>
+            </a>
+            <a href="https://doingfedtime.com" target="_blank">
+                <i class="fab fa-mastodon"></i>
+                <span style="font-family: Arial, sans-serif;">Mastodon</span>
+            </a>
+        </div>
     </div>
 </body>
 </html>

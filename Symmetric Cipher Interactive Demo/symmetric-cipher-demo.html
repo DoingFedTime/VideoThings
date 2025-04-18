@@ -1,0 +1,395 @@
+</div><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Symmetric Cipher Interactive Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #222;
+            text-align: center;
+        }
+        .social-icons {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        .social-link {
+            color: #2c3e50;
+            transition: transform 0.2s, color 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-decoration: none;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .social-link:hover {
+            transform: translateY(-3px);
+            color: #3498db;
+            background-color: #f8f9fa;
+        }
+        .social-svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+            margin-bottom: 5px;
+        }
+        .social-link span {
+            font-size: 12px;
+            margin-top: 5px;
+            text-align: center;
+        }
+        .container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-family: inherit;
+        }
+        .btn {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .btn:hover {
+            background-color: #1a252f;
+            transform: scale(1.05);
+            transition: background-color 0.2s, transform 0.2s;
+        }
+        .output {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 10px;
+            min-height: 50px;
+            white-space: pre-wrap;
+            word-break: break-all;
+            transition: background-color 0.3s ease;
+        }
+        .highlight {
+            background-color: #e3f2fd;
+            animation: pulse 1s;
+        }
+        @keyframes pulse {
+            0% { background-color: #e3f2fd; }
+            50% { background-color: #bbdefb; }
+            100% { background-color: #e3f2fd; }
+        }
+        .diagram {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .flow {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        .box {
+            width: 120px;
+            height: 60px;
+            background-color: #3498db;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .arrow {
+            position: relative;
+            width: 100px;
+            height: 2px;
+            background-color: #333;
+            align-self: center;
+        }
+        .arrow::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: -4px;
+            width: 0;
+            height: 0;
+            border-left: 10px solid #333;
+            border-top: 5px solid transparent;
+            border-bottom: 5px solid transparent;
+        }
+        .key-box {
+            width: 120px;
+            height: 60px;
+            background-color: #e74c3c;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 5px;
+            font-weight: bold;
+            margin: 10px 0;
+        }
+        .info-box {
+            background-color: #f0f7ff;
+            border-left: 4px solid #3498db;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Symmetric Cipher Interactive Demo</h1>
+    <div class="social-icons">
+        <a href="https://rss.com/podcasts/darknet/" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M6.18,15.64A2.18,2.18 0 0,1 8.36,17.82C8.36,19 7.38,20 6.18,20C5,20 4,19 4,17.82A2.18,2.18 0 0,1 6.18,15.64M4,4.44A15.56,15.56 0 0,1 19.56,20H16.73A12.73,12.73 0 0,0 4,7.27V4.44M4,10.1A9.9,9.9 0 0,1 13.9,20H11.07A7.07,7.07 0 0,0 4,12.93V10.1Z" />
+            </svg>
+            <span>Podcast</span>
+        </a>
+        <a href="https://www.doingfedtime.com" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M16.36,14C16.44,13.34 16.5,12.68 16.5,12C16.5,11.32 16.44,10.66 16.36,10H19.74C19.9,10.64 20,11.31 20,12C20,12.69 19.9,13.36 19.74,14M14.59,19.56C15.19,18.45 15.65,17.25 15.97,16H18.92C17.96,17.65 16.43,18.93 14.59,19.56M14.34,14H9.66C9.56,13.34 9.5,12.68 9.5,12C9.5,11.32 9.56,10.65 9.66,10H14.34C14.43,10.65 14.5,11.32 14.5,12C14.5,12.68 14.43,13.34 14.34,14M12,19.96C11.17,18.76 10.5,17.43 10.09,16H13.91C13.5,17.43 12.83,18.76 12,19.96M8,8H5.08C6.03,6.34 7.57,5.06 9.4,4.44C8.8,5.55 8.35,6.75 8,8M5.08,16H8C8.35,17.25 8.8,18.45 9.4,19.56C7.57,18.93 6.03,17.65 5.08,16M4.26,14C4.1,13.36 4,12.69 4,12C4,11.31 4.1,10.64 4.26,10H7.64C7.56,10.66 7.5,11.32 7.5,12C7.5,12.68 7.56,13.34 7.64,14M12,4.03C12.83,5.23 13.5,6.57 13.91,8H10.09C10.5,6.57 11.17,5.23 12,4.03M18.92,8H15.97C15.65,6.75 15.19,5.55 14.59,4.44C16.43,5.07 17.96,6.34 18.92,8M12,2C6.47,2 2,6.5 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2Z" />
+            </svg>
+            <span>Official Website</span>
+        </a>
+        <a href="https://www.sambent.com" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M12,2C6.48,2 2,6.48 2,12C2,17.52 6.48,22 12,22C17.52,22 22,17.52 22,12C22,6.48 17.52,2 12,2M6.5,9L10,5.5L13.5,9H11V13H9V9H6.5M17.5,14.5L14,18L10.5,14.5H13V10.5H15V14.5H17.5Z" />
+            </svg>
+            <span>Website Mirror</span>
+        </a>
+        <a href="https://www.facebook.com/TheOfficialSamBent/" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M5,3H19A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3M18,5H15.5A3.5,3.5 0 0,0 12,8.5V11H10V14H12V21H15V14H18V11H15V9A1,1 0 0,1 16,8H18V5Z" />
+            </svg>
+            <span>Facebook</span>
+        </a>
+        <a href="https://twitter.com/DoingFedTime" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M22.46,6C21.69,6.35 20.86,6.58 20,6.69C20.88,6.16 21.56,5.32 21.88,4.31C21.05,4.81 20.13,5.16 19.16,5.36C18.37,4.5 17.26,4 16,4C13.65,4 11.73,5.92 11.73,8.29C11.73,8.63 11.77,8.96 11.84,9.27C8.28,9.09 5.11,7.38 3,4.79C2.63,5.42 2.42,6.16 2.42,6.94C2.42,8.43 3.17,9.75 4.33,10.5C3.62,10.5 2.96,10.3 2.38,10C2.38,10 2.38,10 2.38,10.03C2.38,12.11 3.86,13.85 5.82,14.24C5.46,14.34 5.08,14.39 4.69,14.39C4.42,14.39 4.15,14.36 3.89,14.31C4.43,16 6,17.26 7.89,17.29C6.43,18.45 4.58,19.13 2.56,19.13C2.22,19.13 1.88,19.11 1.54,19.07C3.44,20.29 5.7,21 8.12,21C16,21 20.33,14.46 20.33,8.79C20.33,8.6 20.33,8.42 20.32,8.23C21.16,7.63 21.88,6.87 22.46,6Z" />
+            </svg>
+            <span>Twitter/X</span>
+        </a>
+        <a href="https://www.linkedin.com/in/sam-bent/" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M19,3A2,2 0 0,1 21,5V19A2,2 0 0,1 19,21H5A2,2 0 0,1 3,19V5A2,2 0 0,1 5,3H19M18.5,18.5V13.2A3.26,3.26 0 0,0 15.24,9.94C14.39,9.94 13.4,10.46 12.92,11.24V10.13H10.13V18.5H12.92V13.57C12.92,12.8 13.54,12.17 14.31,12.17A1.4,1.4 0 0,1 15.71,13.57V18.5H18.5M6.88,8.56A1.68,1.68 0 0,0 8.56,6.88C8.56,5.95 7.81,5.19 6.88,5.19A1.69,1.69 0 0,0 5.19,6.88C5.19,7.81 5.95,8.56 6.88,8.56M8.27,18.5V10.13H5.5V18.5H8.27Z" />
+            </svg>
+            <span>LinkedIn</span>
+        </a>
+        <a href="mailto:contact@sambent.com" class="social-link">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M20,8L12,13L4,8V6L12,11L20,6M20,4H4C2.89,4 2,4.89 2,6V18A2,2 0 0,0 4,20H20A2,2 0 0,0 22,18V6C22,4.89 21.1,4 20,4Z" />
+            </svg>
+            <span>Email</span>
+        </a>
+        <a href="https://www.tiktok.com/@doingfedtime" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M16.6,5.82C15.24,5.82 14.04,6.2 13,6.82L13,12.34C13,15.08 10.76,17.3 8,17.3C5.24,17.3 3,15.08 3,12.34C3,9.6 5.24,7.4 8,7.4L8,11.36C8,11.36 6.64,11.36 6.64,12.38C6.64,13.4 7.64,14.36 8.66,14.36C9.69,14.36 10.69,13.4 10.69,12.38L10.69,2.38L14.7,2.38L14.7,8.41L14.7,8.38C14.7,8.38 16.65,8.38 16.65,6.38C16.65,4.38 19.35,4.38 19.35,4.38L19.35,8.38C19.35,8.38 21,8.38 21,10.38L21,11.4C21,11.4 19.35,11.4 19.35,11.4L19.35,12.32C19.35,16.32 16.6,16.32 16.6,16.32C16.6,16.32 14.6,16.32 13.6,14.32L13.6,14.06L13.6,17.32C14.6,17.97 15.77,18.36 17.03,18.36C20.4,18.36 23.15,15.74 23.15,12.36L23.15,5.82L16.6,5.82Z" />
+            </svg>
+            <span>TikTok</span>
+        </a>
+        <a href="https://www.amazon.com/stores/Sam-Bent/author/B0BHX5V81S" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M8.63,9.61C8.93,9.61 9.17,9.67 9.34,9.81C9.44,9.93 9.5,10.07 9.5,10.25C9.5,10.36 9.47,10.46 9.42,10.54C9.36,10.64 9.27,10.71 9.17,10.77C9,10.86 8.81,10.9 8.63,10.9H8.33V11.37H7.92V9.61H8.63M18.15,9.61V9.8H17.35V10.9L17.04,10.9C17.04,10.9 17.11,10.86 17.1,10.76C17.09,10.68 17.09,10.59 17.08,10.5C17.08,10.39 17.06,10.28 17.03,10.19C17,10.13 16.97,10.07 16.92,10.04C16.87,10 16.79,9.97 16.7,9.97H16.32V10.9H16V9.61H18.15M23.05,14.91C22.47,15.34 21.78,15.67 21,15.93C19.91,16.3 18.68,16.5 17.37,16.5C15.83,16.5 14.36,16.25 12.96,15.75C11.09,15.08 9.5,14.05 8.21,12.68L8.57,12.2C9.3,12.94 10.13,13.44 11.07,13.73C12.97,14.3 15.04,14.45 17.28,14.18C18.78,14 20.15,13.68 21.37,13.23L22.14,14.91H23.05M21.87,16C22.38,15.67 22.83,15.3 23.22,14.92L23.22,14.93C23.4,15.27 23.5,15.64 23.5,16.04C23.5,16.66 23.32,17.15 22.96,17.5C22.6,17.85 22.16,18.03 21.65,18.03C21.14,18.03 20.71,17.84 20.37,17.47C20.03,17.09 19.86,16.61 19.86,16.04V16C19.86,15.47 20.02,15.04 20.34,14.7C20.65,14.36 21.08,14.19 21.6,14.19C21.69,14.19 21.78,14.19 21.87,14.2V16M13.5,16C14.37,16 15.11,16.32 15.71,16.97C16.31,17.61 16.62,18.43 16.62,19.4C16.62,20.38 16.31,21.18 15.7,21.8C15.08,22.43 14.33,22.74 13.45,22.74H13.44C12.56,22.74 11.83,22.43 11.24,21.81C10.65,21.19 10.35,20.39 10.35,19.41C10.35,18.44 10.65,17.62 11.24,16.97C11.83,16.32 12.58,16 13.5,16M13.45,22.01C14.05,22.01 14.56,21.79 14.97,21.36C15.38,20.91 15.59,20.26 15.59,19.39C15.59,18.55 15.38,17.89 14.98,17.46C14.57,17 14.06,16.78 13.44,16.78C12.83,16.78 12.33,17.01 11.94,17.47C11.55,17.92 11.35,18.56 11.35,19.41C11.35,20.26 11.56,20.9 11.95,21.35C12.34,21.79 12.85,22.01 13.45,22.01M16.33,10.45C16.36,10.6 16.41,10.71 16.47,10.76C16.54,10.81 16.62,10.83 16.74,10.83C16.85,10.83 16.93,10.81 16.99,10.77C17.05,10.73 17.1,10.67 17.13,10.6C17.14,10.56 17.15,10.53 17.16,10.5H17.74V10.69C17.74,10.82 17.71,10.92 17.65,11C17.57,11.09 17.47,11.16 17.36,11.21C17.22,11.26 17.07,11.29 16.92,11.29C16.73,11.29 16.57,11.25 16.45,11.19C16.33,11.13 16.23,11.04 16.17,10.93C16.1,10.82 16.07,10.7 16.07,10.56H16.07C16.07,10.42 16.1,10.3 16.16,10.19C16.25,10.03 16.4,9.9 16.61,9.83C16.71,9.8 16.82,9.79 16.93,9.79C17.1,9.79 17.25,9.82 17.37,9.89C17.5,9.96 17.58,10.04 17.63,10.15C17.68,10.23 17.7,10.32 17.7,10.39H17.14C17.12,10.29 17.1,10.23 17.06,10.19C17.03,10.17 16.99,10.16 16.95,10.15C16.9,10.14 16.85,10.13 16.81,10.13C16.71,10.13 16.63,10.15 16.57,10.18C16.5,10.22 16.44,10.28 16.41,10.36C16.37,10.43 16.35,10.52 16.33,10.64V10.45M7.5,11.79H7.97V14.79L10.19,11.79H10.92V15.38H10.46V12.38L8.23,15.38H7.5V11.79M11.59,14.91C11.5,14.91 11.41,14.87 11.34,14.81C11.27,14.75 11.24,14.67 11.24,14.58H11.24C11.24,14.5 11.27,14.43 11.33,14.37C11.4,14.31 11.48,14.28 11.59,14.28C11.69,14.28 11.77,14.31 11.83,14.37C11.9,14.44 11.93,14.51 11.93,14.58V14.59C11.93,14.67 11.9,14.75 11.83,14.81C11.77,14.87 11.69,14.91 11.59,14.91M12.85,14.29V15.37H12.38V14.29H12.05V13.91H12.38V12.83C12.38,12.61 12.42,12.42 12.51,12.27C12.59,12.13 12.72,12.02 12.9,11.95C13.04,11.9 13.22,11.87 13.43,11.87C13.5,11.87 13.56,11.87 13.64,11.88C13.71,11.89 13.78,11.9 13.87,11.91V12.33H13.64C13.54,12.33 13.45,12.34 13.39,12.36C13.32,12.39 13.27,12.43 13.24,12.49C13.21,12.56 13.19,12.64 13.19,12.75V13.9H13.89V14.28L12.85,14.29M14.66,15.37H14.19V12.34H14.66V15.37M14.42,11.79C14.31,11.79 14.23,11.75 14.17,11.68C14.11,11.61 14.08,11.53 14.08,11.43C14.08,11.33 14.11,11.25 14.17,11.18C14.23,11.12 14.31,11.08 14.42,11.08C14.52,11.08 14.61,11.12 14.66,11.19C14.72,11.25 14.75,11.33 14.75,11.43C14.75,11.53 14.72,11.61 14.66,11.68C14.61,11.75 14.52,11.79 14.42,11.79M15.9,14.48C15.93,14.62 16,14.73 16.1,14.8C16.21,14.87 16.34,14.91 16.5,14.91C16.71,14.91 16.88,14.85 17.01,14.72C17.14,14.59 17.2,14.41 17.2,14.16V14.14C17.12,14.25 17.01,14.34 16.88,14.39C16.75,14.45 16.61,14.48 16.47,14.48C16.23,14.48 16.02,14.44 15.85,14.36C15.67,14.27 15.54,14.15 15.45,14C15.36,13.84 15.32,13.67 15.32,13.5V13.49C15.32,13.29 15.36,13.12 15.45,12.95C15.55,12.79 15.68,12.67 15.85,12.57C16.03,12.48 16.23,12.43 16.46,12.43C16.63,12.43 16.78,12.46 16.9,12.52C17.02,12.58 17.12,12.67 17.2,12.77V12.43H17.67V14.13C17.67,14.4 17.61,14.63 17.5,14.82C17.38,15 17.21,15.14 17,15.24C16.78,15.33 16.54,15.38 16.26,15.38C15.95,15.38 15.69,15.32 15.48,15.2C15.27,15.07 15.16,14.89 15.14,14.66H15.9V14.48M16.09,14.12C16.23,14.12 16.35,14.08 16.47,14.01C16.58,13.94 16.67,13.85 16.73,13.73C16.79,13.61 16.82,13.5 16.82,13.37C16.82,13.24 16.79,13.12 16.72,13.02C16.66,12.91 16.57,12.83 16.46,12.76C16.35,12.7 16.23,12.67 16.09,12.67C15.96,12.67 15.84,12.7 15.72,12.77C15.62,12.83 15.53,12.92 15.47,13.03C15.4,13.13 15.37,13.25 15.37,13.38C15.37,13.5 15.41,13.61 15.47,13.73C15.53,13.84 15.62,13.93 15.73,14C15.84,14.08 15.96,14.12 16.09,14.12M18.22,12.43H18.69V12.78C18.77,12.66 18.88,12.56 19.02,12.49C19.16,12.42 19.31,12.39 19.48,12.39C19.73,12.39 19.94,12.45 20.12,12.58C20.29,12.7 20.42,12.87 20.5,13.08C20.58,13.29 20.62,13.53 20.62,13.8V13.93C20.62,14.21 20.58,14.45 20.51,14.66C20.43,14.87 20.31,15.03 20.14,15.15C19.97,15.26 19.75,15.32 19.48,15.32C19.31,15.32 19.16,15.29 19.02,15.22C18.89,15.15 18.78,15.07 18.69,14.94V16.21H18.22V12.43M18.69,13.91C18.69,14.12 18.72,14.3 18.79,14.44C18.86,14.59 18.96,14.7 19.08,14.78C19.2,14.86 19.33,14.9 19.49,14.9C19.71,14.9 19.88,14.83 20.01,14.68C20.14,14.53 20.2,14.3 20.2,14V13.83C20.2,13.6 20.18,13.42 20.13,13.27C20.09,13.12 20.01,13 19.91,12.91C19.81,12.82 19.69,12.77 19.53,12.77C19.38,12.77 19.24,12.81 19.12,12.9C19,12.99 18.9,13.1 18.83,13.24C18.73,13.38 18.69,13.54 18.69,13.73V13.91M21.5,12.43H21.96V15.37H21.5V12.43M21.73,11.79C21.62,11.79 21.54,11.75 21.48,11.68C21.41,11.61 21.38,11.53 21.38,11.43C21.38,11.33 21.41,11.25 21.48,11.18C21.54,11.12 21.62,11.08 21.73,11.08C21.83,11.08 21.92,11.12 21.97,11.19C22.03,11.25 22.06,11.33 22.06,11.43C22.06,11.53 22.03,11.61 21.97,11.68C21.91,11.75 21.83,11.79 21.73,11.79M23.5,12.43V12.95H23.03V14.73C23.03,14.83 23.05,14.9 23.09,14.94C23.13,14.97 23.19,14.99 23.28,14.99H23.5V15.37C23.46,15.37 23.43,15.38 23.39,15.38C23.35,15.38 23.31,15.39 23.29,15.39C23.15,15.39 23.04,15.37 22.94,15.33C22.85,15.29 22.78,15.23 22.74,15.13C22.69,15.04 22.67,14.92 22.67,14.77V12.95H22.37V12.43H22.67V11.86H23.13V12.43H23.5M8.43,10.58H8.61C8.79,10.58 8.92,10.55 8.99,10.5C9.04,10.46 9.07,10.4 9.07,10.31C9.07,10.24 9.05,10.18 9.01,10.15C8.97,10.11 8.92,10.09 8.86,10.07C8.81,10.06 8.72,10.06 8.59,10.06H8.43V10.58Z" />
+            </svg>
+            <span>Amazon</span>
+        </a>
+        <a href="https://github.com/DoingFedTime" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M12,2A10,10 0 0,0 2,12C2,16.42 4.87,20.17 8.84,21.5C9.34,21.58 9.5,21.27 9.5,21C9.5,20.77 9.5,20.14 9.5,19.31C6.73,19.91 6.14,17.97 6.14,17.97C5.68,16.81 5.03,16.5 5.03,16.5C4.12,15.88 5.1,15.9 5.1,15.9C6.1,15.97 6.63,16.93 6.63,16.93C7.5,18.45 8.97,18 9.54,17.76C9.63,17.11 9.89,16.67 10.17,16.42C7.95,16.17 5.62,15.31 5.62,11.5C5.62,10.39 6,9.5 6.65,8.79C6.55,8.54 6.2,7.5 6.75,6.15C6.75,6.15 7.59,5.88 9.5,7.17C10.29,6.95 11.15,6.84 12,6.84C12.85,6.84 13.71,6.95 14.5,7.17C16.41,5.88 17.25,6.15 17.25,6.15C17.8,7.5 17.45,8.54 17.35,8.79C18,9.5 18.38,10.39 18.38,11.5C18.38,15.32 16.04,16.16 13.81,16.41C14.17,16.72 14.5,17.33 14.5,18.26C14.5,19.6 14.5,20.68 14.5,21C14.5,21.27 14.66,21.59 15.17,21.5C19.14,20.16 22,16.42 22,12A10,10 0 0,0 12,2Z" />
+            </svg>
+            <span>GitHub</span>
+        </a>
+        <a href="https://www.reddit.com/user/reservesteel9/" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M14.5,15.41C14.58,15.5 14.58,15.62 14.5,15.7C14.42,15.79 14.3,15.79 14.21,15.7C13.83,15.32 13,15.32 12.61,15.7C12.5,15.79 12.39,15.79 12.3,15.7C12.22,15.62 12.22,15.5 12.3,15.41C13,14.68 14,14.68 14.5,15.41M9.65,15.39C9.57,15.5 9.57,15.62 9.65,15.7C9.73,15.79 9.85,15.79 9.93,15.7C10.32,15.32 11.15,15.32 11.53,15.7C11.62,15.79 11.74,15.79 11.82,15.7C11.9,15.62 11.9,15.5 11.82,15.41C11.35,14.68 10.37,14.68 9.65,15.39M22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2A10,10 0 0,1 22,12M10.63,8.42C11.23,8.42 11.72,8.91 11.72,9.5C11.72,10.1 11.23,10.59 10.63,10.59C10.04,10.59 9.55,10.1 9.55,9.5C9.55,8.91 10.04,8.42 10.63,8.42M17.38,8.42C17.97,8.42 18.47,8.91 18.47,9.5C18.47,10.1 17.97,10.59 17.38,10.59C16.78,10.59 16.29,10.1 16.29,9.5C16.29,8.91 16.78,8.42 17.38,8.42M5.34,10.86C5.05,10.86 4.8,11.04 4.72,11.31C4.26,11.16 4,10.97 4,10.79C4,10.43 4.89,10.08 6,9.9C6.24,9.53 6.65,9.25 7.12,9.11C7.58,9 8.1,9 8.59,9.12L8.85,9.21C9.2,9.16 9.56,9.13 9.92,9.13C10.32,9.13 10.71,9.16 11.1,9.21L11.31,9.13C11.9,9 12.53,9 13.07,9.16C13.62,9.33 14.09,9.69 14.33,10.14C15.35,10.33 16,10.69 16,11.13C16,11.3 15.75,11.5 15.31,11.63C15.24,11.34 14.97,11.13 14.67,11.13C14.35,11.13 14.07,11.36 14.02,11.67C13.69,11.71 13.36,11.72 13.04,11.72C12.7,11.72 12.36,11.71 12.04,11.67C11.98,11.36 11.7,11.13 11.39,11.13C11.07,11.13 10.8,11.36 10.74,11.67C10.42,11.71 10.09,11.72 9.77,11.72C9.43,11.72 9.1,11.71 8.77,11.67C8.71,11.36 8.44,11.13 8.12,11.13C7.81,11.13 7.54,11.36 7.47,11.67C7.15,11.71 6.82,11.72 6.5,11.72C6.22,11.72 5.94,11.71 5.67,11.69C5.64,11.39 5.39,11.15 5.09,11.15C5.03,11.15 4.97,11.16 4.91,11.17C4.8,11.06 4.69,10.94 4.59,10.81C4.5,10.75 4.5,10.64 4.57,10.58C4.64,10.5 4.76,10.5 4.83,10.58C5.09,10.93 5.36,11.11 5.58,11.11C5.65,11.11 5.73,11.1 5.8,11.06C5.91,11.1 6,11.13 6.13,11.13C5.96,11 5.79,10.86 5.62,10.71C5.5,10.61 5.5,10.42 5.62,10.33C5.7,10.22 5.9,10.22 6,10.33C6.17,10.5 6.35,10.64 6.54,10.71C6.69,10.79 6.88,10.79 7.06,10.75C7.14,10.84 7.23,10.92 7.33,11C7.35,11 7.36,11 7.37,11C7.36,11 7.31,10.97 7.23,10.9C7.14,10.84 7.05,10.76 6.96,10.67C6.83,10.57 6.83,10.38 6.96,10.29C7.05,10.19 7.24,10.19 7.33,10.29C7.42,10.38 7.5,10.47 7.61,10.54C7.68,10.63 7.77,10.69 7.87,10.72C8.06,10.74 8.25,10.69 8.42,10.6C8.57,10.67 8.74,10.71 8.91,10.71C9.03,10.71 9.14,10.69 9.24,10.67C9.5,10.79 9.74,10.9 10,11C10.12,11.03 10.22,11.05 10.32,11.05C10.5,11.05 10.65,11 10.79,10.94C10.9,10.97 11,11 11.13,11C11.25,11 11.37,10.97 11.46,10.94C11.61,11 11.75,11.05 11.93,11.05C12.03,11.05 12.13,11.03 12.25,11C12.47,10.91 12.71,10.8 12.95,10.71C13.09,10.74 13.25,10.75 13.39,10.71C13.56,10.67 13.73,10.55 13.86,10.4C13.93,10.45 14,10.5 14.07,10.55C14.29,10.69 14.56,10.76 14.81,10.71C14.91,10.69 15,10.65 15.09,10.59C15.19,10.67 15.29,10.74 15.38,10.83C15.5,10.93 15.5,11.11 15.38,11.21C15.29,11.33 15.09,11.33 15,11.21C14.89,11.11 14.79,11.04 14.69,10.97C14.58,10.9 14.43,10.9 14.32,10.96C14.12,10.97 13.93,10.96 13.74,10.92C13.69,10.92 13.65,10.92 13.61,10.93C13.32,10.85 13.05,10.75 12.79,10.61C12.61,10.55 12.41,10.55 12.23,10.63C12.03,10.69 11.84,10.77 11.66,10.83C11.48,10.89 11.29,10.9 11.11,10.86C11,10.83 10.89,10.77 10.8,10.7C10.63,10.75 10.46,10.79 10.29,10.8C10.11,10.83 9.93,10.8 9.76,10.75C9.67,10.81 9.56,10.86 9.45,10.9C9.25,10.96 9.04,10.96 8.84,10.9C8.74,10.86 8.64,10.8 8.57,10.74C8.4,10.8 8.22,10.83 8.03,10.8C7.87,10.79 7.69,10.74 7.53,10.67C7.44,10.74 7.35,10.8 7.25,10.86C7.17,10.9 7.08,10.93 7,10.93C6.83,10.93 6.67,10.89 6.53,10.82C6.45,10.77 6.36,10.69 6.27,10.6C6.17,10.51 6.07,10.46 5.94,10.45C5.83,10.42 5.7,10.44 5.57,10.5C5.5,10.54 5.42,10.59 5.34,10.65C5.34,10.73 5.34,10.81 5.34,10.86M15.37,13.86C15.73,14.32 15.96,14.85 16,15.4C16,15.74 15.96,16.07 15.86,16.4C15.11,18.43 12.89,19.5 10.5,19.5C8.1,19.5 5.89,18.43 5.14,16.4C5.04,16.07 5,15.74 5,15.4C5.04,14.85 5.27,14.32 5.63,13.86C5.77,13.72 5.95,13.59 6.15,13.47C6.17,13.46 6.19,13.45 6.22,13.44C8.25,12.31 12.75,12.31 14.78,13.44C14.81,13.45 14.83,13.46 14.85,13.47C15.05,13.59 15.23,13.72 15.37,13.86Z" />
+            </svg>
+            <span>Reddit</span>
+        </a>
+        <a href="https://rumble.com/c/DoingFedTime" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M8,7.71V16.29L16.15,12L8,7.71Z" />
+            </svg>
+            <span>Rumble</span>
+        </a>
+        <a href="https://www.instagram.com/sambentoffical/" class="social-link" target="_blank">
+            <svg class="social-svg" viewBox="0 0 24 24">
+                <path d="M7.8,2H16.2C19.4,2 22,4.6 22,7.8V16.2A5.8,5.8 0 0,1 16.2,22H7.8C4.6,22 2,19.4 2,16.2V7.8A5.8,5.8 0 0,1 7.8,2M7.6,4A3.6,3.6 0 0,0 4,7.6V16.4C4,18.39 5.61,20 7.6,20H16.4A3.6,3.6 0 0,0 20,16.4V7.6C20,5.61 18.39,4 16.4,4H7.6M17.25,5.5A1.25,1.25 0 0,1 18.5,6.75A1.25,1.25 0 0,1 17.25,8A1.25,1.25 0 0,1 16,6.75A1.25,1.25 0 0,1 17.25,5.5M12,7A5,5 0 0,1 17,12A5,5 0 0,1 12,17A5,5 0 0,1 7,12A5,5 0 0,1 12,7M12,9A3,3 0 0,0 9,12A3,3 0 0,0 12,15A3,3 0 0,0 15,12A3,3 0 0,0 12,9Z" />
+            </svg>
+            <span>Instagram</span>
+        </a>
+    
+    <div class="info-box">
+        <p>A symmetric cipher uses the same key for both encryption and decryption. This means both parties must securely share this key before they can communicate securely.</p>
+    </div>
+    
+    <div class="container">
+        <h2>Enter Your Message and Key</h2>
+        <div class="input-group">
+            <label for="plaintext">Plain Text (Message):</label>
+            <textarea id="plaintext" rows="3" placeholder="Enter your message here"></textarea>
+        </div>
+        <div class="input-group">
+            <label for="key">Encryption/Decryption Key:</label>
+            <input type="text" id="key" placeholder="Enter your secret key">
+        </div>
+        <div class="input-group">
+            <button id="encrypt-btn" class="btn">Encrypt</button>
+            <button id="decrypt-btn" class="btn" style="margin-left: 10px;">Decrypt</button>
+        </div>
+    </div>
+    
+    <div class="container">
+        <h2>Result</h2>
+        <div id="output" class="output">Your encrypted/decrypted text will appear here...</div>
+    </div>
+    
+    <div class="container">
+        <h2>How Symmetric Encryption Works</h2>
+        
+        <div class="diagram">
+            <h3>Encryption Process</h3>
+            <div class="flow">
+                <div class="box">Plaintext</div>
+                <div class="arrow"></div>
+                <div class="box" style="background-color: #2c3e50;">Encryption</div>
+                <div class="arrow"></div>
+                <div class="box" style="background-color: #8e44ad;">Ciphertext</div>
+            </div>
+            <div class="key-box">Same Key</div>
+        </div>
+        
+        <div class="diagram">
+            <h3>Decryption Process</h3>
+            <div class="flow">
+                <div class="box" style="background-color: #8e44ad;">Ciphertext</div>
+                <div class="arrow"></div>
+                <div class="box" style="background-color: #2c3e50;">Decryption</div>
+                <div class="arrow"></div>
+                <div class="box">Plaintext</div>
+            </div>
+            <div class="key-box">Same Key</div>
+        </div>
+        
+        <h3>Key Properties of Symmetric Ciphers:</h3>
+        <ul>
+            <li>Fast and efficient for large volumes of data</li>
+            <li>Requires secure key exchange beforehand</li>
+            <li>Examples include AES, DES, 3DES, and Blowfish</li>
+            <li>Commonly used for bulk data encryption</li>
+        </ul>
+        
+        <h3>Security Challenge:</h3>
+        <p>The main security challenge is safely distributing the key to all parties who need it without exposing it to attackers.</p>
+    </div>
+
+    <script>
+        // Simple XOR encryption (for demonstration purposes only)
+        function xorEncrypt(text, key) {
+            let result = "";
+            for (let i = 0; i < text.length; i++) {
+                const charCode = text.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+                result += String.fromCharCode(charCode);
+            }
+            return btoa(result); // Convert to base64 for display
+        }
+        
+        function xorDecrypt(encryptedBase64, key) {
+            try {
+                const encryptedText = atob(encryptedBase64); // Convert from base64
+                let result = "";
+                for (let i = 0; i < encryptedText.length; i++) {
+                    const charCode = encryptedText.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+                    result += String.fromCharCode(charCode);
+                }
+                return result;
+            } catch (e) {
+                return "Error: Invalid encrypted text format";
+            }
+        }
+        
+        document.getElementById("encrypt-btn").addEventListener("click", function() {
+            const plaintext = document.getElementById("plaintext").value;
+            const key = document.getElementById("key").value;
+            
+            if (!plaintext || !key) {
+                alert("Please enter both a message and a key");
+                return;
+            }
+            
+            const encrypted = xorEncrypt(plaintext, key);
+            document.getElementById("output").textContent = encrypted;
+            
+            // Add animation effect
+            document.getElementById("output").classList.add("highlight");
+            setTimeout(() => {
+                document.getElementById("output").classList.remove("highlight");
+            }, 1000);
+        });
+        
+        document.getElementById("decrypt-btn").addEventListener("click", function() {
+            const encryptedText = document.getElementById("output").textContent;
+            const key = document.getElementById("key").value;
+            
+            if (encryptedText === "Your encrypted/decrypted text will appear here..." || !key) {
+                alert("Please encrypt a message first and ensure you have a key");
+                return;
+            }
+            
+            const decrypted = xorDecrypt(encryptedText, key);
+            document.getElementById("output").textContent = decrypted;
+            
+            // Add animation effect
+            document.getElementById("output").classList.add("highlight");
+            setTimeout(() => {
+                document.getElementById("output").classList.remove("highlight");
+            }, 1000);
+        });
+        
+        // Add hover effects to social media icons
+        const socialLinks = document.querySelectorAll('.social-link');
+        socialLinks.forEach(link => {
+            link.addEventListener('mouseenter', () => {
+                link.style.transform = 'translateY(-3px)';
+            });
+            link.addEventListener('mouseleave', () => {
+                link.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
