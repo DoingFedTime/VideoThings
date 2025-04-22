@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Browser Hardening Options</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #121212;
+      color: #eee;
+      margin: 0;
+      padding: 20px;
+    }
+    .social-icons {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .social-icons a {
+      display: inline-block;
+      margin: 0 10px;
+      font-size: 24px;
+      color: #eee;
+      transition: color 0.3s;
+      text-decoration: none;
+    }
+    .social-icons i {
+      margin-right: 5px;
+    }
+    .social-icons a:hover {
+      color: #007bff;
+    }
+    .option-container {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin-top: 40px;
+    }
+    .option {
+      background-color: #1e1e1e;
+      border: 1px solid #333;
+      padding: 20px;
+      border-radius: 10px;
+      transition: background-color 0.3s ease;
+    }
+    .option:hover {
+      background-color: #2a2a2a;
+    }
+    .option svg {
+      width: 40px;
+      height: 40px;
+      vertical-align: middle;
+      margin-right: 10px;
+    }
+    .option h3 {
+      display: flex;
+      align-items: center;
+      font-size: 1.2em;
+      margin: 0 0 10px;
+    }
+    a {
+      color: #7aa2f7;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h1>JavaScript Fingerprinting Mitigation</h1>
+  <div class="social-icons">
+    <a href="https://twitter.com/DoingFedTime" target="_blank"><i class="fab fa-twitter"></i><span style="font-family: Arial, sans-serif;">Twitter</span></a>
+    <a href="https://www.linkedin.com/in/doingfedtime/" target="_blank"><i class="fab fa-linkedin"></i><span style="font-family: Arial, sans-serif;">LinkedIn</span></a>
+    <a href="https://github.com/DoingFedTime" target="_blank"><i class="fab fa-github"></i><span style="font-family: Arial, sans-serif;">GitHub</span></a>
+    <a href="https://www.facebook.com/TheOfficialSamBent/" target="_blank"><i class="fab fa-facebook"></i><span style="font-family: Arial, sans-serif;">Facebook</span></a>
+    <a href="https://www.instagram.com/sambentoffical/" target="_blank"><i class="fab fa-instagram"></i><span style="font-family: Arial, sans-serif;">Instagram</span></a>
+    <a href="https://www.youtube.com/@sam_bent" target="_blank"><i class="fab fa-youtube"></i><span style="font-family: Arial, sans-serif;">YouTube</span></a>
+    <a href="https://www.reddit.com/user/reservesteel9/" target="_blank"><i class="fab fa-reddit"></i><span style="font-family: Arial, sans-serif;">Reddit</span></a>
+    <a href="https://doingfedtime.com" target="_blank"><i class="fab fa-mastodon"></i><span style="font-family: Arial, sans-serif;">Mastodon</span></a>
+  </div>
+  <div class="option-container">
+    <div class="option">
+      <h3>
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="32" fill="#6441A5"/>
+          <path d="M22 20h20v24H22z" fill="#fff"/>
+        </svg>
+        Use Tails OS
+      </h3>
+      <p>A secure, amnesic operating system that routes all traffic through Tor. Best for ephemeral sessions.</p>
+    </div>
+    <div class="option">
+      <h3>
+        <svg viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="32" cy="32" r="32" fill="#005f73"/>
+          <path d="M20 20h24v24H20z" fill="#fff"/>
+        </svg>
+        Use Whonix
+      </h3>
+      <p>Whonix runs in VMs and isolates networking to provide strong anonymity. Recommended for persistent setups.</p>
+    </div>
+    <div class="option">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M3 4a1 1 0 011-1h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4z" fill="#ffc107"/>
+        </svg>
+        Re-enable Spoofing in Tor 14.0
+      </h3>
+      <p>If you’re using <strong>Tor Browser 14.0</strong>, spoofing can still be manually re-enabled via the <a href="about:config">about:config</a> page (<code>privacy.resistFingerprinting.spoofOsInUserAgentHeader</code>).</p>
+    </div>
+    <div class="option">
+      <h3>
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L2 7l10 5 10-5-10-5zm0 20v-9" stroke="#03dac6" stroke-width="2"/>
+        </svg>
+        Disable JavaScript
+      </h3>
+      <p>Use hardened browsers with JavaScript disabled entirely, or use extensions like NoScript to limit exposure. Requires manual configuration.</p>
+    </div>
+  </div>
+</body>
+</html>
