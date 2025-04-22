@@ -2,7 +2,7 @@
 
 An interactive guide to understanding and mitigating OS leaks in the Tor Browser.
 
-![Tor Browser Anti-Leak Options Preview](js fingerprinting.gif)
+![Tor Browser Anti-Leak Options Preview](https://raw.githubusercontent.com/DoingFedTime/VideoThings/main/Tor%20Browser%20anti-leak%20options/js%20fingerprinting.gif)
 
 ## Features
 
