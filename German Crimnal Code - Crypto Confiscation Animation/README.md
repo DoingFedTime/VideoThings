@@ -58,6 +58,3 @@ Check out the live demo [here](https://doingfedtime.github.io/German-Criminal-Co
 Created by [DoingFedTime](https://github.com/DoingFedTime)
 
 
-<div align="center">
-  <sub>No frameworks. No dependencies. No bullshit.</sub>
-</div>

@@ -43,4 +43,3 @@ Created by [DoingFedTime](https://github.com/DoingFedTime)
 
 ---
 
-<sub>No frameworks. No dependencies. No bullshit.</sub>

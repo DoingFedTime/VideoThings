@@ -61,6 +61,3 @@ Created by [DoingFedTime](https://github.com/DoingFedTime)
 
 ---
 
-<div align="center">
-  <sub>No frameworks. No dependencies. No bullshit.</sub>
-</div>
