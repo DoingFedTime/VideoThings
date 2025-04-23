@@ -1,6 +1,6 @@
 # Whonix 3D Topology Visualization
 
-![3D Whonix Visualization](3dwhonix.gif)
+<img src="3dwhonix.gif" alt="3D Whonix Visualization">
 
 This HTML file (`3dwhonix.html`) uses [Babylon.js](https://www.babylonjs.com/) to create a 3D visualization of the Whonix network topology. Whonix is a Debian-based security-focused Linux distribution that aims to provide anonymity and privacy.
 
