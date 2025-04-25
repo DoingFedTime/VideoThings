@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Gas Chromatograph Animation</title>
+<style>
+  :root {
+    --primary-color: #2a9d8f;
+    --secondary-color: #e9c46a;
+    --accent-color: #f4a261;
+    --dark-bg: #1a1a1d;
+    --light-text: #f8f9fa;
+    --border-color: #495057;
+    --highlight: #e76f51;
+  }
+
+  body {
+    margin: 0;
+    background: var(--dark-bg);
+    color: var(--light-text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+  }
+
+  .container {
+    position: relative;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 30px;
+    padding: 20px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+  }
+
+  .description {
+    max-width: 800px;
+    margin: 0 auto 30px;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: center;
+    color: #ccc;
+  }
+
+  .controls {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+  }
+
+  button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+  }
+
+  button:hover {
+    background: #1d7d72;
+    transform: translateY(-2px);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .speed-control label {
+    font-size: 0.9rem;
+  }
+
+  .gc-system {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 95%;
+    max-width: 1200px;
+    position: relative;
+    background: #222;
+    border-radius: 15px;
+    padding: 30px 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  }
+
+  .module {
+    background: #2a2a2a;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 18px 24px;
+    text-align: center;
+    min-width: 160px;
+    color: var(--light-text);
+    font-size: 1.1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 3;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .module:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+  }
+
+  .module small {
+    display: block;
+    font-size: 0.85em;
+    color: #aaa;
+    margin-top: 8px;
+  }
+
+  .module-icon {
+    font-size: 1.8rem;
+    margin-bottom: 10px;
+    color: var(--primary-color);
+  }
+
+  .module-temperature {
+    position: absolute;
+    top: -25px;
+    right: -10px;
+    background: var(--highlight);
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.5s;
+  }
+
+  .active .module-temperature {
+    opacity: 1;
+  }
+
+  .line {
+    position: absolute;
+    top: 50%;
+    height: 8px;
+    background: linear-gradient(90deg, var(--border-color), var(--primary-color), var(--border-color));
+    width: 80%;
+    left: 10%;
+    z-index: 0;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  }
+
+  .oven-box {
+    height: 220px;
+    width: 30%;
+    background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+    border: 3px solid var(--border-color);
+    position: absolute;
+    left: 35%;
+    top: 50%;
+    transform: translateY(-50%);
+    border-radius: 15px;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    color: var(--light-text);
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4), 0 10px 20px rgba(0, 0, 0, 0.2);
+    font-size: 1.1em;
+    padding: 15px;
+    transition: all 0.5s;
+  }
+
+  .oven-active {
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.4), 0 10px 20px rgba(0, 0, 0, 0.2), 0 0 20px rgba(231, 111, 81, 0.5);
+    border-color: var(--highlight);
+  }
+
+  .oven-box small {
+    font-size: 0.9em;
+    color: #bbb;
+    margin-top: 10px;
+  }
+
+  .column {
+    width: 80%;
+    height: 20px;
+    background: linear-gradient(90deg, #666, #999, #666);
+    border-radius: 10px;
+    margin: 20px 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .column:before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(90deg, transparent, transparent 8px, rgba(255,255,255,0.1) 8px, rgba(255,255,255,0.1) 10px);
+    border-radius: inherit;
+  }
+
+  .oven-temp {
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: var(--highlight);
+    margin-top: 15px;
+    transition: all 0.5s;
+  }
+
+  .molecule {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    position: absolute;
+    top: calc(50% - 11px);
+    z-index: 2;
+    animation-name: travel;
+    animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
+    animation-fill-mode: forwards;
+    animation-duration: 15s;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 10px;
+    color: rgba(0, 0, 0, 0.7);
+  }
+
+  .mol1 {
+    background: radial-gradient(circle at 30% 30%, #ff6b6b, #c92a2a);
+    animation-delay: 0s;
+  }
+
+  .mol2 {
+    background: radial-gradient(circle at 30% 30%, #69db7c, #2b8a3e);
+    animation-delay: 2s;
+  }
+
+  .mol3 {
+    background: radial-gradient(circle at 30% 30%, #4dabf7, #1971c2);
+    animation-delay: 5s;
+  }
+
+  @keyframes travel {
+    0% {
+      left: 10%;
+      opacity: 0;
+      transform: scale(0);
+    }
+    5% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    20% {
+      left: 35%;
+    }
+    60% {
+      left: 65%;
+    }
+    95% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    100% {
+      left: 90%;
+      opacity: 0;
+      transform: scale(0);
+    }
+  }
+
+  .info-panel {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 250px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    z-index: 10;
+    border: 1px solid var(--primary-color);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  }
+
+  .module:hover .info-panel,
+  .oven-box:hover .info-panel {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .caption {
+    font-size: 1.2em;
+    text-align: center;
+    max-width: 800px;
+    color: var(--light-text);
+    min-height: 3.6em;
+    text-shadow: 1px 1px 2px #000;
+    background: rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    transition: all 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .chart-container {
+    width: 95%;
+    max-width: 1200px;
+    position: relative;
+  }
+
+  .chart {
+    width: 100%;
+    height: 180px;
+    background: #1a1a1a;
+    border: 2px solid #444;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+
+  .chart:before {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 1px;
+    background: #666;
+  }
+
+  .chart:after {
+    content: '';
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 1px;
+    height: 100%;
+    background: #666;
+  }
+
+  .baseline {
+    position: absolute;
+    bottom: 10px;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  .time-labels {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 5px 0;
+    color: #aaa;
+    font-size: 0.8rem;
+  }
+
+  .peak {
+    position: absolute;
+    bottom: 10px;
+    min-width: 2px;
+    background: var(--primary-color);
+    z-index: 5;
+    border-radius: 2px 2px 0 0;
+    transform-origin: bottom;
+    opacity: 0;
+  }
+
+  .peak.peak1 {
+    background: #ff6b6b;
+  }
+
+  .peak.peak2 {
+    background: #69db7c;
+  }
+
+  .peak.peak3 {
+    background: #4dabf7;
+  }
+
+  .peak-label {
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    white-space: nowrap;
+  }
+
+  @keyframes grow {
+    0% {
+      height: 0;
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    100% {
+      height: var(--peak-height);
+      opacity: 1;
+    }
+  }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 10px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .step-indicator {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    max-width: 600px;
+    margin: 30px auto;
+  }
+
+  .step {
+    background: #333;
+    color: #999;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+  }
+
+  .step.active {
+    background: var(--primary-color);
+    color: white;
+  }
+
+  .step-line {
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    width: 80%;
+    height: 2px;
+    background: #333;
+    z-index: 1;
+  }
+
+  .step-progress {
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    height: 2px;
+    background: var(--primary-color);
+    width: 0%;
+    z-index: 1;
+    transition: width 0.5s linear;
+  }
+
+  @media (max-width: 768px) {
+    .gc-system {
+      flex-direction: column;
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    .module {
+      width: 80%;
+    }
+    
+    .line {
+      width: 6px;
+      height: 80%;
+      left: 50%;
+      top: 10%;
+    }
+    
+    .oven-box {
+      position: relative;
+      left: 0;
+      transform: none;
+      width: 80%;
+      margin: 20px 0;
+    }
+    
+    @keyframes travel {
+      0% {
+        top: 5%;
+        left: 50%;
+        opacity: 0;
+        transform: scale(0) translateX(-50%);
+      }
+      5% {
+        opacity: 1;
+        transform: scale(1) translateX(-50%);
+      }
+      20% {
+        top: 30%;
+      }
+      60% {
+        top: 70%;
+      }
+      95% {
+        opacity: 1;
+        transform: scale(1) translateX(-50%);
+      }
+      100% {
+        top: 95%;
+        left: 50%;
+        opacity: 0;
+        transform: scale(0) translateX(-50%);
+      }
+    }
+    
+    .molecule {
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Gas Chromatography</h1>
+    <p class="description">A visualization of how gas chromatography separates compounds based on their different properties and retention times in the column.</p>
+  </header>
+  
+  <div class="controls">
+    <button id="startBtn">Start Animation</button>
+    <button id="resetBtn">Reset</button>
+    <div class="speed-control">
+      <label for="speedControl">Speed:</label>
+      <input type="range" id="speedControl" min="0.5" max="2" step="0.1" value="1">
+    </div>
+  </div>
+  
+  <div class="step-indicator">
+    <div class="step-line"></div>
+    <div class="step-progress" id="stepProgress"></div>
+    <div class="step" data-step="1">1</div>
+    <div class="step" data-step="2">2</div>
+    <div class="step" data-step="3">3</div>
+    <div class="step" data-step="4">4</div>
+  </div>
+  
+  <div class="gc-system">
+    <div class="module" id="injector">
+      <div class="module-icon">💉</div>
+      Injector
+      <small>Sample Injection</small>
+      <div class="module-temperature">250°C</div>
+      <div class="info-panel">
+        The sample is vaporized at high temperature and mixed with a carrier gas (often helium) before entering the column.
+      </div>
+    </div>
+    
+    <div class="line"></div>
+    
+    <div class="oven-box" id="oven">
+      <div class="module-icon">🔥</div>
+      Oven
+      <small>Stationary Phase Column</small>
+      <div class="column"></div>
+      <div class="oven-temp" id="ovenTemp">120°C</div>
+      <div class="info-panel">
+        The column contains a stationary phase that interacts differently with each compound. Temperature affects separation speed and efficiency.
+      </div>
+    </div>
+    
+    <div class="module" id="detector">
+      <div class="module-icon">📊</div>
+      Detector
+      <small>Signal Output</small>
+      <div class="module-temperature">300°C</div>
+      <div class="info-panel">
+        Detects compounds as they elute from the column and generates electrical signals proportional to their concentration.
+      </div>
+    </div>
+
+    <div class="molecule mol1" id="mol1">A</div>
+    <div class="molecule mol2" id="mol2">B</div>
+    <div class="molecule mol3" id="mol3">C</div>
+  </div>
+  
+  <div class="caption" id="caption">Press "Start Animation" to begin the gas chromatography process.</div>
+  
+  <div class="chart-container">
+    <div class="chart" id="chart">
+      <div class="baseline"></div>
+    </div>
+    <div class="time-labels">
+      <span>0 min</span>
+      <span>2 min</span>
+      <span>4 min</span>
+      <span>6 min</span>
+      <span>8 min</span>
+    </div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-color" style="background: #ff6b6b;"></div>
+        <span>Compound A</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #69db7c;"></div>
+        <span>Compound B</span>
+      </div>
+      <div class="legend-item">
+        <div class="legend-color" style="background: #4dabf7;"></div>
+        <span>Compound C</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  // Elements
+  const startBtn = document.getElementById('startBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const speedControl = document.getElementById('speedControl');
+  const caption = document.getElementById('caption');
+  const chart = document.getElementById('chart');
+  const injector = document.getElementById('injector');
+  const oven = document.getElementById('oven');
+  const detector = document.getElementById('detector');
+  const ovenTemp = document.getElementById('ovenTemp');
+  const mol1 = document.getElementById('mol1');
+  const mol2 = document.getElementById('mol2');
+  const mol3 = document.getElementById('mol3');
+  const stepProgress = document.getElementById('stepProgress');
+  const steps = document.querySelectorAll('.step');
+  
+  // Variables
+  let animationStarted = false;
+  let animationSpeed = 1;
+  let currentStep = 0;
+  const totalSteps = 4;
+  let animationTimer;
+  
+  // Speed control
+  speedControl.addEventListener('input', function() {
+    animationSpeed = parseFloat(this.value);
+    updateAnimationSpeed();
+  });
+  
+  function updateAnimationSpeed() {
+    const molecules = document.querySelectorAll('.molecule');
+    molecules.forEach(mol => {
+      if (animationStarted) {
+        mol.style.animationDuration = `${15 / animationSpeed}s`;
+      }
+    });
+  }
+  
+  // Start animation
+  startBtn.addEventListener('click', function() {
+    if (!animationStarted) {
+      animationStarted = true;
+      startBtn.textContent = 'Running...';
+      startBtn.disabled = true;
+      runAnimation();
+    }
+  });
+  
+  // Reset animation
+  resetBtn.addEventListener('click', function() {
+    resetAnimation();
+  });
+  
+  function resetAnimation() {
+    // Clear any existing animation timers
+    clearTimeout(animationTimer);
+    
+    // Reset animation state
+    animationStarted = false;
+    currentStep = 0;
+    
+    // Reset UI elements
+    startBtn.textContent = 'Start Animation';
+    startBtn.disabled = false;
+    caption.textContent = 'Press "Start Animation" to begin the gas chromatography process.';
+    
+    // Remove all peaks
+    const peaks = document.querySelectorAll('.peak');
+    peaks.forEach(peak => peak.remove());
+    
+    // Reset molecules
+    const molecules = document.querySelectorAll('.molecule');
+    molecules.forEach(mol => {
+      mol.style.animation = 'none';
+      mol.offsetHeight; // Trigger reflow
+      mol.style.opacity = '0';
+      mol.style.left = '10%';
+    });
+    
+    // Reset module states
+    injector.classList.remove('active');
+    oven.classList.remove('oven-active');
+    detector.classList.remove('active');
+    ovenTemp.textContent = '120°C';
+    
+    // Reset progress and steps
+    stepProgress.style.width = '0%';
+    steps.forEach(step => step.classList.remove('active'));
+  }
+  
+  function updateStep(step) {
+    currentStep = step;
+    const progressPercentage = (step / totalSteps) * 100;
+    stepProgress.style.width = `${progressPercentage}%`;
+    
+    // Update step indicators
+    steps.forEach(s => {
+      if (parseInt(s.dataset.step) <= step) {
+        s.classList.add('active');
+      } else {
+        s.classList.remove('active');
+      }
+    });
+  }
+  
+  function runAnimation() {
+    updateStep(1);
+    
+    // Step 1: Injection
+    injector.classList.add('active');
+    caption.textContent = 'Sample is vaporized and injected into the carrier gas stream. The carrier gas (mobile phase) carries the sample through the column.';
+    
+    // Set animation properties based on speed
+    const molecules = document.querySelectorAll('.molecule');
+    molecules.forEach(mol => {
+      mol.style.animation = `travel ${15/animationSpeed}s cubic-bezier(0.4, 0.0, 0.2, 1) forwards`;
+    });
+    
+    // Step 2: Separation in column
+    animationTimer = setTimeout(() => {
+      oven.classList.add('oven-active');
+      updateStep(2);
+      caption.textContent = 'Inside the heated column, compounds separate based on their affinity to the stationary phase. Compounds with less affinity move faster through the column.';
+      
+      // Simulate temperature ramping
+      let temp = 120;
+      const tempInterval = setInterval(() => {
+        temp += 10;
+        if (temp <= 220) {
+          ovenTemp.textContent = `${temp}°C`;
+        } else {
+          clearInterval(tempInterval);
+        }
+      }, 1000);
+      
+    }, 2000 / animationSpeed);
+    
+    // Step 3: Detection
+    animationTimer = setTimeout(() => {
+      detector.classList.add('active');
+      updateStep(3);
+      caption.textContent = 'As compounds exit the column, they reach the detector which generates an electrical signal proportional to their concentration.';
+      
+      // Create peaks for compound A
+      setTimeout(() => {
+        createPeak('peak1', 25, 130, 'Compound A', 6.5);
+      }, 1000 / animationSpeed);
+      
+      // Create peaks for compound B
+      setTimeout(() => {
+        createPeak('peak2', 50, 100, 'Compound B', 5.1);
+      }, 4000 / animationSpeed);
+      
+      // Create peaks for compound C
+      setTimeout(() => {
+        createPeak('peak3', 75, 150, 'Compound C', 7.2);
+      }, 8000 / animationSpeed);
+      
+    }, 6000 / animationSpeed);
+    
+    // Step 4: Chromatogram analysis
+    animationTimer = setTimeout(() => {
+      updateStep(4);
+      caption.textContent = 'The chromatogram shows peaks representing each compound. Peak area indicates concentration, while retention time helps identify the compound.';
+      startBtn.textContent = 'Completed';
+    }, 12000 / animationSpeed);
+  }
+  
+  function createPeak(className, position, height, compound, retentionTime) {
+    const peak = document.createElement('div');
+    peak.className = `peak ${className}`;
+    peak.style.left = `${position}%`;
+    peak.style.setProperty('--peak-height', `${height}px`);
+    
+    // Create and add label
+    const label = document.createElement('div');
+    label.className = 'peak-label';
+    label.textContent = `${compound} (${retentionTime} min)`;
+    peak.appendChild(label);
+    
+    chart.appendChild(peak);
+    
+    // Animate peak
+    setTimeout(() => {
+      peak.style.animation = `grow 1s ease-out forwards`;
+    }, 10);
+  }
+});
+</script>
+</body>
+</html>

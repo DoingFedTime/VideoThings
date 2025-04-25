@@ -1,0 +1,1149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Mass Spectrometer Animation</title>
+<style>
+  :root {
+    --primary-color: #6200ea;
+    --secondary-color: #03dac6;
+    --accent-color: #ff4081;
+    --dark-bg: #121212;
+    --darker-bg: #0a0a0a;
+    --light-text: #f8f9fa;
+    --border-color: #333;
+    --highlight: #bb86fc;
+    --ion-color: #ff4081;
+    --electron-color: #03dac6;
+    --neutral-color: #ffffff;
+  }
+
+  body {
+    margin: 0;
+    background: var(--dark-bg);
+    color: var(--light-text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    overflow-x: hidden;
+  }
+
+  .container {
+    position: relative;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 20px;
+    padding: 20px;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 10px;
+    width: 100%;
+  }
+
+  h1 {
+    font-size: 2.2rem;
+    margin-bottom: 0.3rem;
+    color: var(--highlight);
+    text-shadow: 0 0 10px rgba(187, 134, 252, 0.3);
+  }
+
+  .description {
+    max-width: 800px;
+    margin: 0 auto 20px;
+    font-size: 1rem;
+    line-height: 1.5;
+    text-align: center;
+    color: #bbb;
+  }
+
+  .controls {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  button {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.2s;
+    min-width: 120px;
+    z-index: 100; /* Ensure buttons are clickable */
+  }
+
+  button:hover {
+    background: #7c4dff;
+    transform: translateY(-2px);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+
+  button:disabled {
+    background: #555;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .speed-control {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #222;
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+
+  .speed-control label {
+    font-size: 0.9rem;
+    white-space: nowrap;
+  }
+
+  .speed-control input {
+    accent-color: var(--primary-color);
+  }
+
+  .ms-system {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 95%;
+    max-width: 1200px;
+    background: var(--darker-bg);
+    border-radius: 15px;
+    padding: 20px 10px 30px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    position: relative;
+    margin-top: 20px;
+  }
+
+  .ms-components {
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+    align-items: center;
+    margin-bottom: 30px;
+    position: relative;
+  }
+
+  .connector {
+    height: 8px;
+    background: linear-gradient(90deg, rgba(255,255,255,0.1), var(--accent-color), rgba(255,255,255,0.1));
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 10%;
+    right: 10%;
+    border-radius: 4px;
+    z-index: 1;
+  }
+
+  .module {
+    background: #1e1e1e;
+    border: 2px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    min-width: 120px;
+    max-width: 180px;
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--light-text);
+    font-size: 1rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    z-index: 3;
+    transition: all 0.3s;
+    position: relative;
+  }
+
+  .module:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .module.active {
+    border-color: var(--highlight);
+    box-shadow: 0 0 20px rgba(187, 134, 252, 0.3);
+  }
+
+  .module small {
+    display: block;
+    font-size: 0.85em;
+    color: #aaa;
+    margin-top: 8px;
+  }
+
+  .module-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--secondary-color);
+  }
+
+  .visualization-area {
+    width: 100%;
+    height: 300px;
+    position: relative;
+    background: #0d0d0d;
+    border-radius: 10px;
+    border: 1px solid #333;
+    overflow: hidden;
+    margin-top: 30px;
+  }
+
+  /* Ion Source Area */
+  .ion-source-area {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 25%;
+    height: 100%;
+    border-right: 1px dashed #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .molecule {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--neutral-color);
+    position: absolute;
+    top: 50%;
+    left: 12.5%;
+    transform: translate(-50%, -50%);
+    opacity: 0;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
+    transition: opacity 0.5s;
+  }
+
+  .electron-beam {
+    position: absolute;
+    top: 0;
+    left: 12.5%;
+    height: 0;
+    width: 2px;
+    background: var(--electron-color);
+    transform: translateX(-50%);
+    box-shadow: 0 0 5px var(--electron-color);
+    opacity: 0;
+    transition: height 1s, opacity 0.5s;
+  }
+
+  /* Mass Analyzer Area */
+  .mass-analyzer-area {
+    position: absolute;
+    top: 0;
+    left: 25%;
+    width: 50%;
+    height: 100%;
+    border-right: 1px dashed #333;
+    overflow: hidden;
+  }
+
+  .magnetic-field {
+    position: absolute;
+    top: 10%;
+    left: 10%;
+    width: 80%;
+    height: 80%;
+    border-radius: 50%;
+    border: 2px dashed var(--primary-color);
+    opacity: 0;
+    transition: opacity 1s;
+  }
+
+  .magnetic-field::before {
+    content: "B";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    opacity: 0.5;
+  }
+
+  .ion-path {
+    position: absolute;
+    width: 60%;
+    height: 60%;
+    top: 20%;
+    left: 20%;
+    border-radius: 50%;
+    border: 2px solid var(--ion-color);
+    clip-path: inset(0 0 50% 50%);
+    opacity: 0;
+    transition: opacity 1s;
+  }
+
+  .ion {
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background: var(--ion-color);
+    position: absolute;
+    opacity: 0;
+    box-shadow: 0 0 10px rgba(255, 64, 129, 0.5);
+  }
+
+  .ion-charge {
+    position: absolute;
+    font-size: 0.65rem;
+    color: white;
+    top: -12px;
+    right: -5px;
+  }
+
+  /* Detector Area */
+  .detector-area {
+    position: absolute;
+    top: 0;
+    left: 75%;
+    width: 25%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .detector-plate {
+    width: 60%;
+    height: 70%;
+    background: #333;
+    border-radius: 5px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    opacity: 0.7;
+    transition: opacity 0.5s;
+  }
+
+  .detector-plate.active {
+    opacity: 1;
+    box-shadow: 0 0 15px rgba(3, 218, 198, 0.3);
+  }
+
+  .detection-point {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--secondary-color);
+    opacity: 0;
+    transition: opacity 0.3s, transform 0.3s;
+  }
+
+  .detection-point.active {
+    opacity: 1;
+    transform: scale(1.5);
+    box-shadow: 0 0 10px var(--secondary-color);
+  }
+
+  .signal-line {
+    position: absolute;
+    top: 10px;
+    right: -20px;
+    width: 3px;
+    height: 0;
+    background: var(--secondary-color);
+    transition: height 0.5s;
+  }
+
+  /* Spectrum Display */
+  .spectrum-display {
+    width: 100%;
+    height: 200px;
+    background: #0d0d0d;
+    border-radius: 10px;
+    border: 1px solid #333;
+    position: relative;
+    margin-top: 20px;
+    overflow: hidden;
+  }
+
+  .spectrum-axes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+
+  .spectrum-x-axis {
+    position: absolute;
+    bottom: 30px;
+    left: 50px;
+    right: 20px;
+    height: 2px;
+    background: #555;
+  }
+
+  .spectrum-y-axis {
+    position: absolute;
+    bottom: 30px;
+    left: 50px;
+    width: 2px;
+    height: calc(100% - 50px);
+    background: #555;
+  }
+
+  .spectrum-x-label {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+
+  .spectrum-y-label {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%) rotate(-90deg);
+    font-size: 0.9rem;
+    color: #aaa;
+  }
+
+  .mass-markers {
+    position: absolute;
+    bottom: 15px;
+    left: 50px;
+    right: 20px;
+    display: flex;
+    justify-content: space-between;
+    padding-right: 10px;
+    font-size: 0.8rem;
+    color: #777;
+  }
+
+  .intensity-markers {
+    position: absolute;
+    left: 20px;
+    top: 20px;
+    bottom: 30px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    font-size: 0.8rem;
+    color: #777;
+  }
+
+  .spectrum-peak {
+    position: absolute;
+    bottom: 32px;
+    width: 4px;
+    background: var(--ion-color);
+    transform-origin: bottom;
+    transform: scaleY(0);
+    transition: transform 0.5s;
+  }
+
+  .info-panel {
+    position: absolute;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    max-width: 300px;
+    font-size: 0.9rem;
+    line-height: 1.4;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    z-index: 10;
+    border: 1px solid var(--highlight);
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+  }
+
+  .module:hover .info-panel {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .caption {
+    font-size: 1.1em;
+    text-align: center;
+    max-width: 800px;
+    min-height: 3em;
+    color: var(--light-text);
+    background: rgba(0, 0, 0, 0.3);
+    padding: 15px;
+    border-radius: 10px;
+    margin: 20px 0;
+    transition: all 0.5s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .step-indicator {
+    display: flex;
+    justify-content: space-between;
+    width: 80%;
+    max-width: 600px;
+    margin: 20px auto;
+    position: relative;
+  }
+
+  .step {
+    background: #333;
+    color: #999;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    z-index: 2;
+    font-weight: bold;
+    transition: all 0.3s;
+  }
+
+  .step.active {
+    background: var(--highlight);
+    color: #000;
+  }
+
+  .step-line {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    right: 15px;
+    height: 3px;
+    background: #333;
+    z-index: 1;
+    transform: translateY(-50%);
+  }
+
+  .step-progress {
+    position: absolute;
+    top: 50%;
+    left: 15px;
+    height: 3px;
+    background: var(--highlight);
+    width: 0%;
+    z-index: 1;
+    transform: translateY(-50%);
+    transition: width 0.5s linear;
+  }
+
+  .legend {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 15px;
+    flex-wrap: wrap;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.9rem;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 5px 10px;
+    border-radius: 5px;
+  }
+
+  .legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+
+  .formula {
+    font-family: 'Courier New', monospace;
+    font-weight: bold;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 3px 6px;
+    border-radius: 4px;
+    margin: 0 2px;
+  }
+
+  .sample-info {
+    margin: 15px 0;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    border: 1px solid #333;
+    max-width: 600px;
+    text-align: center;
+  }
+
+  .sample-formula {
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+    color: var(--secondary-color);
+  }
+
+  .fragment-info {
+    margin-top: 5px;
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+  }
+
+  .fragment {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    font-size: 0.9rem;
+  }
+
+  @media (max-width: 768px) {
+    .ms-components {
+      flex-direction: column;
+      gap: 20px;
+    }
+    
+    .connector {
+      height: 80%;
+      width: 8px;
+      left: 50%;
+      top: 10%;
+      transform: translateX(-50%);
+    }
+    
+    .visualization-area {
+      height: 400px;
+    }
+    
+    .ion-source-area {
+      width: 100%;
+      height: 33.33%;
+      border-right: none;
+      border-bottom: 1px dashed #333;
+    }
+    
+    .mass-analyzer-area {
+      width: 100%;
+      height: 33.33%;
+      left: 0;
+      top: 33.33%;
+      border-right: none;
+      border-bottom: 1px dashed #333;
+    }
+    
+    .detector-area {
+      width: 100%;
+      left: 0;
+      top: 66.66%;
+      height: 33.33%;
+    }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Mass Spectrometer</h1>
+    <p class="description">
+      Visualizing how a mass spectrometer ionizes molecules, separates ions by mass-to-charge ratio, 
+      and produces a mass spectrum for chemical analysis.
+    </p>
+  </header>
+  
+  <div class="controls">
+    <button id="startBtn">Start Animation</button>
+    <button id="resetBtn">Reset</button>
+    <div class="speed-control">
+      <label for="speedControl">Animation Speed:</label>
+      <input type="range" id="speedControl" min="0.5" max="2" step="0.1" value="1">
+    </div>
+  </div>
+  
+  <div class="sample-info">
+    <div class="sample-formula">CH<sub>3</sub>CH<sub>2</sub>OH (Ethanol)</div>
+    <div>Molecular Weight: 46 g/mol</div>
+    <div class="fragment-info">
+      <div class="fragment">M<sup>+</sup> (46 m/z)</div>
+      <div class="fragment">CH<sub>3</sub>CH<sub>2</sub><sup>+</sup> (29 m/z)</div>
+      <div class="fragment">CH<sub>3</sub><sup>+</sup> (15 m/z)</div>
+    </div>
+  </div>
+  
+  <div class="step-indicator">
+    <div class="step-line"></div>
+    <div class="step-progress" id="stepProgress"></div>
+    <div class="step" data-step="1">1</div>
+    <div class="step" data-step="2">2</div>
+    <div class="step" data-step="3">3</div>
+    <div class="step" data-step="4">4</div>
+  </div>
+  
+  <div class="ms-system">
+    <div class="ms-components">
+      <div class="connector"></div>
+      
+      <div class="module" id="ionSource">
+        <div class="module-icon">⚡</div>
+        Ion Source
+        <small>Electron Impact (EI)</small>
+        <div class="info-panel">
+          The sample is vaporized and bombarded with high-energy electrons. 
+          This removes electrons from the molecules, creating positive ions and fragment ions.
+        </div>
+      </div>
+      
+      <div class="module" id="massAnalyzer">
+        <div class="module-icon">🧲</div>
+        Mass Analyzer
+        <small>Magnetic Sector</small>
+        <div class="info-panel">
+          Ions are accelerated through a magnetic field where they travel in circular paths. 
+          The radius of the path depends on the mass-to-charge ratio (m/z), separating ions of different masses.
+        </div>
+      </div>
+      
+      <div class="module" id="detector">
+        <div class="module-icon">📊</div>
+        Detector
+        <small>Electron Multiplier</small>
+        <div class="info-panel">
+          Detects ions that make it through the mass analyzer and amplifies the signal.
+          The data is then processed to create a mass spectrum showing intensity vs. m/z.
+        </div>
+      </div>
+    </div>
+    
+    <div class="visualization-area">
+      <!-- Ion Source Area -->
+      <div class="ion-source-area">
+        <div class="molecule" id="molecule"></div>
+        <div class="electron-beam" id="electronBeam"></div>
+      </div>
+      
+      <!-- Mass Analyzer Area -->
+      <div class="mass-analyzer-area">
+        <div class="magnetic-field" id="magneticField"></div>
+        <div class="ion-path" id="ionPath"></div>
+      </div>
+      
+      <!-- Detector Area -->
+      <div class="detector-area">
+        <div class="detector-plate" id="detectorPlate">
+          <div class="detection-point" id="detectionPoint1"></div>
+          <div class="detection-point" id="detectionPoint2"></div>
+          <div class="detection-point" id="detectionPoint3"></div>
+          <div class="signal-line" id="signalLine"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="caption" id="caption">Press "Start Animation" to begin the mass spectrometry process.</div>
+  </div>
+  
+  <div class="spectrum-display">
+    <div class="spectrum-axes">
+      <div class="spectrum-x-axis"></div>
+      <div class="spectrum-y-axis"></div>
+      <div class="spectrum-x-label">m/z (mass-to-charge ratio)</div>
+      <div class="spectrum-y-label">Relative Intensity (%)</div>
+      <div class="mass-markers">
+        <span>0</span>
+        <span>10</span>
+        <span>20</span>
+        <span>30</span>
+        <span>40</span>
+        <span>50</span>
+        <span>60</span>
+      </div>
+      <div class="intensity-markers">
+        <span>100%</span>
+        <span>50%</span>
+        <span>0%</span>
+      </div>
+    </div>
+    <div id="spectrumPeaks"></div>
+  </div>
+  
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-color" style="background: var(--neutral-color);"></div>
+      <span>Neutral Molecule</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: var(--ion-color);"></div>
+      <span>Ions</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: var(--electron-color);"></div>
+      <span>Electron Beam</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-color" style="background: var(--primary-color);"></div>
+      <span>Magnetic Field</span>
+    </div>
+  </div>
+</div>
+
+<script>
+// Using window.onload to ensure all elements are available
+window.onload = function() {
+  // Elements
+  const startBtn = document.getElementById('startBtn');
+  const resetBtn = document.getElementById('resetBtn');
+  const speedControl = document.getElementById('speedControl');
+  const caption = document.getElementById('caption');
+  const stepProgress = document.getElementById('stepProgress');
+  const steps = document.querySelectorAll('.step');
+  
+  // Module elements
+  const ionSource = document.getElementById('ionSource');
+  const massAnalyzer = document.getElementById('massAnalyzer');
+  const detector = document.getElementById('detector');
+  
+  // Visualization elements
+  const molecule = document.getElementById('molecule');
+  const electronBeam = document.getElementById('electronBeam');
+  const magneticField = document.getElementById('magneticField');
+  const ionPath = document.getElementById('ionPath');
+  const detectorPlate = document.getElementById('detectorPlate');
+  const detectionPoint1 = document.getElementById('detectionPoint1');
+  const detectionPoint2 = document.getElementById('detectionPoint2');
+  const detectionPoint3 = document.getElementById('detectionPoint3');
+  const signalLine = document.getElementById('signalLine');
+  const spectrumPeaks = document.getElementById('spectrumPeaks');
+  
+  // Mass spectrum data for ethanol
+  const peaks = [
+    { mz: 15, intensity: 35, label: "CH₃⁺" },
+    { mz: 29, intensity: 60, label: "CH₃CH₂⁺" },
+    { mz: 31, intensity: 30, label: "CH₂OH⁺" },
+    { mz: 46, intensity: 100, label: "C₂H₅OH⁺ (M⁺)" }
+  ];
+  
+  // Variables - initialize with console.log to confirm code execution
+  console.log("Initializing variables");
+  let animationStarted = false;
+  let animationSpeed = 1;
+  let currentStep = 0;
+  let totalSteps = 4;
+  let animationTimer;
+  let ions = [];
+  
+  // Speed control
+  speedControl.addEventListener('input', function() {
+    animationSpeed = parseFloat(speedControl.value);
+  });
+  
+  // Start animation - with error handling
+  startBtn.addEventListener('click', function() {
+    console.log("Start button clicked - Event listener triggered");
+    try {
+      if (!animationStarted) {
+        console.log("Animation not started - Starting animation");
+        animationStarted = true;
+        startBtn.textContent = 'Running...';
+        startBtn.disabled = true;
+        
+        // Add a small delay to ensure DOM updates
+        setTimeout(function() {
+          console.log("Running animation after delay");
+          runAnimation();
+        }, 50);
+      } else {
+        console.log("Animation already started");
+      }
+    } catch (error) {
+      console.error("Error starting animation:", error);
+      alert("Animation error: " + error.message);
+    }
+    console.log("Start button clicked - Event listener finished");
+  });
+  
+  // Reset animation
+  resetBtn.addEventListener('click', function() {
+    resetAnimation();
+  });
+  
+  function resetAnimation() {
+    // Clear any existing animation timers
+    clearTimeout(animationTimer);
+    
+    // Reset animation state
+    animationStarted = false;
+    currentStep = 0;
+    
+    // Reset UI elements
+    startBtn.textContent = 'Start Animation';
+    startBtn.disabled = false;
+    caption.textContent = 'Press "Start Animation" to begin the mass spectrometry process.';
+    
+    // Reset modules
+    ionSource.classList.remove('active');
+    massAnalyzer.classList.remove('active');
+    detector.classList.remove('active');
+    
+    // Reset visualization
+    molecule.style.opacity = '0';
+    electronBeam.style.opacity = '0';
+    electronBeam.style.height = '0';
+    magneticField.style.opacity = '0';
+    ionPath.style.opacity = '0';
+    detectorPlate.classList.remove('active');
+    detectionPoint1.classList.remove('active');
+    detectionPoint2.classList.remove('active');
+    detectionPoint3.classList.remove('active');
+    signalLine.style.height = '0';
+    
+    // Remove ions
+    ions.forEach(ion => {
+      if (ion.element) {
+        ion.element.remove();
+      }
+    });
+    ions = [];
+    
+    // Reset spectrum
+    const existingPeaks = document.querySelectorAll('.spectrum-peak');
+    existingPeaks.forEach(peak => peak.remove());
+    
+    // Reset progress
+    stepProgress.style.width = '0%';
+    steps.forEach(step => step.classList.remove('active'));
+  }
+  
+  function updateStep(step) {
+    currentStep = step;
+    const progressPercentage = (step / totalSteps) * 100;
+    stepProgress.style.width = `${progressPercentage}%`;
+    
+    // Update step indicators
+    steps.forEach(s => {
+      if (parseInt(s.dataset.step) <= step) {
+        s.classList.add('active');
+      } else {
+        s.classList.remove('active');
+      }
+    });
+  }
+  
+  function createIon(mz, label, delay) {
+    console.log(`Creating ion: mz=${mz}, label=${label}, delay=${delay}`);
+    
+    animationTimer = setTimeout(() => {
+      const ion = document.createElement('div');
+      ion.className = 'ion';
+      ion.style.top = '50%';
+      ion.style.left = '12.5%';
+      ion.style.transform = 'translate(-50%, -50%)';
+      ion.style.opacity = '1'; // Ensure ion is visible
+      
+      const charge = document.createElement('span');
+      charge.className = 'ion-charge';
+      charge.textContent = '+';
+      ion.appendChild(charge);
+      
+      document.querySelector('.mass-analyzer-area').appendChild(ion);
+      
+      // Store ion info
+      const ionObj = {
+        element: ion,
+        mz: mz,
+        label: label,
+        angle: 0
+      };
+      ions.push(ionObj);
+      
+      // Start ion animation
+      animateIon(ionObj);
+    }, delay / animationSpeed);
+  }
+  
+  function animateIon(ion) {
+    console.log(`Animating ion with mz=${ion.mz}`);
+    const radius = Math.min(ion.mz * 2, 100); // Adjusting radius based on m/z
+    const speedFactor = 1 / ion.mz * 50; // Heavier ions move slower
+    
+    const moveIon = () => {
+      ion.angle += speedFactor * animationSpeed * 0.05;
+      
+      // Calculate position based on circular path
+      const centerX = 50; // Center X in percentage
+      const centerY = 50; // Center Y in percentage
+      
+      const x = centerX + radius * Math.cos(ion.angle);
+      const y = centerY + radius * Math.sin(ion.angle);
+      
+      ion.element.style.left = `${x}%`;
+      ion.element.style.top = `${y}%`;
+      
+      // Continue animation until ion leaves analyzer
+      if (ion.angle < Math.PI * 1.5) {
+        requestAnimationFrame(moveIon);
+      } else {
+        // Ion reaches detector
+        ion.element.style.opacity = '0';
+        setTimeout(() => {
+          console.log(`Ion with mz=${ion.mz} reached detector`);
+          if (ion.element) {
+            ion.element.remove();
+          }
+          
+          // Activate detection point based on m/z
+          if (ion.mz === 15) {
+            detectionPoint1.classList.add('active');
+          } else if (ion.mz === 29) {
+            detectionPoint2.classList.add('active');
+          } else {
+            detectionPoint3.classList.add('active');
+          }
+          
+          // Create peak in spectrum
+          createSpectrumPeak(ion.mz, ion.label);
+        }, 100 / animationSpeed);
+      }
+    };
+    
+    // Start moving the ion
+    moveIon();
+  }
+  
+  function createSpectrumPeak(mz, label) {
+    console.log(`Creating spectrum peak: mz=${mz}, label=${label}`);
+    
+    const peakData = peaks.find(p => p.mz === mz);
+    if (!peakData) {
+      console.error("Peak data not found for mz:", mz);
+      return;
+    }
+    
+    const maxMz = 60; // Maximum m/z value to display
+    const peakPosition = (peakData.mz / maxMz) * 100;
+    
+    const peak = document.createElement('div');
+    peak.className = 'spectrum-peak';
+    peak.style.left = `${50 + (peakPosition * 0.8)}px`; // Offset for y-axis + scaled position
+    peak.style.height = `${peakData.intensity * 1.3}px`; // Scaled height
+    
+    // Add label
+    const peakLabel = document.createElement('div');
+    peakLabel.textContent = `${peakData.mz}`;
+    peakLabel.style.position = 'absolute';
+    peakLabel.style.top = '-20px';
+    peakLabel.style.left = '50%';
+    peakLabel.style.transform = 'translateX(-50%)';
+    peakLabel.style.fontSize = '0.8rem';
+    peakLabel.style.color = '#ccc';
+    peak.appendChild(peakLabel);
+    
+    spectrumPeaks.appendChild(peak);
+    
+    // Animate the peak
+    setTimeout(() => {
+      peak.style.transform = `scaleY(1)`;
+    }, 10);
+  }
+  
+  function runAnimation() {
+      console.log("runAnimation - Function started");
+      
+      // Step 1: Sample introduction and ionization
+      updateStep(1);
+      ionSource.classList.add('active');
+      
+      caption.textContent = 'Sample molecules are vaporized and enter the ion source where they are bombarded with high-energy electrons.';
+      
+      // Show molecule
+      molecule.style.opacity = '1';
+      
+      // Show electron beam after delay
+      animationTimer = setTimeout(() => {
+        console.log("Showing electron beam");
+        electronBeam.style.opacity = '1';
+        electronBeam.style.height = '100%';
+        
+        // Create ions after ionization
+        animationTimer = setTimeout(() => {
+          console.log("Ionization occurring");
+          molecule.style.opacity = '0';
+          
+          // Create fragment ions with delays between them
+          createIon(46, "C₂H₅OH⁺", 0);     // Molecular ion
+          createIon(29, "CH₃CH₂⁺", 500);   // Fragment ion
+          createIon(15, "CH₃⁺", 1000);     // Fragment ion
+        }, 2000 / animationSpeed);
+      }, 1000 / animationSpeed);
+      
+      // Step 2: Mass analysis
+      animationTimer = setTimeout(() => {
+        console.log("Moving to step 2: Mass analysis");
+        updateStep(2);
+        massAnalyzer.classList.add('active');
+        caption.textContent = 'Ions are accelerated into the mass analyzer where a magnetic field separates them based on their mass-to-charge (m/z) ratio.';
+        
+        // Show magnetic field
+        magneticField.style.opacity = '1';
+        ionPath.style.opacity = '1';
+      }, 4000 / animationSpeed);
+      
+      // Step 3: Detection
+      animationTimer = setTimeout(() => {
+        console.log("Moving to step 3: Detection");
+        updateStep(3);
+        detector.classList.add('active');
+        caption.textContent = 'Ions reach the detector where they generate an electronic signal proportional to their abundance.';
+        
+        detectorPlate.classList.add('active');
+        
+        // Show signal line
+        animationTimer = setTimeout(() => {
+          signalLine.style.height = '100%';
+        }, 1000 / animationSpeed);
+      }, 8000 / animationSpeed);
+      
+      // Step 4: Mass spectrum
+      animationTimer = setTimeout(() => {
+        console.log("Moving to step 4: Mass spectrum");
+        updateStep(4);
+        caption.textContent = 'The data is processed to create a mass spectrum showing the relative abundance of each ion fragment by m/z ratio.';
+        
+        startBtn.textContent = 'Completed';
+        
+        // Create remaining peaks for a complete spectrum
+        const remainingPeaks = peaks.filter(p =>
+          !ions.some(ion => ion.mz === p.mz)
+        );
+        
+        console.log("Creating remaining peaks:", remainingPeaks.length);
+        
+        remainingPeaks.forEach((peak, index) => {
+          animationTimer = setTimeout(() => {
+            createSpectrumPeak(peak.mz, peak.label);
+          }, index * 500 / animationSpeed);
+        });
+      }, 12000 / animationSpeed);
+      console.log("runAnimation - Function finished");
+    }
+  };
+</script>
+</body>
+</html>
