@@ -1,0 +1,1488 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Surveillance: How Sites Track You</title>
+    <style>
+        :root {
+            --primary: #121212;
+            --secondary: #1e1e1e;
+            --accent: #bb86fc;
+            --text: #f5f5f5;
+            --danger: #cf6679;
+            --warning: #ffb74d;
+            --info: #64b5f6;
+            --success: #81c784;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background-color: var(--primary);
+            color: var(--text);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+        }
+
+        header {
+            background-color: var(--secondary);
+            padding: 1.5rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .nav-toggle {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--text);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        nav a {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        nav a:hover {
+            color: var(--accent);
+        }
+
+        .hero {
+            padding: 5rem 0;
+            background-color: var(--secondary);
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at center, transparent 0%, var(--secondary) 70%);
+            z-index: 1;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 2;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: float 10s infinite linear;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        h1 {
+            margin-bottom: 1rem;
+            font-size: 3rem;
+            font-weight: 800;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+            margin-bottom: 2rem;
+        }
+
+        .cta {
+            display: inline-block;
+            background-color: var(--accent);
+            color: #121212;
+            padding: 0.75rem 1.5rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .cta:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(187, 134, 252, 0.3);
+        }
+
+        section {
+            padding: 4rem 0;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 2rem;
+            color: var(--accent);
+            margin-bottom: 1rem;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .card {
+            background-color: var(--secondary);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            position: relative;
+            height: 100%;
+        }
+
+        .card-hidden {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .card-visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-icon {
+            width: 60px;
+            height: 60px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            margin-top: -30px;
+            position: relative;
+        }
+
+        .card-danger .card-icon {
+            background-color: var(--danger);
+        }
+
+        .card-warning .card-icon {
+            background-color: var(--warning);
+        }
+
+        .card-info .card-icon {
+            background-color: var(--info);
+        }
+
+        .card-success .card-icon {
+            background-color: var(--success);
+        }
+
+        .card-content {
+            padding: 2rem;
+        }
+
+        .card-title {
+            margin-top: 1rem;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .card-description {
+            color: #a0a0a0;
+        }
+
+        .details {
+            margin-top: 1rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+            padding: 1rem;
+        }
+
+        .details-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .details-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+
+        .details-expanded .details-content {
+            max-height: 500px;
+        }
+
+        .details-title::after {
+            content: "+";
+            margin-left: auto;
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .details-expanded .details-title::after {
+            transform: rotate(45deg);
+        }
+
+        .details-list {
+            list-style-position: inside;
+            padding-left: 1rem;
+        }
+
+        .details-list li {
+            margin-bottom: 0.5rem;
+        }
+
+        .mitigation {
+            background-color: rgba(129, 199, 132, 0.1);
+            border-left: 3px solid var(--success);
+            padding: 1rem;
+            margin-top: 1rem;
+            border-radius: 0 4px 4px 0;
+        }
+
+        .mitigation-title {
+            color: var(--success);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            margin: 3rem 0;
+        }
+
+        .stat {
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .stat-value {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .stat-label {
+            color: #a0a0a0;
+        }
+
+        footer {
+            background-color: var(--secondary);
+            padding: 2rem 0;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        .footer-content p {
+            color: #a0a0a0;
+        }
+
+        .dots-background {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            opacity: 0.1;
+            z-index: 1;
+        }
+
+        .dot {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: var(--accent);
+            border-radius: 50%;
+        }
+
+        .progress-container {
+            width: 100%;
+            height: 3px;
+            background-color: var(--secondary);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 200;
+        }
+
+        .progress-bar {
+            height: 3px;
+            background-color: var(--accent);
+            width: 0;
+        }
+
+        .feature-list {
+            margin-top: 2rem;
+        }
+
+        .feature {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 1.5rem;
+            padding: 1rem;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateX(5px);
+        }
+
+        .feature-icon {
+            min-width: 40px;
+            height: 40px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .feature-content {
+            flex: 1;
+        }
+
+        .feature-title {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .highlighted {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .danger-text {
+            color: var(--danger);
+        }
+
+        .warning-text {
+            color: var(--warning);
+        }
+
+        .info-text {
+            color: var(--info);
+        }
+
+        .success-text {
+            color: var(--success);
+        }
+
+        .animated-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.05;
+        }
+
+        .tracking-simulation {
+            padding: 2rem;
+            background-color: rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            margin-top: 3rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .simulation-header {
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .browser-mockup {
+            border-radius: 8px;
+            background-color: #333;
+            padding: 1rem;
+            position: relative;
+        }
+
+        .browser-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #444;
+            margin-bottom: 1rem;
+        }
+
+        .browser-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: #ff6057;
+        }
+
+        .browser-dot:nth-child(2) {
+            background-color: #ffbd2e;
+        }
+
+        .browser-dot:nth-child(3) {
+            background-color: #27c93f;
+        }
+
+        .browser-address {
+            flex: 1;
+            background-color: #444;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+            margin-left: 1rem;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+
+        .browser-content {
+            min-height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #fff;
+            color: #333;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .tracker-dot {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: red;
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: tracker-float 5s infinite linear;
+        }
+
+        @keyframes tracker-float {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.7;
+            }
+            90% {
+                opacity: 0.7;
+            }
+            100% {
+                transform: translate(300px, -150px);
+                opacity: 0;
+            }
+        }
+
+        .data-packet {
+            position: absolute;
+            padding: 0.25rem 0.5rem;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            animation: packet-float 8s infinite linear;
+            opacity: 0;
+        }
+
+        @keyframes packet-float {
+            0% {
+                transform: translate(0, 0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translate(400px, -200px);
+                opacity: 0;
+            }
+        }
+
+        .data-stream {
+            position: absolute;
+            height: 1px;
+            background: linear-gradient(90deg, transparent 0%, red 50%, transparent 100%);
+            animation: stream-float 4s infinite linear;
+            opacity: 0;
+        }
+
+        @keyframes stream-float {
+            0% {
+                width: 0;
+                opacity: 0;
+            }
+            20% {
+                opacity: 0.5;
+            }
+            80% {
+                opacity: 0.5;
+            }
+            100% {
+                width: 300px;
+                opacity: 0;
+            }
+        }
+
+        .protection-tip {
+            background-color: rgba(129, 199, 132, 0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .tip-icon {
+            background-color: var(--success);
+            min-width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+        }
+
+        .tip-content h3 {
+            margin-bottom: 0.5rem;
+            color: var(--success);
+        }
+
+        @media (max-width: 768px) {
+            .nav-toggle {
+                display: block;
+            }
+
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                background-color: var(--secondary);
+                height: 100vh;
+                width: 70%;
+                padding: 2rem;
+                transition: right 0.3s ease;
+                z-index: 101;
+            }
+
+            nav.active {
+                right: 0;
+            }
+
+            nav ul {
+                flex-direction: column;
+                gap: 2rem;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .stat {
+                width: 50%;
+                margin-bottom: 1rem;
+            }
+
+            .stat-value {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <div class="animated-background" id="animatedBackground"></div>
+
+    <header>
+        <div class="container header-content">
+            <div class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                </svg>
+                <h1>Digital Privacy Guard</h1>
+            </div>
+            <button class="nav-toggle" id="navToggle">☰</button>
+            <nav id="mainNav">
+                <ul>
+                    <li><a href="#tracking-methods">Tracking Methods</a></li>
+                    <li><a href="#data-collection">Data Collection</a></li>
+                    <li><a href="#protection">Protection</a></li>
+                    <li><a href="#simulation">Live Simulation</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="particles" id="particles"></div>
+        <div class="hero-content container">
+            <h1>They're <span class="danger-text">Watching</span> You</h1>
+            <p class="subtitle">Exposing the hidden techniques websites use to track, monitor, and collect your data.</p>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 22px; flex-wrap: wrap; padding: 10px 0; color: inherit;">
+                <a href="https://www.youtube.com/@Sam_Bent" target="_blank" aria-label="YouTube" style="width: 32px; height: 32px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+                  <path fill="#FF3D00" d="M43.2,33.9c-0.4,2.1-2.1,3.7-4.2,4c-3.3,0.5-8.8,1.1-15,1.1c-6.1,0-11.6-0.6-15-1.1c-2.1-0.3-3.8-1.9-4.2-4C4.4,31.6,4,28.2,4,24c0-4.2,0.4-7.6,0.8-9.9c0.4-2.1,2.1-3.7,4.2-4C12.3,9.6,17.8,9,24,9c6.2,0,11.6,0.6,15,1.1c2.1,0.3,3.8,1.9,4.2,4c0.4,2.3,0.9,5.7,0.9,9.9C44,28.2,43.6,31.6,43.2,33.9z"/>
+                  <path fill="#FFF" d="M20 31L20 17 32 24z"/>
+                </svg>
+              </a>
+                <a href="https://twitter.com/DoingFedTime" target="_blank" aria-label="X" style="width: 32px; height: 32px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 50 50" width="100%" height="100%" fill="#ccc">
+                  <path d="M 11 4 C 7.134 4 4 7.134 4 11 L 4 39 C 4 42.866 7.134 46 11 46 L 39 46 C 42.866 46 46 42.866 46 39 L 46 11 C 46 7.134 42.866 4 39 4 L 11 4 z M 13.085938 13 L 21.023438 13 L 26.660156 21.009766 L 33.5 13 L 36 13 L 27.789062 22.613281 L 37.914062 37 L 29.978516 37 L 23.4375 27.707031 L 15.5 37 L 13 37 L 22.308594 26.103516 L 13.085938 13 z M 16.914062 15 L 31.021484 35 L 34.085938 35 L 19.978516 15 L 16.914062 15 z"/>
+                </svg>
+              </a>
+              <a href="https://doingfedtime.com" target="_blank" aria-label="DoingFedTime" style="width: 32px; height: 32px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%" stroke-width="3" stroke="#ccc" fill="none">
+                  <path d="M39.93,55.72A24.86,24.86,0,1,1,56.86,32.15a37.24,37.24,0,0,1-.73,6"/>
+                  <path d="M37.86,51.1A47,47,0,0,1,32,56.7"/>
+                  <path d="M32,7A34.14,34.14,0,0,1,43.57,30a34.07,34.07,0,0,1,.09,4.85"/>
+                  <path d="M32,7A34.09,34.09,0,0,0,20.31,32.46c0,16.2,7.28,21,11.66,24.24"/>
+                  <line x1="10.37" y1="19.9" x2="53.75" y2="19.9"/>
+                  <line x1="32" y1="6.99" x2="32" y2="56.7"/>
+                  <line x1="11.05" y1="45.48" x2="37.04" y2="45.48"/>
+                  <line x1="7.14" y1="32.46" x2="56.86" y2="31.85"/>
+                  <path d="M53.57,57,58,52.56l-8-8,4.55-2.91a.38.38,0,0,0-.12-.7L39.14,37.37a.39.39,0,0,0-.46.46L42,53.41a.39.39,0,0,0,.71.13L45.57,49Z"/>
+                </svg>
+              </a>
+              <a href="https://www.linkedin.com/in/sambent/" target="_blank" aria-label="LinkedIn" style="width: 32px; height: 32px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="100%" height="100%">
+                  <path fill="#0A66C2" d="M12.225 12.225h-1.778V9.44c0-.664-.012-1.519-.925-1.519-.926 0-1.068.724-1.068 1.47v2.834H6.676V6.498h1.707v.783h.024c.348-.594.996-.95 1.684-.925 1.802 0 2.135 1.185 2.135 2.728l-.001 3.14zM4.67 5.715a1.037 1.037 0 01-1.032-1.031c0-.566.466-1.032 1.032-1.032.566 0 1.031.466 1.032 1.032 0 .566-.466 1.032-1.032 1.032zm.889 6.51h-1.78V6.498h1.78v5.727zM13.11 2H2.885A.88.88 0 002 2.866v10.268a.88.88 0 00.885.866h10.226a.882.882 0 00.889-.866V2.865a.88.88 0 00-.889-.864z"/>
+                </svg>
+              </a>
+                <a href="https://github.com/DoingFedTime" target="_blank" aria-label="GitHub" style="width: 32px; height: 32px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="100%" height="100%" fill="currentColor">
+                  <path d="M32 6C17.641 6 6 17.641 6 32c0 12.277 8.512 22.56 19.955 25.286-.592-.141-1.179-.299-1.755-.479V50.85c0 0-.975.325-2.275.325-3.637 0-5.148-3.245-5.525-4.875-.229-.993-.827-1.934-1.469-2.509-.767-.684-1.126-.686-1.131-.92-.01-.491.658-.471.975-.471 1.625 0 2.857 1.729 3.429 2.623 1.417 2.207 2.938 2.577 3.721 2.577.975 0 1.817-.146 2.397-.426.268-1.888 1.108-3.57 2.478-4.774-6.097-1.219-10.4-4.716-10.4-10.4 0-2.928 1.175-5.619 3.133-7.792C19.333 23.641 19 22.494 19 20.625c0-1.235.086-2.751.65-4.225 0 0 3.708.026 7.205 3.338C28.469 19.268 30.196 19 32 19s3.531.268 5.145.738c3.497-3.312 7.205-3.338 7.205-3.338.567 1.474.65 2.99.65 4.225 0 2.015-.268 3.19-.432 3.697C46.466 26.475 47.6 29.124 47.6 32c0 5.684-4.303 9.181-10.4 10.4 1.628 1.43 2.6 3.513 2.6 5.85v8.557c-.576.181-1.162.338-1.755.479C49.488 54.56 58 44.277 58 32 58 17.641 46.359 6 32 6zM33.813 57.93C33.214 57.972 32.61 58 32 58 32.61 58 33.213 57.971 33.813 57.93zM37.786 57.346c-1.164.265-2.357.451-3.575.554C35.429 57.797 36.622 57.61 37.786 57.346zM32 58c-.61 0-1.214-.028-1.813-.07C30.787 57.971 31.39 58 32 58zM29.788 57.9c-1.217-.103-2.411-.289-3.574-.554C27.378 57.61 28.571 57.797 29.788 57.9z"/>
+                </svg>
+              </a>
+                
+                <a href="https://bsky.app/profile/doingfedtime.bsky.social" target="_blank" aria-label="Bluesky" style="width: 32px; height: 32px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+                  <linearGradient id="vDWP7DBQDc96tCF4UoN6na" x1="24" x2="24" y1="5.565" y2="40.968" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#3d9cff"/>
+                    <stop offset="1" stop-color="#1185fe"/>
+                  </linearGradient>
+                  <path fill="url(#vDWP7DBQDc96tCF4UoN6na)" d="M12.104,7.999C16.919,11.614,22.099,18.944,24,22.877c1.902-3.933,7.081-11.263,11.896-14.878	C39.371,5.391,45,3.373,45,9.795c0,1.283-0.735,10.774-1.167,12.315c-1.499,5.357-6.962,6.724-11.821,5.897	C40.506,29.452,42.667,34.241,38,39.03c-8.863,9.094-12.738-2.282-13.732-5.197c-0.182-0.534-0.267-0.784-0.268-0.572	c-0.001-0.213-0.086,0.037-0.268,0.572C22.738,36.748,18.863,48.124,10,39.03c-4.667-4.789-2.506-9.577,5.988-11.023	c-4.86,0.827-10.323-0.539-11.821-5.897C3.735,20.569,3,11.077,3,9.795C3,3.373,8.63,5.391,12.104,7.999L12.104,7.999z"/>
+                </svg>
+              </a>
+                <a href="https://rumble.com/c/SamBent" target="_blank" aria-label="Rumble" style="width: 32px; height: 32px;">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%" fill="#8bc34a">
+                    <path d="M38.544,16.899C34.578,13.008,23.053,5,16,5c-3,0-6,1-8,6S6,24,6,24s0,8,2,13s5,6,8,6c7.053,0,18.578-8.008,22.544-11.899C40.204,29.473,42,27.422,42,24C42,20.578,40.204,18.527,38.544,16.899z"/>
+                    <path fill="currentColor" d="M16.472,19.839c-0.296,2.881-0.296,5.441,0,8.322c0.209,2.031,2.321,3.298,4.187,2.469c1.979-0.879,4.578-2.234,7.324-4.22c1.629-1.178,1.629-3.642,0-4.82c-2.746-1.986-5.345-3.342-7.324-4.22C18.793,16.541,16.681,17.808,16.472,19.839z"/>
+                  </svg>
+                </a>
+                <a href="https://www.facebook.com/profile.php?id=61552282253130" target="_blank" aria-label="Facebook" style="width: 32px; height: 32px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="100%" height="100%">
+                  <path fill="#039be5" d="M24 5A19 19 0 1 0 24 43A19 19 0 1 0 24 5Z"/>
+                  <path fill="currentColor" d="M26.572,29.036h4.917l0.772-4.995h-5.69v-2.73c0-2.075,0.678-3.915,2.619-3.915h3.119v-4.359c-0.548-0.074-1.707-0.236-3.897-0.236c-4.573,0-7.254,2.415-7.254,7.917v3.323h-4.701v4.995h4.701v13.729C22.089,42.905,23.032,43,24,43c0.875,0,1.729-0.08,2.572-0.194V29.036z"/>
+                </svg>
+              </a>
+                <a href="mailto:contact@sambent.com" aria-label="Email" style="width: 32px; height: 32px;">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1920" width="100%" height="100%" fill="currentColor">
+                  <path d="M0 1694.235h1920V226H0v1468.235ZM112.941 376.664V338.94H1807.06v37.723L960 1111.233l-847.059-734.57ZM1807.06 526.198v950.513l-351.134-438.89-88.32 70.475 378.353 472.998H174.042l378.353-472.998-88.32-70.475-351.134 438.89V526.198L960 1260.768l847.059-734.57Z" fill-rule="evenodd"/>
+                </svg>
+              </a>
+                <a href="https://darkwebdaily.live" target="_blank" aria-label="DarkwebDaily" style="width: 32px; height: 32px;">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="100%" height="100%">
+                    <path d="M12 2C6.48 2 2 6.48 2 12C2 17.52 6.48 22 12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2ZM8.65 14.77C8.54 15.07 8.25 15.26 7.95 15.26C7.86 15.26 7.78 15.25 7.69 15.21C6.88 14.91 6.2 14.32 5.77 13.55C4.77 11.75 5.39 9.4 7.14 8.31L9.48 6.86C10.34 6.33 11.35 6.17 12.31 6.42C13.27 6.67 14.08 7.3 14.57 8.18C15.57 9.98 14.95 12.33 13.2 13.42L12.94 13.61C12.6 13.85 12.13 13.77 11.89 13.44C11.65 13.1 11.73 12.63 12.06 12.39L12.37 12.17C13.49 11.47 13.87 10.02 13.26 8.91C12.97 8.39 12.5 8.02 11.94 7.87C11.38 7.72 10.79 7.81 10.28 8.13L7.92 9.59C6.84 10.26 6.46 11.71 7.07 12.83C7.32 13.28 7.72 13.63 8.2 13.81C8.59 13.95 8.79 14.38 8.65 14.77ZM16.92 15.65L14.58 17.1C13.99 17.47 13.33 17.65 12.66 17.65C12.36 17.65 12.05 17.61 11.75 17.53C10.79 17.28 9.98 16.65 9.5 15.77C8.5 13.97 9.12 11.62 10.87 10.53L11.13 10.34C11.47 10.1 11.94 10.18 12.18 10.51C12.42 10.85 12.34 11.32 12.01 11.56L11.7 11.78C10.58 12.48 10.2 13.93 10.81 15.04C11.1 15.56 11.57 15.93 12.13 16.08C12.69 16.23 13.28 16.14 13.79 15.82L16.13 14.37C17.21 13.7 17.59 12.25 16.98 11.13C16.73 10.68 16.33 10.33 15.85 10.15C15.46 10.01 15.26 9.58 15.41 9.19C15.55 8.8 15.99 8.6 16.37 8.75C17.18 9.05 17.86 9.64 18.29 10.41C19.28 12.21 18.67 14.56 16.92 15.65Z" fill="currentColor"/>
+                  </svg>
+                </a>
+              </div>
+            <a href="#tracking-methods" class="cta">Discover How</a>
+        </div>
+    </section>
+
+    <section id="tracking-methods">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Tracking Methods</h2>
+                <p>Websites employ numerous sophisticated techniques to track your online behavior.</p>
+            </div>
+
+            <div class="stats">
+                <div class="stat">
+                    <span class="stat-value" data-value="87">0</span>%
+                    <p class="stat-label">of websites use cookies for tracking</p>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" data-value="72">0</span>%
+                    <p class="stat-label">use fingerprinting techniques</p>
+                </div>
+                <div class="stat">
+                    <span class="stat-value" data-value="3.4">0</span>s
+                    <p class="stat-label">avg. time before tracking begins</p>
+                </div>
+            </div>
+
+            <div class="grid" id="trackingGrid">
+                <div class="card card-danger card-hidden">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2a10 10 0 1 0 0 20 10 10 0 1 0 0-20z"></path>
+                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
+                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
+                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Cookies & Supercookies</h3>
+                        <p class="card-description">Small text files stored on your computer that track your browsing history and preferences across sessions.</p>
+                        
+                        <div class="details">
+                            <div class="details-title">How They Work</div>
+                            <div class="details-content">
+                                <p>Standard cookies are text files that websites store on your device to remember information about you:</p>
+                                <ul class="details-list">
+                                    <li>Session cookies track your activity during a browser session</li>
+                                    <li>Persistent cookies remain after you close your browser</li>
+                                    <li>Third-party cookies come from domains other than the one you're visiting</li>
+                                </ul>
+                                <p>Supercookies are more invasive tracking mechanisms:</p>
+                                <ul class="details-list">
+                                    <li>HSTS supercookies abuse web security features</li>
+                                    <li>Evercookies use multiple storage techniques for persistence</li>
+                                    <li>ETags exploit browser caching mechanisms</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mitigation">
+                            <div class="mitigation-title">Protection</div>
+                            <p>Use browser extensions like "Cookie AutoDelete" or "Privacy Badger". Configure your browser to delete cookies when you close it, and regularly clear your browser data.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-danger card-hidden">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Browser Fingerprinting</h3>
+                        <p class="card-description">Creating a unique identifier based on your browser and device characteristics, without using cookies.</p>
+                        
+                        <div class="details">
+                            <div class="details-title">How It Works</div>
+                            <div class="details-content">
+                                <p>Websites collect information about your browser setup to create a unique identifier:</p>
+                                <ul class="details-list">
+                                    <li>Installed plugins and their versions</li>
+                                    <li>Browser type, version, and settings</li>
+                                    <li>Operating system and hardware details</li>
+                                    <li>Screen resolution and color depth</li>
+                                    <li>Installed fonts</li>
+                                    <li>Language preferences</li>
+                                    <li>Time zone information</li>
+                                    <li>Canvas fingerprinting (using HTML5 canvas element)</li>
+                                    <li>WebGL fingerprinting (GPU information)</li>
+                                    <li>Audio fingerprinting</li>
+                                </ul>
+                                <p>The combination of these elements creates a fingerprint that's highly unique.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mitigation">
+                            <div class="mitigation-title">Protection</div>
+                            <p>Use privacy-focused browsers like Firefox with fingerprinting protection, Brave, or Tor. Add extensions like "Canvas Blocker" or "Privacy Badger" and disable JavaScript when possible.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-warning card-hidden">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="2" y1="12" x2="22" y2="12"></line>
+                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Tracking Pixels</h3>
+                        <p class="card-description">Invisible 1x1 pixel images embedded in websites and emails that track when you view content.</p>
+                        
+                        <div class="details">
+                            <div class="details-title">How They Work</div>
+                            <div class="details-content">
+                                <p>Tracking pixels are tiny, invisible images (usually 1x1 pixel) embedded in:</p>
+                                <ul class="details-list">
+                                    <li>Websites</li>
+                                    <li>Emails</li>
+                                    <li>Digital advertisements</li>
+                                    <li>Social media posts</li>
+                                </ul>
+                                <p>When loaded, they send information to a server:</p>
+                                <ul class="details-list">
+                                    <li>User IP address</li>
+                                    <li>Time and duration of visit</li>
+                                    <li>Operating system</li>
+                                    <li>Email open rates (in email marketing)</li>
+                                    <li>Device type</li>
+                                </ul>
+                                <p>Common examples include Facebook Pixel, Google Analytics pixel, and LinkedIn Insight Tag.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mitigation">
+                            <div class="mitigation-title">Protection</div>
+                            <p>Use ad blockers like uBlock Origin, disable automatic image loading in email clients, and consider email privacy tools like SimpleLogin or AnonAddy.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-warning card-hidden">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20 14.66V20a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h5.34"></path>
+                            <polygon points="18 2 22 6 12 16 8 16 8 12 18 2"></polygon>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Local Storage & Session Storage</h3>
+                        <p class="card-description">Browser-based storage mechanisms that store larger amounts of data than cookies and can persist across sessions.</p>
+                        
+                        <div class="details">
+                            <div class="details-title">How They Work</div>
+                            <div class="details-content">
+                                <p>Web Storage API provides two mechanisms for storing data client-side:</p>
+                                <ul class="details-list">
+                                    <li><strong>localStorage:</strong> Persists even after browser is closed (no expiration date)</li>
+                                    <li><strong>sessionStorage:</strong> Only available for the duration of the page session</li>
+                                </ul>
+                                <p>Compared to cookies, these methods:</p>
+                                <ul class="details-list">
+                                    <li>Store significantly more data (5MB vs 4KB for cookies)</li>
+                                    <li>Never sent to the server automatically</li>
+                                    <li>Can only be accessed from the same domain</li>
+                                </ul>
+                                <p>Used for both legitimate purposes (saving user preferences) and tracking (storing user identifiers).</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mitigation">
+                            <div class="mitigation-title">Protection</div>
+                            <p>Regularly clear browser data, use private browsing, or extensions like "Cookie AutoDelete" (which can also clear local storage). Some privacy-focused browsers include automatic clearing options.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-info card-hidden">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 5H6"></path>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">E-commerce & Social Media Tracking</h3>
+                        <p class="card-description">Shopping sites and social networks track your product views, clicks, and interests to create comprehensive profiles.</p>
+                        
+                        <div class="details">
+                            <div class="details-title">How It Works</div>
+                            <div class="details-content">
+                                <p>E-commerce and social media platforms utilize multiple techniques:</p>
+                                <ul class="details-list">
+                                    <li>Product/post engagement tracking</li>
+                                    <li>Cart abandonment tracking</li>
+                                    <li>Purchase history analysis</li>
+                                    <li>Cross-site tracking via social login buttons</li>
+                                    <li>Interest-based profiling</li>
+                                    <li>Location-based recommendations</li>
+                                    <li>Device correlation (matching your identity across devices)</li>
+                                </ul>
+                                <p>This data builds comprehensive profiles used for targeted advertising and behavioral prediction.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="mitigation">
+                            <div class="mitigation-title">Protection</div>
+                            <p>Use dedicated shopping browsers, disable social login options, and consider tools like "Facebook Container" extension. Log out of social accounts when browsing the web.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-info card-hidden">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                            <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Cross-Site Tracking & CNAME Cloaking</h3>
+                        <p class="card-description">Advanced techniques that follow you across different websites and disguise third-party trackers as first-party resources.</p>
+                        
+                        <div class="details">
+                            <div class="details-title">How It Works</div>
+                            <div class="details-content">
+                                <p><strong>Cross-Site Tracking:</strong></p>
+                                <ul class="details-list">
+                                    <li>Tracking scripts embedded on multiple websites</li>
+                                    <li>Social media sharing buttons monitoring site visits</li>
+                                    <li>Ad networks correlating activity across their network</li>
+                                    <li>Single Sign-On services monitoring logins</li>
+                                </ul>
+                                <p><strong>CNAME Cloaking:</strong></p>
+                                <ul class="details-list">
+                                    <li>Uses DNS CNAME records to make third-party trackers appear as first-party</li>
+                                    <li>Bypasses many tracker blockers and browser protections</li>
+                                    <li>Makes tracking domains look like they belong to the website you're visiting</li>
+                                    <li>Increasingly common as standard third-party cookie blocking improves</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mitigation">
+                            <div class="mitigation-title">Protection</div>
+                            <p>Use browsers with anti-tracking protection (Firefox, Brave), DNS-level blocking (Pi-hole, NextDNS), and extensions like uBlock Origin with CNAME-uncloaking capabilities.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="data-collection">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">What Data Is Collected</h2>
+                <p>The extent of information websites gather about you is both vast and concerning.</p>
+            </div>
+
+            <div class="feature-list">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="12" y1="8" x2="12" y2="12"></line>
+                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title">Personal Identifiers</h3>
+                        <p>Your <span class="highlighted">name, email, phone number, address</span>, and unique IDs assigned by tracking services. Even if you don't explicitly provide this information, sites can often associate your browsing with your identity through login status or cross-site tracking.</p>
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
+                            <polyline points="22,6 12,13 2,6"></polyline>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title">Technical Data</h3>
+                        <p>Your <span class="highlighted">IP address, device information, browser type, operating system</span>, screen resolution, connection speed, and mobile carrier. This data helps create your unique browser fingerprint and can reveal your approximate location.</p>
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title">Behavioral Data</h3>
+                        <p>Every <span class="highlighted">click, hover, scroll pattern, mouse movements, time spent</span> on page, and forms you fill out. This data is used to analyze your engagement, interests, and determine how likely you are to convert or make a purchase.</p>
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                            <circle cx="12" cy="10" r="3"></circle>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title">Location Data</h3>
+                        <p>Your <span class="highlighted">precise location</span> (if you grant permission) or <span class="highlighted">approximate location</span> based on IP address. This information is used for geo-targeting content, location-based services, and regional compliance purposes.</p>
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title">Preference & Interest Data</h3>
+                        <p>Your <span class="highlighted">search history, content interests, preferences</span>, purchase history, and affinities. Sites build detailed profiles about what you like, what you might buy, and what content keeps you engaged the longest.</p>
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title">Social Media & Connection Data</h3>
+                        <p>When you use social login or share content, sites collect <span class="highlighted">social connections, friend lists, profile data</span> and activity. This enriches their user profiles and reveals your social graph.</p>
+                    </div>
+                </div>
+
+                <div class="feature">
+                    <div class="feature-icon danger-text">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="feature-content">
+                        <h3 class="feature-title danger-text">Sensitive Data</h3>
+                        <p>Some sites collect <span class="highlighted danger-text">health information, financial data, sexual preferences, political views</span>, and other sensitive details that can be used for highly targeted advertising or potentially discriminatory practices.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="simulation">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Live Tracking Simulation</h2>
+                <p>See in real-time how websites monitor your every move.</p>
+            </div>
+
+            <div class="tracking-simulation">
+                <div class="simulation-header">
+                    <h3>What happens when you visit a website</h3>
+                </div>
+                <div class="browser-mockup">
+                    <div class="browser-bar">
+                        <div class="browser-dot"></div>
+                        <div class="browser-dot"></div>
+                        <div class="browser-dot"></div>
+                        <div class="browser-address">https://shopping-site.example</div>
+                    </div>
+                    <div class="browser-content" id="simulationContent">
+                        <p>Sample Website Content</p>
+                        <!-- Tracking elements will be added via JavaScript -->
+                    </div>
+                </div>
+
+                <div class="simulation-data" id="simulationData">
+                    <p style="margin-top: 1rem; text-align: center;">Data being collected...</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="protection">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Protecting Yourself</h2>
+                <p>Practical steps you can take to minimize tracking and protect your online privacy.</p>
+            </div>
+
+            <div class="grid">
+                <div class="card card-success card-hidden">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Browser Protection</h3>
+                        <p class="card-description">Configure your browser settings and extensions to minimize tracking.</p>
+                        
+                        <div class="details">
+                            <div class="details-title">Recommended Tools</div>
+                            <div class="details-content">
+                                <p><strong>Privacy-Focused Browsers:</strong></p>
+                                <ul class="details-list">
+                                    <li>Firefox with privacy settings enhanced</li>
+                                    <li>Brave Browser</li>
+                                    <li>Tor Browser (maximum anonymity)</li>
+                                </ul>
+                                <p><strong>Essential Extensions:</strong></p>
+                                <ul class="details-list">
+                                    <li>uBlock Origin - Comprehensive ad and tracker blocking</li>
+                                    <li>Privacy Badger - Learns to block invisible trackers</li>
+                                    <li>HTTPS Everywhere - Forces encrypted connections</li>
+                                    <li>Decentraleyes - Protects against CDN tracking</li>
+                                    <li>Canvas Blocker - Prevents fingerprinting</li>
+                                </ul>
+                                <p><strong>Browser Settings:</strong></p>
+                                <ul class="details-list">
+                                    <li>Disable third-party cookies</li>
+                                    <li>Enable tracking protection features</li>
+                                    <li>Clear cookies and site data when closing</li>
+                                    <li>Use a private/incognito window for sensitive browsing</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card card-success card-hidden">
+                    <div class="card-icon">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="card-content">
+                        <h3 class="card-title">Network-Level Protection</h3>
+                        <p class="card-description">Block tracking at the network level before it reaches any of your devices.</p>
+                        
+                        <div class="details">
+                            <div class="details-title">Recommended Tools</div>
+                            <div class="details-content">
+                                <p><strong>DNS-Level Blocking:</strong></p>
+                                <ul class="details-list">
+                                    <li>Pi-hole - Network-wide ad and tracker blocking</li>
+                                    <li>NextDNS - Cloud-based DNS filtering</li>
+                                    <li>AdGuard Home - Similar to Pi-hole with additional features</li>
+                                </ul>
+                                <p><strong>VPN Services:</strong></p>
+                                <ul class="details-list">
+                                    <li>Use a no-logs VPN service to mask your IP address</li>
+                                    <li>Look for VPNs with built-in tracker blocking features</li>
+                                    <li>Consider multi-hop VPN connections for sensitive activities</li>
+                                </ul>
+                                <p><strong>Advanced Techniques:</strong></p>
+                                <ul class="details-list">
+                                    <li>Tor network for maximum anonymity</li>
+                                    <li>Custom router firmware with advanced security features</li>
+                                    <li>Network traffic analysis tools to identify unwanted connections</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="protection-tip">
+                <div class="tip-icon">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                </div>
+                <div class="tip-content">
+                    <h3>Remember</h3>
+                    <p>No solution provides 100% protection against all tracking methods. The key is to use multiple layers of protection and be conscious about what information you share online. Regularly update your privacy tools, as tracking technologies constantly evolve.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container footer-content">
+            <p>Created to raise awareness about online tracking and privacy concerns.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Progress bar
+        window.addEventListener('scroll', () => {
+            const totalHeight = document.body.scrollHeight - window.innerHeight;
+            const progress = (window.pageYOffset / totalHeight) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        });
+
+        // Navigation toggle for mobile
+        document.getElementById('navToggle').addEventListener('click', () => {
+            document.getElementById('mainNav').classList.toggle('active');
+        });
+
+        // Animated stats counter
+        const stats = document.querySelectorAll('.stat-value');
+        let animated = false;
+
+        function animateStats() {
+            if (animated) return;
+            
+            stats.forEach(stat => {
+                const target = parseFloat(stat.getAttribute('data-value'));
+                const duration = 2000;
+                const startTime = Date.now();
+                const isDecimal = target % 1 !== 0;
+                
+                function updateStat() {
+                    const currentTime = Date.now() - startTime;
+                    const progress = Math.min(currentTime / duration, 1);
+                    const value = progress * target;
+                    
+                    if (isDecimal) {
+                        stat.textContent = value.toFixed(1);
+                    } else {
+                        stat.textContent = Math.floor(value);
+                    }
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(updateStat);
+                    }
+                }
+                
+                updateStat();
+            });
+            
+            animated = true;
+        }
+
+        // Reveal cards on scroll
+        const cards = document.querySelectorAll('.card-hidden');
+        
+        function revealCards() {
+            cards.forEach(card => {
+                const cardTop = card.getBoundingClientRect().top;
+                const windowHeight = window.innerHeight;
+                
+                if (cardTop < windowHeight - 100) {
+                    card.classList.add('card-visible');
+                }
+            });
+        }
+
+        // Expand/collapse details
+        document.querySelectorAll('.details-title').forEach(title => {
+            title.addEventListener('click', () => {
+                const details = title.parentElement;
+                details.classList.toggle('details-expanded');
+            });
+        });
+
+        // Create particles
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 50; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 10 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 5) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        // Animated background
+        function createDots() {
+            const container = document.getElementById('animatedBackground');
+            for (let i = 0; i < 100; i++) {
+                const dot = document.createElement('div');
+                dot.classList.add('dot');
+                dot.style.left = Math.random() * 100 + '%';
+                dot.style.top = Math.random() * 100 + '%';
+                container.appendChild(dot);
+            }
+        }
+
+        // Tracking simulation
+        function createTrackingSimulation() {
+            const container = document.getElementById('simulationContent');
+            const dataDisplay = document.getElementById('simulationData');
+            
+            // Create tracking elements
+            function createTracker() {
+                const tracker = document.createElement('div');
+                tracker.classList.add('tracker-dot');
+                tracker.style.left = Math.random() * 80 + 10 + '%';
+                tracker.style.top = Math.random() * 80 + 10 + '%';
+                tracker.style.animationDelay = Math.random() * 2 + 's';
+                container.appendChild(tracker);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    container.removeChild(tracker);
+                }, 5000);
+            }
+            
+            // Create data packets
+            function createDataPacket() {
+                const packet = document.createElement('div');
+                packet.classList.add('data-packet');
+                
+                const dataTypes = [
+                    'IP: 192.168.x.x',
+                    'Browser: Chrome/Firefox',
+                    'Resolution: 1920x1080',
+                    'OS: Windows/macOS',
+                    'Click pattern recorded',
+                    'Session duration: 2m 34s',
+                    'Location: New York, USA',
+                    'Device: Desktop/Mobile',
+                    'Previous site: search engine',
+                    'Font list acquired',
+                    'WebGL fingerprint created',
+                    'Canvas fingerprint #A52F'
+                ];
+                
+                packet.textContent = dataTypes[Math.floor(Math.random() * dataTypes.length)];
+                packet.style.left = Math.random() * 60 + 20 + '%';
+                packet.style.top = Math.random() * 60 + 20 + '%';
+                packet.style.animationDelay = Math.random() * 3 + 's';
+                container.appendChild(packet);
+                
+                // Update data display
+                const dataItem = document.createElement('div');
+                dataItem.textContent = `→ ${packet.textContent}`;
+                dataItem.style.color = '#a0a0a0';
+                dataItem.style.fontSize = '0.8rem';
+                dataItem.style.margin = '0.25rem 0';
+                dataDisplay.appendChild(dataItem);
+                
+                if (dataDisplay.children.length > 6) {
+                    dataDisplay.removeChild(dataDisplay.firstChild);
+                }
+                
+                // Remove after animation
+                setTimeout(() => {
+                    container.removeChild(packet);
+                }, 8000);
+            }
+            
+            // Create data streams
+            function createDataStream() {
+                const stream = document.createElement('div');
+                stream.classList.add('data-stream');
+                stream.style.left = Math.random() * 60 + 20 + '%';
+                stream.style.top = Math.random() * 60 + 20 + '%';
+                stream.style.transform = `rotate(${Math.random() * 360}deg)`;
+                container.appendChild(stream);
+                
+                // Remove after animation
+                setTimeout(() => {
+                    container.removeChild(stream);
+                }, 4000);
+            }
+            
+            // Start simulations
+            setInterval(createTracker, 2000);
+            setInterval(createDataPacket, 3000);
+            setInterval(createDataStream, 2500);
+        }
+
+        // Initialize
+        window.addEventListener('load', () => {
+            createParticles();
+            createDots();
+            createTrackingSimulation();
+            
+            // Trigger animations on scroll
+            window.addEventListener('scroll', () => {
+                revealCards();
+                
+                // Animate stats when they come into view
+                const statsSection = document.querySelector('.stats');
+                if (statsSection.getBoundingClientRect().top < window.innerHeight - 100) {
+                    animateStats();
+                }
+            });
+            
+            // Initial check for elements in view
+            revealCards();
+        });
+    </script>
+</body>
+</html>
