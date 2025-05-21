@@ -1,0 +1,1016 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Freenode IRC Network: An Animated History</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            color: #333;
+            line-height: 1.6;
+            max-width: 100%;
+            overflow-x: hidden;
+            padding-bottom: 50px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 40px 0;
+            background-color: #2c3e50;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .section {
+            margin-bottom: 60px;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        p {
+            margin-bottom: 15px;
+        }
+
+        /* Timeline Styles */
+        .timeline {
+            position: relative;
+            max-width: 1200px;
+            margin: 20px auto;
+        }
+
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 6px;
+            background-color: #2c3e50;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -3px;
+            transform: scaleY(0);
+            transform-origin: top;
+            animation: timeline-grow 3s forwards;
+        }
+
+        @keyframes timeline-grow {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+
+        .timeline-item {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+            opacity: 0;
+        }
+
+        .timeline-item-left {
+            left: 0;
+            text-align: right;
+        }
+
+        .timeline-item-right {
+            left: 50%;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            background-color: white;
+            border: 4px solid #62a8ea;
+            top: 15px;
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .timeline-item-left::after {
+            right: -17px;
+        }
+
+        .timeline-item-right::after {
+            left: -16px;
+        }
+
+        .timeline-content {
+            padding: 20px;
+            background-color: white;
+            border-radius: 6px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        /* IRC Network Animation */
+        .network-container {
+            position: relative;
+            height: 400px;
+            margin: 30px 0;
+            overflow: hidden;
+        }
+
+        .server {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            background-color: #3498db;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        .client {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background-color: #e74c3c;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        .connection {
+            position: absolute;
+            height: 2px;
+            background-color: #95a5a6;
+            transform-origin: left center;
+            z-index: 1;
+        }
+
+        .message {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: #f1c40f;
+            border-radius: 50%;
+            z-index: 3;
+        }
+
+        /* 2021 Controversy Animation */
+        .controversy-container {
+            position: relative;
+            height: 500px;
+            margin: 30px 0;
+        }
+
+        .network-group {
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: all 2s ease-in-out;
+        }
+
+        .network-label {
+            font-weight: bold;
+            margin-top: 10px;
+            font-size: 1.2rem;
+        }
+
+        .project {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #2ecc71;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            color: white;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            transition: all 2s ease-in-out;
+        }
+
+        /* Infrastructure Animation */
+        .infra-container {
+            position: relative;
+            height: 500px;
+            margin: 30px 0;
+        }
+
+        .region {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border: 2px dashed #95a5a6;
+            border-radius: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(149, 165, 166, 0.1);
+        }
+
+        .region-label {
+            position: absolute;
+            top: -25px;
+            font-weight: bold;
+            color: #34495e;
+        }
+
+        /* Server Animation */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Button Styles */
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            margin: 10px 0;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Fade-in animation for sections */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 1s forwards;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 100%;
+            background-color: #ddd;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+        
+        .progress-bar {
+            height: 24px;
+            background-color: #3498db;
+            border-radius: 5px;
+            width: 0;
+            transition: width 0.5s;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Freenode IRC Network</h1>
+        <p class="text-xl">An Animated History & Exploration</p>
+    </div>
+
+    <div class="container">
+        <div class="section fade-in" id="introduction">
+            <h2>Introduction to Freenode and IRC</h2>
+            <p>Freenode was an Internet Relay Chat (IRC) network that became the primary platform for discussing and coordinating open-source and peer-directed projects. At its height, it was one of the largest IRC networks in the world, hosting thousands of channels and serving millions of users.</p>
+            <p>This interactive page explores Freenode's history, structure, and significance through animations and visualizations.</p>
+            <div class="flex justify-center my-6">
+                <div class="server" id="intro-server" style="position: relative; animation: pulse 2s infinite;">
+                    IRC<br>Server
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="timeline-section">
+            <h2>Timeline of Freenode's History</h2>
+            <p>Freenode's journey spans nearly three decades, evolving from a small Linux support channel to becoming the backbone of open-source communication infrastructure.</p>
+            
+            <button class="button" id="start-timeline">Start Timeline Animation</button>
+            
+            <div class="timeline" id="timeline">
+                <div class="timeline-item timeline-item-left" data-year="1994">
+                    <div class="timeline-content">
+                        <h3>1994</h3>
+                        <p>Started as #LinPeople, a four-person Linux support channel on EFnet.</p>
+                    </div>
+                </div>
+                <div class="timeline-item timeline-item-right" data-year="1995">
+                    <div class="timeline-content">
+                        <h3>1995</h3>
+                        <p>After moving through Undernet and DALnet, becomes its own network: irc.linpeople.org.</p>
+                    </div>
+                </div>
+                <div class="timeline-item timeline-item-left" data-year="1998">
+                    <div class="timeline-content">
+                        <h3>1998</h3>
+                        <p>Renamed to Open Projects Network (OPN) with about 200 users and under 20 channels.</p>
+                    </div>
+                </div>
+                <div class="timeline-item timeline-item-right" data-year="2002">
+                    <div class="timeline-content">
+                        <h3>2002</h3>
+                        <p>Network renamed to Freenode. The Peer-Directed Projects Center (PDPC) was founded to support it.</p>
+                    </div>
+                </div>
+                <div class="timeline-item timeline-item-left" data-year="2006">
+                    <div class="timeline-content">
+                        <h3>2006</h3>
+                        <p>Network faces security breach and founder Rob Levin (lilo) passes away in September.</p>
+                    </div>
+                </div>
+                <div class="timeline-item timeline-item-right" data-year="2010">
+                    <div class="timeline-content">
+                        <h3>2010</h3>
+                        <p>Freenode switches from Hyperion to IRCd-Seven, a Freenode-specific fork of Charybdis.</p>
+                    </div>
+                </div>
+                <div class="timeline-item timeline-item-left" data-year="2017">
+                    <div class="timeline-content">
+                        <h3>2017</h3>
+                        <p>Christel Dahlskjaer incorporates Freenode Limited and transfers ownership to Andrew Lee.</p>
+                    </div>
+                </div>
+                <div class="timeline-item timeline-item-right" data-year="2021">
+                    <div class="timeline-content">
+                        <h3>2021</h3>
+                        <p>Mass resignation of staff following ownership dispute. Many projects migrate to Libera Chat or OFTC.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="irc-function">
+            <h2>How IRC Networks Function</h2>
+            <p>IRC (Internet Relay Chat) is a protocol for real-time text messaging. It operates on a client-server model where servers form a network and users connect through client applications.</p>
+            
+            <button class="button" id="start-irc-animation">Start IRC Network Animation</button>
+            
+            <div class="network-container" id="irc-network">
+                <!-- Dynamic content will be added by JavaScript -->
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-xl font-bold mb-2">Components of an IRC Network:</h3>
+                <ul class="list-disc ml-6">
+                    <li><strong>Servers:</strong> Form the backbone of the network, relaying messages between users.</li>
+                    <li><strong>Clients:</strong> User applications that connect to the network.</li>
+                    <li><strong>Channels:</strong> Discussion spaces denoted by names starting with # (e.g., #linux).</li>
+                    <li><strong>Services:</strong> Special bots that provide functionality like nickname registration.</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section" id="key-milestones">
+            <h2>Key Milestones in Freenode's Growth</h2>
+            <p>From a small Linux support channel to the largest open-source community network, Freenode experienced significant growth over its lifetime.</p>
+            
+            <button class="button" id="show-growth">Show Growth Animation</button>
+            
+            <div class="progress-container">
+                <div class="progress-bar" id="users-progress">0 users</div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="channels-progress">0 channels</div>
+            </div>
+            <div class="progress-container">
+                <div class="progress-bar" id="servers-progress">0 servers</div>
+            </div>
+            
+            <div class="mt-6">
+                <h3 class="text-xl font-bold mb-2">Notable Events:</h3>
+                <div id="events-container" class="space-y-4">
+                    <!-- Events will be added by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <div class="section" id="controversy">
+            <h2>The 2021 Ownership Controversy & Exodus</h2>
+            <p>In 2021, Freenode underwent what some staff described as a "hostile takeover," leading to mass resignations and the migration of projects to other networks.</p>
+            
+            <button class="button" id="start-controversy">Show Controversy Animation</button>
+            
+            <div class="controversy-container" id="controversy-animation">
+                <div class="network-group" id="freenode-network" style="top: 50px; left: 300px;">
+                    <div style="width: 150px; height: 150px; background-color: #3498db; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">
+                        Freenode
+                    </div>
+                    <div class="network-label">Freenode IRC</div>
+                </div>
+                
+                <div class="network-group" id="libera-network" style="top: 50px; left: 700px; opacity: 0;">
+                    <div style="width: 150px; height: 150px; background-color: #9b59b6; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">
+                        Libera Chat
+                    </div>
+                    <div class="network-label">Libera Chat</div>
+                </div>
+                
+                <div class="network-group" id="oftc-network" style="top: 50px; left: 900px; opacity: 0;">
+                    <div style="width: 150px; height: 150px; background-color: #e74c3c; border-radius: 50%; display: flex; justify-content: center; align-items: center; color: white; font-weight: bold;">
+                        OFTC
+                    </div>
+                    <div class="network-label">OFTC</div>
+                </div>
+                
+                <!-- Projects will be added by JavaScript -->
+            </div>
+
+            <div class="mt-6" id="controversy-explanation" style="opacity: 0; transition: opacity 1s ease-in-out;">
+                <h3 class="text-xl font-bold mb-2">What Happened:</h3>
+                <ol class="list-decimal ml-6">
+                    <li>In 2017, Christel Dahlskjaer transferred Freenode Limited ownership to Andrew Lee.</li>
+                    <li>In May 2021, conflict erupted over network control and governance.</li>
+                    <li>14+ staff members resigned, describing the situation as a "hostile takeover."</li>
+                    <li>Former staff created Libera Chat as an alternative network.</li>
+                    <li>Over 1,000 projects migrated away from Freenode to Libera Chat and OFTC.</li>
+                    <li>On June 14, 2021, Freenode launched a new IRC network infrastructure, abandoning user/channel data.</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="section" id="infrastructure">
+            <h2>Freenode's Network Infrastructure</h2>
+            <p>At its peak, Freenode operated about 23 servers distributed worldwide to provide resilience and low-latency access to users globally.</p>
+            
+            <button class="button" id="show-infrastructure">Show Infrastructure Animation</button>
+            
+            <div class="infra-container" id="infra-animation">
+                <!-- Regions and servers will be added by JavaScript -->
+            </div>
+
+            <div class="mt-6">
+                <h3 class="text-xl font-bold mb-2">Technical Evolution:</h3>
+                <ul class="list-disc ml-6">
+                    <li><strong>1999:</strong> Used Dancer IRCd (based on IRC-Hybrid)</li>
+                    <li><strong>2005:</strong> Switched to Hyperion</li>
+                    <li><strong>2010:</strong> Migrated to IRCd-Seven (a fork of Charybdis)</li>
+                    <li><strong>2021:</strong> Final iteration used InspIRCd and Anope IRC Services</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section fade-in" id="conclusion">
+            <h2>Freenode's Legacy</h2>
+            <p>Despite its controversial end, Freenode's impact on open-source collaboration is undeniable. For nearly three decades, it served as the communication backbone for countless projects and communities.</p>
+            <p>Many of the communities and practices developed on Freenode continue today on networks like Libera Chat and OFTC, preserving the culture of collaborative development through IRC.</p>
+            <p>The Freenode story illustrates the challenges of governance and ownership in community-driven technical infrastructure, and reminds us of the importance of transparent stewardship in open-source ecosystems.</p>
+        </div>
+    </div>
+
+    <script>
+        // Wait for the DOM to fully load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Fade in all sections with delay
+            const sections = document.querySelectorAll('.section:not(.fade-in)');
+            sections.forEach((section, index) => {
+                setTimeout(() => {
+                    section.classList.add('fade-in');
+                }, index * 300);
+            });
+
+            // Timeline Animation
+            const startTimelineBtn = document.getElementById('start-timeline');
+            startTimelineBtn.addEventListener('click', animateTimeline);
+
+            function animateTimeline() {
+                const timelineItems = document.querySelectorAll('.timeline-item');
+                timelineItems.forEach((item, index) => {
+                    setTimeout(() => {
+                        item.style.opacity = 1;
+                        item.style.animation = 'fadeIn 1s forwards';
+                    }, index * 1000);
+                });
+            }
+
+            // IRC Network Animation
+            const ircNetworkContainer = document.getElementById('irc-network');
+            const startIrcAnimationBtn = document.getElementById('start-irc-animation');
+            startIrcAnimationBtn.addEventListener('click', setupIrcAnimation);
+
+            function setupIrcAnimation() {
+                // Clear previous animation if any
+                ircNetworkContainer.innerHTML = '';
+                
+                // Create servers
+                const servers = [
+                    { id: 'server1', x: 200, y: 80, label: 'Server 1' },
+                    { id: 'server2', x: 600, y: 80, label: 'Server 2' },
+                    { id: 'server3', x: 400, y: 280, label: 'Server 3' }
+                ];
+                
+                servers.forEach(server => {
+                    const serverEl = document.createElement('div');
+                    serverEl.className = 'server';
+                    serverEl.id = server.id;
+                    serverEl.style.left = `${server.x}px`;
+                    serverEl.style.top = `${server.y}px`;
+                    serverEl.textContent = server.label;
+                    ircNetworkContainer.appendChild(serverEl);
+                });
+                
+                // Create connections between servers
+                createConnection('server1', 'server2', ircNetworkContainer);
+                createConnection('server1', 'server3', ircNetworkContainer);
+                createConnection('server2', 'server3', ircNetworkContainer);
+                
+                // Add clients after a delay
+                setTimeout(() => {
+                    const clients = [
+                        { id: 'client1', x: 100, y: 200, label: 'User 1', server: 'server1' },
+                        { id: 'client2', x: 300, y: 200, label: 'User 2', server: 'server1' },
+                        { id: 'client3', x: 500, y: 200, label: 'User 3', server: 'server2' },
+                        { id: 'client4', x: 700, y: 200, label: 'User 4', server: 'server2' },
+                        { id: 'client5', x: 400, y: 350, label: 'User 5', server: 'server3' }
+                    ];
+                    
+                    clients.forEach(client => {
+                        const clientEl = document.createElement('div');
+                        clientEl.className = 'client';
+                        clientEl.id = client.id;
+                        clientEl.style.left = `${client.x}px`;
+                        clientEl.style.top = `${client.y}px`;
+                        clientEl.textContent = client.label;
+                        ircNetworkContainer.appendChild(clientEl);
+                        
+                        // Connect client to its server
+                        createConnection(client.id, client.server, ircNetworkContainer);
+                    });
+                    
+                    // Start message animation
+                    setTimeout(animateIrcMessages, 1000);
+                }, 1500);
+            }
+            
+            function createConnection(fromId, toId, container) {
+                setTimeout(() => {
+                    const from = document.getElementById(fromId);
+                    const to = document.getElementById(toId);
+                    
+                    if (from && to) {
+                        const fromRect = from.getBoundingClientRect();
+                        const toRect = to.getBoundingClientRect();
+                        
+                        const containerRect = container.getBoundingClientRect();
+                        
+                        const fromX = fromRect.left + fromRect.width/2 - containerRect.left;
+                        const fromY = fromRect.top + fromRect.height/2 - containerRect.top;
+                        const toX = toRect.left + toRect.width/2 - containerRect.left;
+                        const toY = toRect.top + toRect.height/2 - containerRect.top;
+                        
+                        const distance = Math.sqrt(Math.pow(toX - fromX, 2) + Math.pow(toY - fromY, 2));
+                        const angle = Math.atan2(toY - fromY, toX - fromX) * 180 / Math.PI;
+                        
+                        const connection = document.createElement('div');
+                        connection.className = 'connection';
+                        connection.style.width = `${distance}px`;
+                        connection.style.left = `${fromX}px`;
+                        connection.style.top = `${fromY}px`;
+                        connection.style.transform = `rotate(${angle}deg)`;
+                        
+                        container.appendChild(connection);
+                        
+                        // Animate connection appearance
+                        connection.style.transition = 'opacity 0.5s';
+                        connection.style.opacity = 0;
+                        setTimeout(() => {
+                            connection.style.opacity = 1;
+                        }, 100);
+                    }
+                }, 500);
+            }
+            
+            function animateIrcMessages() {
+                const paths = [
+                    { from: 'client1', through: 'server1', to: 'client2' },
+                    { from: 'client3', through: 'server2', to: 'client4' },
+                    { from: 'client1', through: ['server1', 'server3'], to: 'client5' }
+                ];
+                
+                paths.forEach((path, index) => {
+                    setTimeout(() => {
+                        animateMessage(path);
+                    }, index * 3000);
+                });
+            }
+            
+            function animateMessage(path) {
+                const container = document.getElementById('irc-network');
+                const from = document.getElementById(path.from);
+                const fromRect = from.getBoundingClientRect();
+                const containerRect = container.getBoundingClientRect();
+                
+                const message = document.createElement('div');
+                message.className = 'message';
+                message.style.left = `${fromRect.left + fromRect.width/2 - containerRect.left}px`;
+                message.style.top = `${fromRect.top + fromRect.height/2 - containerRect.top}px`;
+                container.appendChild(message);
+                
+                let throughPath = Array.isArray(path.through) ? path.through : [path.through];
+                const completePath = [path.from, ...throughPath, path.to];
+                
+                animateMessageStep(message, completePath, 0, container);
+            }
+            
+            function animateMessageStep(message, path, step, container) {
+                if (step >= path.length - 1) {
+                    // End of path
+                    setTimeout(() => {
+                        message.style.opacity = 0;
+                        setTimeout(() => {
+                            message.remove();
+                        }, 500);
+                    }, 500);
+                    return;
+                }
+                
+                const current = document.getElementById(path[step]);
+                const next = document.getElementById(path[step + 1]);
+                
+                if (current && next) {
+                    const containerRect = container.getBoundingClientRect();
+                    const currentRect = current.getBoundingClientRect();
+                    const nextRect = next.getBoundingClientRect();
+                    
+                    const fromX = currentRect.left + currentRect.width/2 - containerRect.left;
+                    const fromY = currentRect.top + currentRect.height/2 - containerRect.top;
+                    const toX = nextRect.left + nextRect.width/2 - containerRect.left;
+                    const toY = nextRect.top + nextRect.height/2 - containerRect.top;
+                    
+                    // Animate message to next node
+                    message.style.transition = 'left 1s, top 1s';
+                    message.style.left = `${toX}px`;
+                    message.style.top = `${toY}px`;
+                    
+                    setTimeout(() => {
+                        animateMessageStep(message, path, step + 1, container);
+                    }, 1000);
+                }
+            }
+
+            // Growth Animation
+            const showGrowthBtn = document.getElementById('show-growth');
+            showGrowthBtn.addEventListener('click', animateGrowth);
+            
+            function animateGrowth() {
+                // User growth animation
+                const usersProgress = document.getElementById('users-progress');
+                animateProgressBar(usersProgress, 0, 1000000, 'users', 3000);
+                
+                // Channels growth animation
+                const channelsProgress = document.getElementById('channels-progress');
+                animateProgressBar(channelsProgress, 0, 90000, 'channels', 3000);
+                
+                // Servers growth animation
+                const serversProgress = document.getElementById('servers-progress');
+                animateProgressBar(serversProgress, 0, 23, 'servers', 3000);
+                
+                // Show key events
+                const eventsContainer = document.getElementById('events-container');
+                eventsContainer.innerHTML = '';
+                
+                const events = [
+                    { year: 1998, text: "OPN grows to become the largest network for the free software community." },
+                    { year: 2002, text: "Peer-Directed Projects Center (PDPC) is founded to support Freenode." },
+                    { year: 2006, text: "Security breach affects approximately 25 user passwords." },
+                    { year: 2010, text: "Network faces DDoS attack using a novel JavaScript exploit." },
+                    { year: 2014, text: "Multiple DDoS attacks and server compromise lead to network splits." },
+                    { year: 2017, text: "Freenode becomes the largest IRC network for open source projects." }
+                ];
+                
+                events.forEach((event, index) => {
+                    setTimeout(() => {
+                        const eventEl = document.createElement('div');
+                        eventEl.className = 'bg-gray-100 p-3 rounded';
+                        eventEl.innerHTML = `<strong>${event.year}:</strong> ${event.text}`;
+                        eventEl.style.opacity = 0;
+                        eventEl.style.transform = 'translateY(20px)';
+                        eventEl.style.transition = 'opacity 1s, transform 1s';
+                        
+                        eventsContainer.appendChild(eventEl);
+                        
+                        setTimeout(() => {
+                            eventEl.style.opacity = 1;
+                            eventEl.style.transform = 'translateY(0)';
+                        }, 100);
+                    }, index * 800);
+                });
+            }
+            
+            function animateProgressBar(element, start, end, label, duration) {
+                const increment = Math.ceil((end - start) / 100);
+                const step = Math.max(1, Math.floor(duration / 100));
+                let current = start;
+                
+                const timer = setInterval(() => {
+                    current += increment;
+                    if (current >= end) {
+                        current = end;
+                        clearInterval(timer);
+                    }
+                    
+                    const percentage = Math.floor((current / end) * 100);
+                    element.style.width = `${percentage}%`;
+                    
+                    // Format number with commas
+                    const formattedNumber = current.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+                    element.textContent = `${formattedNumber} ${label}`;
+                }, step);
+            }
+
+            // Controversy Animation
+            const startControversyBtn = document.getElementById('start-controversy');
+            startControversyBtn.addEventListener('click', animateControversy);
+            
+            function animateControversy() {
+                // Create projects
+                const projects = [
+                    { id: 'project1', label: 'Gentoo', x: 250, y: 250 },
+                    { id: 'project2', label: 'FSF', x: 300, y: 270 },
+                    { id: 'project3', label: 'CentOS', x: 350, y: 240 },
+                    { id: 'project4', label: 'KDE', x: 270, y: 300 },
+                    { id: 'project5', label: 'Ubuntu', x: 330, y: 310 },
+                    { id: 'project6', label: 'Arch', x: 250, y: 330 },
+                    { id: 'project7', label: 'Wiki', x: 370, y: 300 },
+                    { id: 'project8', label: 'Alpine', x: 390, y: 270 },
+                    { id: 'project9', label: 'Haiku', x: 280, y: 350 },
+                    { id: 'project10', label: 'FreeBSD', x: 230, y: 290 }
+                ];
+                
+                const container = document.getElementById('controversy-animation');
+                
+                // Clear existing projects if any
+                const existingProjects = container.querySelectorAll('.project');
+                existingProjects.forEach(p => p.remove());
+                
+                // Add projects to Freenode
+                projects.forEach(project => {
+                    const projectEl = document.createElement('div');
+                    projectEl.className = 'project';
+                    projectEl.id = project.id;
+                    projectEl.textContent = project.label;
+                    projectEl.style.left = `${project.x}px`;
+                    projectEl.style.top = `${project.y}px`;
+                    container.appendChild(projectEl);
+                });
+                
+                // Create other networks with delay
+                setTimeout(() => {
+                    document.getElementById('libera-network').style.opacity = 1;
+                    document.getElementById('oftc-network').style.opacity = 1;
+                    
+                    // Move staff first
+                    setTimeout(() => {
+                        const staffEl = document.createElement('div');
+                        staffEl.className = 'project';
+                        staffEl.style.left = '320px';
+                        staffEl.style.top = '200px';
+                        staffEl.textContent = 'Staff';
+                        staffEl.style.backgroundColor = '#f39c12';
+                        container.appendChild(staffEl);
+                        
+                        setTimeout(() => {
+                            staffEl.style.left = '700px';
+                            staffEl.style.top = '200px';
+                        }, 500);
+                        
+                        // Move projects to Libera and OFTC
+                        setTimeout(() => {
+                            // Move to Libera
+                            document.getElementById('project1').style.left = '650px';
+                            document.getElementById('project1').style.top = '250px';
+                            
+                            document.getElementById('project2').style.left = '700px';
+                            document.getElementById('project2').style.top = '270px';
+                            
+                            document.getElementById('project3').style.left = '750px';
+                            document.getElementById('project3').style.top = '240px';
+                            
+                            document.getElementById('project4').style.left = '670px';
+                            document.getElementById('project4').style.top = '300px';
+                            
+                            document.getElementById('project5').style.left = '730px';
+                            document.getElementById('project5').style.top = '310px';
+                            
+                            document.getElementById('project6').style.left = '650px';
+                            document.getElementById('project6').style.top = '330px';
+                            
+                            document.getElementById('project7').style.left = '770px';
+                            document.getElementById('project7').style.top = '300px';
+                            
+                            // Move to OFTC
+                            document.getElementById('project8').style.left = '900px';
+                            document.getElementById('project8').style.top = '270px';
+                            
+                            document.getElementById('project9').style.left = '880px';
+                            document.getElementById('project9').style.top = '300px';
+                            
+                            document.getElementById('project10').style.left = '920px';
+                            document.getElementById('project10').style.top = '290px';
+                            
+                            // Show explanation
+                            setTimeout(() => {
+                                document.getElementById('controversy-explanation').style.opacity = 1;
+                            }, 1500);
+                        }, 2000);
+                    }, 1000);
+                }, 1000);
+            }
+
+            // Infrastructure Animation
+            const showInfrastructureBtn = document.getElementById('show-infrastructure');
+            showInfrastructureBtn.addEventListener('click', setupInfraAnimation);
+            
+            function setupInfraAnimation() {
+                const container = document.getElementById('infra-animation');
+                container.innerHTML = '';
+                
+                // Create regions
+                const regions = [
+                    { id: 'europe', label: 'Europe', x: 150, y: 100 },
+                    { id: 'usa', label: 'United States', x: 500, y: 100 },
+                    { id: 'australia', label: 'Australia', x: 325, y: 300 }
+                ];
+                
+                regions.forEach(region => {
+                    const regionEl = document.createElement('div');
+                    regionEl.className = 'region';
+                    regionEl.style.left = `${region.x}px`;
+                    regionEl.style.top = `${region.y}px`;
+                    regionEl.style.opacity = 0;
+                    regionEl.style.transform = 'scale(0.8)';
+                    regionEl.style.transition = 'opacity 1s, transform 1s';
+                    
+                    const label = document.createElement('div');
+                    label.className = 'region-label';
+                    label.textContent = region.label;
+                    
+                    regionEl.appendChild(label);
+                    container.appendChild(regionEl);
+                    
+                    setTimeout(() => {
+                        regionEl.style.opacity = 1;
+                        regionEl.style.transform = 'scale(1)';
+                    }, 500);
+                });
+                
+                // Add servers with delay
+                setTimeout(() => {
+                    // Europe servers
+                    addServer(container, 140, 110, 'Server 1', '#3498db');
+                    addServer(container, 180, 160, 'Server 2', '#3498db');
+                    addServer(container, 220, 110, 'Server 3', '#3498db');
+                    
+                    // US servers
+                    setTimeout(() => {
+                        addServer(container, 490, 110, 'Server 4', '#e74c3c');
+                        addServer(container, 530, 160, 'Server 5', '#e74c3c');
+                        addServer(container, 570, 110, 'Server 6', '#e74c3c');
+                    }, 1000);
+                    
+                    // Australia servers
+                    setTimeout(() => {
+                        addServer(container, 315, 310, 'Server 7', '#2ecc71');
+                        addServer(container, 355, 360, 'Server 8', '#2ecc71');
+                    }, 2000);
+                    
+                    // Add connections with delay
+                    setTimeout(() => {
+                        // Connect servers
+                        addConnection(container, 180, 140, 350, 310);
+                        addConnection(container, 530, 140, 350, 310);
+                        addConnection(container, 180, 140, 530, 140);
+                        
+                        // Add internet cloud
+                        const cloudEl = document.createElement('div');
+                        cloudEl.style.position = 'absolute';
+                        cloudEl.style.left = '330px';
+                        cloudEl.style.top = '200px';
+                        cloudEl.style.width = '120px';
+                        cloudEl.style.height = '80px';
+                        cloudEl.style.backgroundColor = 'rgba(189, 195, 199, 0.7)';
+                        cloudEl.style.borderRadius = '40px';
+                        cloudEl.style.display = 'flex';
+                        cloudEl.style.justifyContent = 'center';
+                        cloudEl.style.alignItems = 'center';
+                        cloudEl.style.zIndex = '1';
+                        cloudEl.style.color = '#2c3e50';
+                        cloudEl.style.fontWeight = 'bold';
+                        cloudEl.textContent = 'Internet';
+                        cloudEl.style.opacity = 0;
+                        cloudEl.style.transition = 'opacity 1s';
+                        
+                        container.appendChild(cloudEl);
+                        
+                        setTimeout(() => {
+                            cloudEl.style.opacity = 1;
+                        }, 500);
+                        
+                        // Add a client
+                        setTimeout(() => {
+                            const clientEl = document.createElement('div');
+                            clientEl.className = 'client';
+                            clientEl.style.left = '350px';
+                            clientEl.style.top = '420px';
+                            clientEl.style.opacity = 0;
+                            clientEl.style.transition = 'opacity 1s';
+                            clientEl.textContent = 'User';
+                            
+                            container.appendChild(clientEl);
+                            
+                            setTimeout(() => {
+                                clientEl.style.opacity = 1;
+                                
+                                // Connect client to Australia server
+                                setTimeout(() => {
+                                    addConnection(container, 350, 420, 335, 360);
+                                }, 500);
+                            }, 100);
+                        }, 1000);
+                    }, 3000);
+                }, 1000);
+            }
+            
+            function addServer(container, x, y, label, color) {
+                const server = document.createElement('div');
+                server.className = 'server';
+                server.style.width = '60px';
+                server.style.height = '60px';
+                server.style.left = `${x}px`;
+                server.style.top = `${y}px`;
+                server.style.backgroundColor = color;
+                server.style.opacity = 0;
+                server.style.transform = 'scale(0)';
+                server.style.transition = 'opacity 0.5s, transform 0.5s';
+                server.textContent = label;
+                server.style.fontSize = '0.7rem';
+                
+                container.appendChild(server);
+                
+                setTimeout(() => {
+                    server.style.opacity = 1;
+                    server.style.transform = 'scale(1)';
+                }, 100);
+            }
+            
+            function addConnection(container, x1, y1, x2, y2) {
+                const distance = Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+                const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+                
+                const connection = document.createElement('div');
+                connection.className = 'connection';
+                connection.style.width = `${distance}px`;
+                connection.style.left = `${x1}px`;
+                connection.style.top = `${y1}px`;
+                connection.style.transform = `rotate(${angle}deg)`;
+                connection.style.opacity = 0;
+                connection.style.transition = 'opacity 1s';
+                
+                container.appendChild(connection);
+                
+                setTimeout(() => {
+                    connection.style.opacity = 1;
+                }, 100);
+            }
+        });
+    </script>
+</body>
+</html>

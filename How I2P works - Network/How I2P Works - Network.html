@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I2P Network Explained</title>
+    <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f4f8;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .animation-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            height: 560px;
+            overflow: hidden;
+        }
+        
+        .node {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            position: absolute;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            background: linear-gradient(135deg, #1e3a8a, #2563eb);
+            color: white;
+            font-weight: bold;
+            transition: transform 0.5s ease, box-shadow 0.3s ease;
+        }
+        
+        .node:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+        }
+        
+        .computer {
+            width: 100px;
+            height: 80px;
+            border-radius: 5px;
+            background-color: #334155;
+            position: absolute;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .computer::after {
+            content: '';
+            width: 110px;
+            height: 10px;
+            background-color: #475569;
+            position: absolute;
+            bottom: -10px;
+            border-radius: 0 0 5px 5px;
+        }
+        
+        .data-packet {
+            width: 35px;
+            height: 35px;
+            border-radius: 5px;
+            position: absolute;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            color: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tunnel {
+            position: absolute;
+            height: 10px;
+            background: linear-gradient(90deg, rgba(37, 99, 235, 0.5), rgba(30, 58, 138, 0.8));
+            border-radius: 5px;
+            transform-origin: left;
+            z-index: 5;
+        }
+        
+        .info-box {
+            position: absolute;
+            background-color: white;
+            border: 2px solid #bfdbfe;
+            border-radius: 8px;
+            padding: 15px;
+            width: 250px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        
+        .info-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #1e3a8a;
+        }
+        
+        .info-content {
+            font-size: 14px;
+            line-height: 1.4;
+        }
+        
+        .layer {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+        
+        .controls {
+            margin-top: 15px;
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .btn {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+        
+        .btn:hover {
+            background-color: #1e40af;
+        }
+        
+        #resetBtn {
+            background-color: #4b5563;
+        }
+        
+        #resetBtn:hover {
+            background-color: #374151;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background-color: #e5e7eb;
+            border-radius: 2.5px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background-color: #2563eb;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 0.7; }
+        }
+        
+        .active-node {
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s forwards;
+        }
+        
+        @keyframes moveAlong {
+            0% { offset-distance: 0%; }
+            100% { offset-distance: 100%; }
+        }
+        
+        .legend {
+            margin-top: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 15px;
+            font-size: 14px;
+        }
+        
+        .legend-color {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="container">
+        <h1 class="text-3xl font-bold text-center my-5 text-blue-800">How the I2P Network Works</h1>
+        
+        <div class="animation-container relative">
+            <!-- Computers -->
+            <div id="sender" class="computer" style="left: 50px; top: 240px;">
+                <span>Sender</span>
+            </div>
+            <div id="receiver" class="computer" style="right: 50px; top: 240px;">
+                <span>Receiver</span>
+            </div>
+            
+            <!-- Nodes -->
+            <div id="node1" class="node" style="left: 200px; top: 150px;">
+                Router 1
+            </div>
+            <div id="node2" class="node" style="left: 380px; top: 100px;">
+                Router 2
+            </div>
+            <div id="node3" class="node" style="left: 560px; top: 150px;">
+                Router 3
+            </div>
+            <div id="node4" class="node" style="left: 200px; top: 350px;">
+                Router 4
+            </div>
+            <div id="node5" class="node" style="left: 380px; top: 400px;">
+                Router 5
+            </div>
+            <div id="node6" class="node" style="left: 560px; top: 350px;">
+                Router 6
+            </div>
+            
+            <!-- Initial tunnels (hidden) -->
+            <div id="tunnel1" class="tunnel" style="left: 150px; top: 245px; width: 0px; transform: rotate(0deg);"></div>
+            
+            <!-- Information Boxes -->
+            <div id="introBox" class="info-box" style="top: 20px; left: 50%; transform: translateX(-50%); width: 600px; text-align: center; opacity: 1;">
+                <div class="info-title">Welcome to the I2P Network Animation</div>
+                <div class="info-content">
+                    I2P (Invisible Internet Project) is an anonymous network layer that allows for censorship-resistant, 
+                    peer-to-peer communication. This animation will demonstrate how data travels securely through the I2P network.
+                </div>
+            </div>
+            
+            <div id="garlicRoutingBox" class="info-box" style="top: 150px; left: 380px; width: 280px;">
+                <div class="info-title">Garlic Routing</div>
+                <div class="info-content">
+                    I2P uses "garlic routing" which bundles multiple messages together 
+                    and encrypts them in multiple layers, like an onion. This makes traffic 
+                    analysis more difficult for attackers.
+                </div>
+            </div>
+            
+            <div id="tunnelBox" class="info-box" style="top: 460px; left: 250px; width: 300px;">
+                <div class="info-title">I2P Tunnels</div>
+                <div class="info-content">
+                    I2P creates separate inbound and outbound tunnels for each participant.
+                    These tunnels are temporary, one-directional pathways through the network
+                    that typically last for 10 minutes before new ones are created.
+                </div>
+            </div>
+            
+            <div id="netDBBox" class="info-box" style="top: 20px; right: 50px; width: 250px;">
+                <div class="info-title">netDB</div>
+                <div class="info-content">
+                    The Network Database (netDB) is a distributed database containing:
+                    - RouterInfo: Public keys and transport addresses of routers
+                    - LeaseSet: Information about how to contact a destination
+                </div>
+            </div>
+            
+            <div id="e2eBox" class="info-box" style="bottom: 50px; right: 50px; width: 270px;">
+                <div class="info-title">End-to-End Encryption</div>
+                <div class="info-content">
+                    All communication in I2P is end-to-end encrypted. Each router in a tunnel 
+                    only knows the identity of the previous and next hop, not the complete route 
+                    of the message or its contents.
+                </div>
+            </div>
+            
+            <!-- Data packet (initially hidden) -->
+            <div id="dataPacket" class="data-packet" style="opacity: 0; background-color: #2563eb; left: 100px; top: 240px;">
+                Data
+            </div>
+        </div>
+        
+        <div class="progress-bar">
+            <div id="progress" class="progress"></div>
+        </div>
+        
+        <div class="controls">
+            <button id="playBtn" class="btn">Play Animation</button>
+            <button id="pauseBtn" class="btn" style="display: none;">Pause</button>
+            <button id="resetBtn" class="btn">Reset</button>
+        </div>
+        
+        <div class="legend mt-4 p-3 bg-white rounded shadow-sm">
+            <div class="text-sm font-semibold mb-2 w-full text-center">Legend</div>
+            <div class="legend-item"><div class="legend-color" style="background-color: #2563eb;"></div> Router Node</div>
+            <div class="legend-item"><div class="legend-color" style="background-color: rgba(37, 99, 235, 0.5);"></div> Tunnel</div>
+            <div class="legend-item"><div class="legend-color" style="background: #334155;"></div> Endpoint</div>
+            <div class="legend-item"><div class="legend-color" style="background: #2563eb;"></div> Data Packet</div>
+            <div class="legend-item"><div class="legend-color" style="background: #ff9800;"></div> Encrypted Layer</div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const playBtn = document.getElementById('playBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const progressBar = document.getElementById('progress');
+            
+            // Animation elements
+            const introBox = document.getElementById('introBox');
+            const garlicRoutingBox = document.getElementById('garlicRoutingBox');
+            const tunnelBox = document.getElementById('tunnelBox');
+            const netDBBox = document.getElementById('netDBBox');
+            const e2eBox = document.getElementById('e2eBox');
+            const dataPacket = document.getElementById('dataPacket');
+            
+            const nodes = [
+                document.getElementById('node1'),
+                document.getElementById('node2'),
+                document.getElementById('node3'),
+                document.getElementById('node4'),
+                document.getElementById('node5'),
+                document.getElementById('node6')
+            ];
+            
+            let animationInterval;
+            let animationStep = 0;
+            let isPlaying = false;
+            const totalSteps = 15;
+            
+            function createTunnel(start, end) {
+                const tunnel = document.createElement('div');
+                tunnel.className = 'tunnel';
+                document.querySelector('.animation-container').appendChild(tunnel);
+                
+                const startRect = start.getBoundingClientRect();
+                const endRect = end.getBoundingClientRect();
+                const containerRect = document.querySelector('.animation-container').getBoundingClientRect();
+                
+                const startX = startRect.left - containerRect.left + start.offsetWidth/2;
+                const startY = startRect.top - containerRect.top + start.offsetHeight/2;
+                const endX = endRect.left - containerRect.left + end.offsetWidth/2;
+                const endY = endRect.top - containerRect.top + end.offsetHeight/2;
+                
+                const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                
+                tunnel.style.width = '0px';
+                tunnel.style.left = `${startX}px`;
+                tunnel.style.top = `${startY}px`;
+                tunnel.style.transform = `rotate(${angle}deg)`;
+                
+                setTimeout(() => {
+                    tunnel.style.transition = 'width 0.8s ease';
+                    tunnel.style.width = `${length}px`;
+                }, 100);
+                
+                return tunnel;
+            }
+            
+            function createEncryptionLayer(element, color) {
+                const layer = document.createElement('div');
+                layer.className = 'layer';
+                document.querySelector('.animation-container').appendChild(layer);
+                
+                const rect = element.getBoundingClientRect();
+                const containerRect = document.querySelector('.animation-container').getBoundingClientRect();
+                
+                const centerX = rect.left - containerRect.left + element.offsetWidth/2;
+                const centerY = rect.top - containerRect.top + element.offsetHeight/2;
+                
+                layer.style.left = `${centerX - 25}px`;
+                layer.style.top = `${centerY - 25}px`;
+                layer.style.width = '50px';
+                layer.style.height = '50px';
+                layer.style.backgroundColor = color;
+                layer.style.opacity = '0';
+                
+                setTimeout(() => {
+                    layer.style.transition = 'all 0.8s ease';
+                    layer.style.opacity = '0.7';
+                    layer.style.width = '70px';
+                    layer.style.height = '70px';
+                    layer.style.left = `${centerX - 35}px`;
+                    layer.style.top = `${centerY - 35}px`;
+                }, 100);
+                
+                return layer;
+            }
+            
+            function moveElementAlongPath(element, path, duration) {
+                let pathStr = '';
+                
+                for (let i = 0; i < path.length; i++) {
+                    if (i === 0) {
+                        pathStr += `M ${path[i].x} ${path[i].y} `;
+                    } else {
+                        pathStr += `L ${path[i].x} ${path[i].y} `;
+                    }
+                }
+                
+                const svgPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                svgPath.setAttribute('d', pathStr);
+                svgPath.style.display = 'none';
+                document.body.appendChild(svgPath);
+                
+                const pathLength = svgPath.getTotalLength();
+                
+                function moveElement(progress) {
+                    const point = svgPath.getPointAtLength(progress * pathLength);
+                    element.style.left = `${point.x}px`;
+                    element.style.top = `${point.y}px`;
+                }
+                
+                let startTime = null;
+                
+                function animate(timestamp) {
+                    if (!startTime) startTime = timestamp;
+                    const elapsed = timestamp - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    moveElement(progress);
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        document.body.removeChild(svgPath);
+                    }
+                }
+                
+                requestAnimationFrame(animate);
+            }
+            
+            function highlightNode(node) {
+                node.classList.add('active-node');
+                setTimeout(() => {
+                    node.classList.remove('active-node');
+                }, 2000);
+            }
+            
+            function showInfoBox(box) {
+                box.style.opacity = '1';
+                setTimeout(() => {
+                    box.style.opacity = '0';
+                }, 4000);
+            }
+            
+            function resetAnimation() {
+                clearInterval(animationInterval);
+                animationStep = 0;
+                progressBar.style.width = '0%';
+                isPlaying = false;
+                playBtn.style.display = 'inline-block';
+                pauseBtn.style.display = 'none';
+                
+                // Reset all elements
+                introBox.style.opacity = '1';
+                garlicRoutingBox.style.opacity = '0';
+                tunnelBox.style.opacity = '0';
+                netDBBox.style.opacity = '0';
+                e2eBox.style.opacity = '0';
+                dataPacket.style.opacity = '0';
+                
+                // Remove all dynamically created tunnels and layers
+                document.querySelectorAll('.tunnel:not(#tunnel1)').forEach(el => el.remove());
+                document.querySelectorAll('.layer').forEach(el => el.remove());
+                
+                // Reset the first tunnel
+                const tunnel1 = document.getElementById('tunnel1');
+                tunnel1.style.transition = 'none';
+                tunnel1.style.width = '0px';
+                
+                // Reset node classes
+                nodes.forEach(node => {
+                    node.classList.remove('active-node');
+                });
+                
+                // Reset packet position
+                dataPacket.style.left = '100px';
+                dataPacket.style.top = '240px';
+            }
+            
+            function runAnimation() {
+                animationInterval = setInterval(() => {
+                    animationStep++;
+                    progressBar.style.width = `${(animationStep / totalSteps) * 100}%`;
+                    
+                    switch(animationStep) {
+                        case 1:
+                            // Fade out intro, show garlic routing explanation
+                            introBox.style.opacity = '0';
+                            setTimeout(() => {
+                                showInfoBox(netDBBox);
+                            }, 1000);
+                            break;
+                        
+                        case 2:
+                            // Show the data packet at the sender
+                            dataPacket.style.opacity = '1';
+                            dataPacket.style.left = '100px';
+                            dataPacket.style.top = '240px';
+                            
+                            setTimeout(() => {
+                                showInfoBox(garlicRoutingBox);
+                            }, 1000);
+                            
+                            // Create encryption layers
+                            setTimeout(() => {
+                                createEncryptionLayer(dataPacket, '#ff9800');
+                                setTimeout(() => {
+                                    createEncryptionLayer(dataPacket, '#f44336');
+                                    setTimeout(() => {
+                                        createEncryptionLayer(dataPacket, '#9c27b0');
+                                    }, 800);
+                                }, 800);
+                            }, 1000);
+                            break;
+                        
+                        case 3:
+                            // Show tunnel explanation
+                            showInfoBox(tunnelBox);
+                            break;
+                        
+                        case 4:
+                            // Create first tunnel and move packet
+                            const tunnel1 = createTunnel(document.getElementById('sender'), nodes[0]);
+                            setTimeout(() => {
+                                highlightNode(nodes[0]);
+                                
+                                // Move packet to first node
+                                dataPacket.style.transition = 'left 1s, top 1s';
+                                dataPacket.style.left = '200px';
+                                dataPacket.style.top = '150px';
+                            }, 800);
+                            break;
+                        
+                        case 5:
+                            // Create second tunnel and move packet
+                            const tunnel2 = createTunnel(nodes[0], nodes[1]);
+                            setTimeout(() => {
+                                highlightNode(nodes[1]);
+                                
+                                // Move packet to second node
+                                dataPacket.style.transition = 'left 1s, top 1s';
+                                dataPacket.style.left = '380px';
+                                dataPacket.style.top = '100px';
+                            }, 800);
+                            break;
+                        
+                        case 6:
+                            // Create third tunnel and move packet
+                            const tunnel3 = createTunnel(nodes[1], nodes[2]);
+                            setTimeout(() => {
+                                highlightNode(nodes[2]);
+                                
+                                // Move packet to third node
+                                dataPacket.style.transition = 'left 1s, top 1s';
+                                dataPacket.style.left = '560px';
+                                dataPacket.style.top = '150px';
+                            }, 800);
+                            break;
+                        
+                        case 7:
+                            // Show E2E encryption box
+                            showInfoBox(e2eBox);
+                            break;
+                        
+                        case 8:
+                            // Create fourth tunnel and move packet
+                            const tunnel4 = createTunnel(nodes[2], nodes[5]);
+                            setTimeout(() => {
+                                highlightNode(nodes[5]);
+                                
+                                // Move packet to sixth node
+                                dataPacket.style.transition = 'left 1s, top 1s';
+                                dataPacket.style.left = '560px';
+                                dataPacket.style.top = '350px';
+                            }, 800);
+                            break;
+                        
+                        case 9:
+                            // Create fifth tunnel and move packet
+                            const tunnel5 = createTunnel(nodes[5], nodes[4]);
+                            setTimeout(() => {
+                                highlightNode(nodes[4]);
+                                
+                                // Move packet to fifth node
+                                dataPacket.style.transition = 'left 1s, top 1s';
+                                dataPacket.style.left = '380px';
+                                dataPacket.style.top = '400px';
+                            }, 800);
+                            break;
+                        
+                        case 10:
+                            // Create sixth tunnel and move packet
+                            const tunnel6 = createTunnel(nodes[4], nodes[3]);
+                            setTimeout(() => {
+                                highlightNode(nodes[3]);
+                                
+                                // Move packet to fourth node
+                                dataPacket.style.transition = 'left 1s, top 1s';
+                                dataPacket.style.left = '200px';
+                                dataPacket.style.top = '350px';
+                            }, 800);
+                            break;
+                        
+                        case 11:
+                            // Create final tunnel and move packet to receiver
+                            const tunnel7 = createTunnel(nodes[3], document.getElementById('receiver'));
+                            setTimeout(() => {
+                                // Move packet to receiver
+                                dataPacket.style.transition = 'left 1s, top 1s';
+                                dataPacket.style.left = '740px';
+                                dataPacket.style.top = '240px';
+                            }, 800);
+                            break;
+                        
+                        case 12:
+                            // Show decryption process
+                            document.querySelectorAll('.layer').forEach(layer => {
+                                layer.style.opacity = '0';
+                                setTimeout(() => {
+                                    layer.remove();
+                                }, 800);
+                            });
+                            break;
+                        
+                        case 13:
+                            // Show summary box
+                            const summaryBox = document.createElement('div');
+                            summaryBox.className = 'info-box';
+                            summaryBox.style = 'top: 20px; left: 50%; transform: translateX(-50%); width: 600px; text-align: center;';
+                            summaryBox.innerHTML = `
+                                <div class="info-title">I2P Network Summary</div>
+                                <div class="info-content">
+                                    <ul class="list-disc pl-5 text-left">
+                                        <li>I2P uses garlic routing to bundle and encrypt messages</li>
+                                        <li>Separate inbound and outbound tunnels provide anonymity</li>
+                                        <li>Each router only knows the previous and next hop</li>
+                                        <li>The netDB provides decentralized network information</li>
+                                        <li>End-to-end encryption protects message contents</li>
+                                        <li>Tunnels are temporary and regularly rotated</li>
+                                    </ul>
+                                </div>
+                            `;
+                            document.querySelector('.animation-container').appendChild(summaryBox);
+                            setTimeout(() => {
+                                summaryBox.style.opacity = '1';
+                            }, 100);
+                            break;
+                        
+                        case 14:
+                            // Animation complete
+                            clearInterval(animationInterval);
+                            isPlaying = false;
+                            playBtn.style.display = 'inline-block';
+                            pauseBtn.style.display = 'none';
+                            break;
+                    }
+                    
+                }, 3000); // Steps change every 3 seconds
+            }
+            
+            playBtn.addEventListener('click', function() {
+                if (!isPlaying) {
+                    isPlaying = true;
+                    this.style.display = 'none';
+                    pauseBtn.style.display = 'inline-block';
+                    runAnimation();
+                }
+            });
+            
+            pauseBtn.addEventListener('click', function() {
+                if (isPlaying) {
+                    isPlaying = false;
+                    this.style.display = 'none';
+                    playBtn.style.display = 'inline-block';
+                    clearInterval(animationInterval);
+                }
+            });
+            
+            resetBtn.addEventListener('click', resetAnimation);
+            
+            // Auto-start animation after 1 second
+            setTimeout(() => {
+                playBtn.click();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

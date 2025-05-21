@@ -1,0 +1,2008 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding GNUnet: A Secure, Distributed Network</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400;600;700&display=swap');
+        
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --danger-color: #e74c3c;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+            --node-color-1: #f39c12;
+            --node-color-2: #9b59b6;
+            --node-color-3: #16a085;
+            --node-color-4: #e67e22;
+            --node-color-5: #8e44ad;
+            --gnunet-blue: #3498db;
+            --gnunet-green: #27ae60;
+            --particle-color: rgba(52, 152, 219, 0.6);
+        }
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            overflow-x: hidden;
+            background: #f9f9f9;
+        }
+        
+        .container-custom {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .section {
+            min-height: 100vh;
+            padding: 4rem 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Header animation */
+        .header-title {
+            background: linear-gradient(90deg, var(--gnunet-blue), var(--gnunet-green));
+            background-size: 200% auto;
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: gradient-shift 5s ease-in-out infinite;
+        }
+        
+        @keyframes gradient-shift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Network Animation */
+        .network-container {
+            position: relative;
+            height: 400px;
+            overflow: hidden;
+            margin: 2rem 0;
+            background-color: rgba(15, 23, 42, 0.02);
+            border-radius: 12px;
+        }
+        
+        .network-node {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            transition: all 0.5s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        
+        .network-node:hover {
+            transform: translate(-50%, -50%) scale(1.2);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+            z-index: 10;
+        }
+        
+        .network-connection {
+            position: absolute;
+            height: 2px;
+            background: rgba(44, 62, 80, 0.2);
+            transform-origin: left center;
+            z-index: 1;
+        }
+        
+        .network-connection.active {
+            animation: pulse-connection 1.5s infinite;
+        }
+        
+        @keyframes pulse-connection {
+            0% {
+                opacity: 0.2;
+                height: 2px;
+            }
+            50% {
+                opacity: 0.8;
+                height: 3px;
+            }
+            100% {
+                opacity: 0.2;
+                height: 2px;
+            }
+        }
+        
+        .data-packet {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background-color: var(--gnunet-green);
+            z-index: 3;
+            box-shadow: 0 0 5px var(--secondary-color);
+        }
+        
+        /* Architecture Animation */
+        .arch-layer {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 10px 0;
+            position: relative;
+            transition: all 0.4s ease;
+            border-left: 5px solid transparent;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .arch-layer:hover {
+            transform: translateX(10px);
+            border-left-color: var(--gnunet-blue);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Privacy Shield Animation */
+        .privacy-shield {
+            position: relative;
+            height: 300px;
+            overflow: hidden;
+            margin: 2rem 0;
+            border-radius: 12px;
+        }
+        
+        .shield {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 200px;
+            height: 200px;
+            transform: translate(-50%, -50%);
+            background-color: rgba(52, 152, 219, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse-shield 4s infinite;
+        }
+        
+        .shield:before {
+            content: "";
+            position: absolute;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            border-radius: 50%;
+            border: 4px solid rgba(52, 152, 219, 0.3);
+            animation: rotate 10s linear infinite;
+        }
+        
+        @keyframes pulse-shield {
+            0% {
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4);
+            }
+            70% {
+                box-shadow: 0 0 0 40px rgba(52, 152, 219, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(52, 152, 219, 0);
+            }
+        }
+        
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Comparison Animation */
+        .comparison-container {
+            display: flex;
+            margin: 2rem 0;
+            overflow: hidden;
+            border-radius: 12px;
+        }
+        
+        .comparison-side {
+            flex: 1;
+            padding: 20px;
+            position: relative;
+            min-height: 400px;
+        }
+        
+        .comparison-traditional {
+            background-color: #f8f8f8;
+            border-right: 1px solid #ddd;
+        }
+        
+        .comparison-gnunet {
+            background-color: #f0f9ff;
+        }
+        
+        .attack-animation {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--danger-color);
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        /* Section transitions */
+        .fade-in {
+            opacity: 0;
+            animation: fadeIn 1s forwards;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* Particles */
+        #particles {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--particle-color);
+            pointer-events: none;
+        }
+        
+        /* Interactive elements */
+        .interactive-button {
+            background: linear-gradient(135deg, var(--gnunet-blue), var(--gnunet-green));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.3);
+        }
+        
+        .interactive-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 20px rgba(52, 152, 219, 0.4);
+        }
+        
+        .interactive-button:active {
+            transform: translateY(1px);
+        }
+        
+        .interactive-button:after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+        
+        .interactive-button:hover:after {
+            width: 100%;
+        }
+        
+        /* Subsystem cards */
+        .subsystem-card {
+            border-radius: 12px;
+            background-color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+        
+        .subsystem-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .subsystem-icon {
+            font-size: 2.5rem;
+            height: 100px;
+            width: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            border-radius: 50%;
+            background-color: rgba(52, 152, 219, 0.1);
+            color: var(--gnunet-blue);
+            transition: all 0.3s ease;
+        }
+        
+        .subsystem-card:hover .subsystem-icon {
+            transform: scale(1.1);
+            background-color: rgba(52, 152, 219, 0.2);
+        }
+        
+        /* Floating elements animation */
+        .floating {
+            animation: floating 3s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        
+        /* Principle cards with hover effect */
+        .principle-card {
+            border-left: 4px solid var(--gnunet-blue);
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .principle-card:hover {
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            transform: translateX(5px);
+        }
+        
+        .principle-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 0 0 40px 40px;
+            border-color: transparent transparent rgba(52, 152, 219, 0.1) transparent;
+            transition: all 0.3s ease;
+        }
+        
+        .principle-card:hover::after {
+            border-width: 0 0 80px 80px;
+        }
+        
+        /* Animations for peer packets */
+        .peer-packet {
+            width: 12px;
+            height: 12px;
+            background: var(--gnunet-green);
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        /* Typing animation */
+        .typing-container {
+            display: inline-block;
+        }
+        
+        .typing-text {
+            overflow: hidden;
+            border-right: 0.15em solid var(--gnunet-blue);
+            white-space: nowrap;
+            margin: 0;
+            letter-spacing: 0.05em;
+            animation: typing 3.5s steps(40, end), blink-caret 0.75s step-end infinite;
+        }
+        
+        @keyframes typing {
+            from { width: 0 }
+            to { width: 100% }
+        }
+        
+        @keyframes blink-caret {
+            from, to { border-color: transparent }
+            50% { border-color: var(--gnunet-blue) }
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <div id="particles"></div>
+    
+    <!-- Header Section -->
+    <header class="py-20 px-4 text-center relative overflow-hidden">
+        <h1 class="header-title text-5xl font-bold mb-4">Understanding GNUnet</h1>
+        <p class="text-xl text-gray-600 max-w-3xl mx-auto">A secure, distributed, and privacy-preserving network protocol stack</p>
+        <div class="mt-10 flex justify-center">
+            <button class="interactive-button scroll-to-explore">
+                <span>Explore</span>
+                <i class="fas fa-chevron-down ml-2"></i>
+            </button>
+        </div>
+        
+        <div class="shield floating absolute" style="top: 30%; left: 15%; width: 50px; height: 50px; opacity: 0.4;"></div>
+        <div class="shield floating absolute" style="top: 50%; left: 85%; width: 60px; height: 60px; opacity: 0.3; animation-delay: 1s;"></div>
+        <div class="shield floating absolute" style="top: 70%; left: 25%; width: 40px; height: 40px; opacity: 0.2; animation-delay: 2s;"></div>
+    </header>
+    
+    <!-- Introduction Section -->
+    <section id="introduction" class="section py-20 px-4">
+        <div class="container-custom">
+            <div class="flex flex-col md:flex-row items-center">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <h2 class="text-3xl font-bold mb-6 typing-container">
+                        <span class="typing-text">The Internet is Broken</span>
+                    </h2>
+                    <p class="text-gray-700 mb-6">
+                        The conventional Internet was not designed with security in mind. It's like a system of roads with potholes and highwaymen all over the place. Your data can be hijacked, damaged, or stolen without your knowledge.
+                    </p>
+                    <p class="text-gray-700 mb-6">
+                        GNUnet aims to replace the old insecure Internet protocol stack with a network protocol stack for building secure, distributed, and privacy-preserving applications.
+                    </p>
+                    <div class="inline-block relative">
+                        <button class="interactive-button start-animation">
+                            <span>See the Problem</span>
+                            <i class="fas fa-play ml-2"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="md:w-1/2 pl-0 md:pl-10">
+                    <div class="privacy-shield">
+                        <div class="shield">
+                            <i class="fas fa-shield-alt text-5xl text-blue-500"></i>
+                        </div>
+                        <div class="traditional-internet">
+                            <!-- Animated traditional internet nodes will go here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Core Principles Section -->
+    <section id="principles" class="section py-20 bg-blue-50 px-4">
+        <div class="container-custom">
+            <h2 class="text-3xl font-bold mb-10 text-center">Core Principles of GNUnet</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="principle-card" data-aos="fade-right">
+                    <h3 class="text-xl font-bold mb-2">Free Software</h3>
+                    <p>GNUnet is implemented as Free Software, giving users the freedom to run, study, share, and modify the software.</p>
+                </div>
+                
+                <div class="principle-card" data-aos="fade-left">
+                    <h3 class="text-xl font-bold mb-2">Privacy Protection</h3>
+                    <p>GNUnet minimizes the amount of personally identifiable information exposed during network operations.</p>
+                </div>
+                
+                <div class="principle-card" data-aos="fade-right">
+                    <h3 class="text-xl font-bold mb-2">Decentralization</h3>
+                    <p>The network is fully distributed and resilient to external attacks and rogue participants.</p>
+                </div>
+                
+                <div class="principle-card" data-aos="fade-left">
+                    <h3 class="text-xl font-bold mb-2">Self-Organization</h3>
+                    <p>GNUnet is self-organizing and doesn't depend on administrators or centralized infrastructure.</p>
+                </div>
+                
+                <div class="principle-card" data-aos="fade-right">
+                    <h3 class="text-xl font-bold mb-2">Transparency</h3>
+                    <p>Users are informed which other participants have to be trusted when establishing private communications.</p>
+                </div>
+                
+                <div class="principle-card" data-aos="fade-left">
+                    <h3 class="text-xl font-bold mb-2">Openness</h3>
+                    <p>GNUnet is open and permits new peers to join the network freely.</p>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <button class="interactive-button see-network">
+                    <span>See the Network in Action</span>
+                    <i class="fas fa-network-wired ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Network Animation Section -->
+    <section id="network" class="section py-20 px-4">
+        <div class="container-custom">
+            <h2 class="text-3xl font-bold mb-6 text-center">GNUnet: A Peer-to-Peer Network</h2>
+            <p class="text-gray-700 mb-10 text-center max-w-3xl mx-auto">
+                GNUnet is a peer-to-peer framework for secure, decentralized networking. Watch how data flows through this encrypted network.
+            </p>
+            
+            <div class="network-container" id="network-animation">
+                <!-- Network nodes and connections will be generated by JavaScript -->
+            </div>
+            
+            <div class="mt-10 grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="text-blue-500 mb-4">
+                        <i class="fas fa-lock text-4xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">End-to-End Encryption</h3>
+                    <p class="text-gray-700">All communication is encrypted, protecting your data from interception.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="text-blue-500 mb-4">
+                        <i class="fas fa-project-diagram text-4xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Decentralized Routing</h3>
+                    <p class="text-gray-700">No central authority controls the network, making it resistant to censorship.</p>
+                </div>
+                
+                <div class="bg-white p-6 rounded-lg shadow-md">
+                    <div class="text-blue-500 mb-4">
+                        <i class="fas fa-user-secret text-4xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Metadata Protection</h3>
+                    <p class="text-gray-700">GNUnet hides who is communicating with whom, protecting your privacy.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Architecture Section -->
+    <section id="architecture" class="section py-20 bg-gray-50 px-4">
+        <div class="container-custom">
+            <h2 class="text-3xl font-bold mb-10 text-center">GNUnet's LEGO Architecture</h2>
+            
+            <div class="flex flex-col md:flex-row">
+                <div class="md:w-1/2 mb-10 md:mb-0">
+                    <p class="text-gray-700 mb-6">
+                        GNUnet's architecture is based on LEGOs - interchangeable components that can be stacked together to create complex systems. Each component is isolated from others for security and reliability.
+                    </p>
+                    
+                    <div class="arch-layer" data-layer="application">
+                        <h3 class="text-xl font-bold">Application Layer</h3>
+                        <p>User interfaces and daemons that interact with the user</p>
+                    </div>
+                    
+                    <div class="arch-layer" data-layer="services">
+                        <h3 class="text-xl font-bold">Services Layer</h3>
+                        <p>Core services offering APIs and functionality</p>
+                    </div>
+                    
+                    <div class="arch-layer" data-layer="transport">
+                        <h3 class="text-xl font-bold">Transport Layer</h3>
+                        <p>Secure, encrypted communication between peers</p>
+                    </div>
+                    
+                    <div class="arch-layer" data-layer="foundation">
+                        <h3 class="text-xl font-bold">Foundation Layer</h3>
+                        <p>Core libraries and utilities that all components rely upon</p>
+                    </div>
+                </div>
+                
+                <div class="md:w-1/2 md:pl-10">
+                    <div class="bg-white p-6 rounded-lg shadow-lg">
+                        <div class="service-stack-animation" id="service-stack">
+                            <svg width="100%" height="400" viewBox="0 0 400 400" id="arch-svg">
+                                <!-- SVG animation will be generated by JavaScript -->
+                                <defs>
+                                    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+                                        <feGaussianBlur stdDeviation="5" result="blur" />
+                                        <feComposite in="SourceGraphic" in2="blur" operator="over" />
+                                    </filter>
+                                </defs>
+                            </svg>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <p class="text-sm text-gray-500 italic">
+                                Hover over each layer to see its connections and responsibilities.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Key Subsystems Section -->
+    <section id="subsystems" class="section py-20 px-4">
+        <div class="container-custom">
+            <h2 class="text-3xl font-bold mb-10 text-center">Key Subsystems</h2>
+            <p class="text-gray-700 mb-12 text-center max-w-3xl mx-auto">
+                GNUnet consists of multiple subsystems that work together to create a secure and private network. Each subsystem handles specific aspects of the network's functionality.
+            </p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="subsystem-card p-6" id="dht-card">
+                    <div class="subsystem-icon mb-6">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-center">Distributed Hash Table (R5N)</h3>
+                    <p class="text-gray-700 text-center">
+                        A secure way to store and retrieve data across the network without central servers.
+                    </p>
+                    <div class="subsystem-animation mt-6 h-32 relative overflow-hidden rounded bg-blue-50">
+                        <!-- Animation elements will be added by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="subsystem-card p-6" id="cadet-card">
+                    <div class="subsystem-icon mb-6">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-center">CADET</h3>
+                    <p class="text-gray-700 text-center">
+                        End-to-end encrypted messaging layer similar to SCTP for secure communication.
+                    </p>
+                    <div class="subsystem-animation mt-6 h-32 relative overflow-hidden rounded bg-blue-50">
+                        <!-- Animation elements will be added by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="subsystem-card p-6" id="gns-card">
+                    <div class="subsystem-icon mb-6">
+                        <i class="fas fa-globe"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-center">GNU Name System (GNS)</h3>
+                    <p class="text-gray-700 text-center">
+                        Decentralized and secure alternative to DNS for naming resources.
+                    </p>
+                    <div class="subsystem-animation mt-6 h-32 relative overflow-hidden rounded bg-blue-50">
+                        <!-- Animation elements will be added by JavaScript -->
+                    </div>
+                </div>
+                
+                <div class="subsystem-card p-6" id="transport-card">
+                    <div class="subsystem-icon mb-6">
+                        <i class="fas fa-exchange-alt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-center">Transport</h3>
+                    <p class="text-gray-700 text-center">
+                        Pluggable system for network communication supporting various protocols.
+                    </p>
+                    <div class="subsystem-animation mt-6 h-32 relative overflow-hidden rounded bg-blue-50">
+                        <!-- Animation elements will be added by JavaScript -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-16 text-center">
+                <button class="interactive-button show-comparison">
+                    <span>Compare with Traditional Internet</span>
+                    <i class="fas fa-balance-scale ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Comparison Section -->
+    <section id="comparison" class="section py-20 bg-gray-50 px-4">
+        <div class="container-custom">
+            <h2 class="text-3xl font-bold mb-10 text-center">GNUnet vs. Traditional Internet</h2>
+            
+            <div class="comparison-container">
+                <div class="comparison-side comparison-traditional" id="traditional-side">
+                    <h3 class="text-2xl font-bold mb-6">Traditional Internet</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-times text-red-500 mt-1 mr-3"></i>
+                            <span>Centralized infrastructure vulnerable to censorship and control</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times text-red-500 mt-1 mr-3"></i>
+                            <span>Metadata exposure revealing who communicates with whom</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times text-red-500 mt-1 mr-3"></i>
+                            <span>Insecure routing allowing traffic interception</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-times text-red-500 mt-1 mr-3"></i>
+                            <span>Dependence on trusted third parties</span>
+                        </li>
+                    </ul>
+                    <div class="mt-10 relative h-40">
+                        <!-- Traditional internet animation -->
+                    </div>
+                </div>
+                
+                <div class="comparison-side comparison-gnunet" id="gnunet-side">
+                    <h3 class="text-2xl font-bold mb-6">GNUnet</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span>Decentralized peer-to-peer network resistant to censorship</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span>Metadata protection through encryption and routing techniques</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span>Secure end-to-end encrypted communication</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-check text-green-500 mt-1 mr-3"></i>
+                            <span>Self-organizing without need for trusted third parties</span>
+                        </li>
+                    </ul>
+                    <div class="mt-10 relative h-40">
+                        <!-- GNUnet animation -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Benefits Section -->
+    <section id="benefits" class="section py-20 px-4">
+        <div class="container-custom">
+            <h2 class="text-3xl font-bold mb-10 text-center">Benefits of GNUnet</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+                    <div class="text-blue-500 mb-6 text-center">
+                        <i class="fas fa-user-shield text-5xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-center">Privacy Protection</h3>
+                    <p class="text-gray-700">
+                        GNUnet protects both content and metadata, ensuring that your communications remain private from end to end.
+                    </p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+                    <div class="text-blue-500 mb-6 text-center">
+                        <i class="fas fa-ban text-5xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-center">Censorship Resistance</h3>
+                    <p class="text-gray-700">
+                        The decentralized design makes it extremely difficult for anyone to censor or shut down the network.
+                    </p>
+                </div>
+                
+                <div class="bg-white p-8 rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
+                    <div class="text-blue-500 mb-6 text-center">
+                        <i class="fas fa-code-branch text-5xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-4 text-center">Freedom and Control</h3>
+                    <p class="text-gray-700">
+                        As free software, GNUnet puts you in control of your data and communications, respecting your essential freedoms.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Call to Action -->
+    <section id="cta" class="section py-20 bg-blue-600 text-white px-4">
+        <div class="container-custom text-center">
+            <h2 class="text-3xl font-bold mb-6">Join the Secure Internet Revolution</h2>
+            <p class="text-xl mb-10 max-w-3xl mx-auto">
+                GNUnet is building the foundation for a more secure, private, and free internet. Learn more about how you can get involved.
+            </p>
+            <div class="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
+                <a href="https://www.gnunet.org/en/use.html" target="_blank" rel="noopener noreferrer" class="bg-white text-blue-600 hover:bg-blue-100 px-8 py-3 rounded-full font-bold transition-all">
+                    Use GNUnet
+                </a>
+                <a href="https://docs.gnunet.org/" target="_blank" rel="noopener noreferrer" class="bg-transparent border-2 border-white hover:bg-white hover:text-blue-600 px-8 py-3 rounded-full font-bold transition-all">
+                    Learn More
+                </a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12 px-4">
+        <div class="container-custom">
+            <div class="flex flex-col md:flex-row justify-between">
+                <div class="mb-8 md:mb-0">
+                    <h3 class="text-xl font-bold mb-4">About GNUnet</h3>
+                    <p class="max-w-md text-gray-400">
+                        GNUnet is an alternative network stack for building secure, decentralized and privacy-preserving distributed applications.
+                    </p>
+                </div>
+                
+                <div>
+                    <h3 class="text-xl font-bold mb-4">Resources</h3>
+                    <ul class="space-y-2 text-gray-400">
+                        <li><a href="https://www.gnunet.org" class="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">Official Website</a></li>
+                        <li><a href="https://docs.gnunet.org" class="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">Documentation</a></li>
+                        <li><a href="https://git.gnunet.org" class="hover:text-white transition-colors" target="_blank" rel="noopener noreferrer">Source Code</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="mt-12 pt-8 border-t border-gray-800 text-center text-gray-500">
+                <p>This educational content is provided to explain the GNUnet network and its capabilities.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Helper functions for animations and interactivity
+        document.addEventListener('DOMContentLoaded', function() {
+            // Make sections visible on scroll
+            const sections = document.querySelectorAll('.section');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+            
+            // Scroll-to functionality for the "Explore" button
+            document.querySelector('.scroll-to-explore').addEventListener('click', function() {
+                document.getElementById('introduction').scrollIntoView({ behavior: 'smooth' });
+            });
+            
+            // See the Network in Action button
+            document.querySelector('.see-network').addEventListener('click', function() {
+                document.getElementById('network').scrollIntoView({ behavior: 'smooth' });
+                setTimeout(initNetworkAnimation, 500);
+            });
+            
+            // Show Comparison button
+            document.querySelector('.show-comparison').addEventListener('click', function() {
+                document.getElementById('comparison').scrollIntoView({ behavior: 'smooth' });
+                setTimeout(initComparisonAnimation, 500);
+            });
+            
+            // Start Animation button
+            document.querySelector('.start-animation').addEventListener('click', function() {
+                animateTraditionalInternet();
+            });
+            
+            // Create particles for background effect
+            createParticles();
+            
+            // Initialize the network animation
+            initNetworkAnimation();
+            
+            // Initialize the architecture animation
+            initArchitectureAnimation();
+            
+            // Initialize subsystem animations
+            initSubsystemAnimations();
+            
+            // Initialize regular animation interval
+            setInterval(animateRandomData, 3000);
+        });
+        
+        // Particle background animation
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 30;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                // Random position
+                const xPos = Math.random() * 100;
+                const yPos = Math.random() * 100;
+                
+                // Random size
+                const size = Math.random() * 4 + 2;
+                
+                // Random opacity
+                const opacity = Math.random() * 0.3 + 0.1;
+                
+                // Set styles
+                particle.style.left = `${xPos}%`;
+                particle.style.top = `${yPos}%`;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.opacity = opacity;
+                
+                // Set animation
+                const duration = Math.random() * 20 + 10;
+                const delay = Math.random() * 5;
+                
+                particle.style.animation = `floating ${duration}s ease-in-out ${delay}s infinite alternate`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+        
+        // Network animation
+        function initNetworkAnimation() {
+            const networkContainer = document.getElementById('network-animation');
+            if (!networkContainer) return;
+            
+            // Clear previous animation
+            networkContainer.innerHTML = '';
+            
+            const nodeCount = 12;
+            const nodes = [];
+            
+            // Create nodes
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.classList.add('network-node');
+                
+                // Choose node color
+                const colorIndex = i % 5 + 1;
+                node.style.backgroundColor = `var(--node-color-${colorIndex})`;
+                
+                // Random position within container
+                const xPos = 10 + Math.random() * 80;
+                const yPos = 10 + Math.random() * 80;
+                
+                node.style.left = `${xPos}%`;
+                node.style.top = `${yPos}%`;
+                
+                // Add label
+                node.innerHTML = `<span>${i+1}</span>`;
+                
+                // Add to container
+                networkContainer.appendChild(node);
+                
+                // Store node info
+                nodes.push({
+                    element: node,
+                    x: xPos,
+                    y: yPos,
+                    id: i
+                });
+                
+                // Add hover animation
+                node.addEventListener('mouseenter', function() {
+                    highlightConnections(i);
+                });
+                
+                node.addEventListener('mouseleave', function() {
+                    resetConnections();
+                });
+            }
+            
+            // Create connections between nodes
+            for (let i = 0; i < nodes.length; i++) {
+                // Connect each node to 2-4 random other nodes
+                const connectionCount = Math.floor(Math.random() * 3) + 2;
+                
+                for (let j = 0; j < connectionCount; j++) {
+                    let targetIdx;
+                    do {
+                        targetIdx = Math.floor(Math.random() * nodes.length);
+                    } while (targetIdx === i);
+                    
+                    const sourceNode = nodes[i];
+                    const targetNode = nodes[targetIdx];
+                    
+                    // Calculate connection parameters
+                    const dx = targetNode.x - sourceNode.x;
+                    const dy = targetNode.y - sourceNode.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    
+                    // Create connection element
+                    const connection = document.createElement('div');
+                    connection.classList.add('network-connection');
+                    connection.dataset.source = i;
+                    connection.dataset.target = targetIdx;
+                    
+                    connection.style.width = `${distance}%`;
+                    connection.style.left = `${sourceNode.x}%`;
+                    connection.style.top = `${sourceNode.y}%`;
+                    connection.style.transform = `rotate(${angle}deg)`;
+                    
+                    networkContainer.appendChild(connection);
+                }
+            }
+            
+            // Start animation
+            animateData();
+        }
+        
+        // Highlight connections for a specific node
+        function highlightConnections(nodeId) {
+            const connections = document.querySelectorAll('.network-connection');
+            
+            connections.forEach(conn => {
+                if (conn.dataset.source == nodeId || conn.dataset.target == nodeId) {
+                    conn.classList.add('active');
+                } else {
+                    conn.classList.remove('active');
+                }
+            });
+        }
+        
+        // Reset connections highlight
+        function resetConnections() {
+            const connections = document.querySelectorAll('.network-connection');
+            connections.forEach(conn => {
+                conn.classList.remove('active');
+            });
+        }
+        
+        // Animate data packets flowing through the network
+        function animateData() {
+            const networkContainer = document.getElementById('network-animation');
+            const connections = document.querySelectorAll('.network-connection');
+            
+            if (connections.length === 0) return;
+            
+            // Randomly select a connection to animate
+            const randomIndex = Math.floor(Math.random() * connections.length);
+            const selectedConnection = connections[randomIndex];
+            
+            // Get source and target nodes
+            const sourceId = selectedConnection.dataset.source;
+            const targetId = selectedConnection.dataset.target;
+            
+            const sourceNode = document.querySelectorAll('.network-node')[sourceId];
+            const targetNode = document.querySelectorAll('.network-node')[targetId];
+            
+            if (!sourceNode || !targetNode) return;
+            
+            // Create a data packet
+            const packet = document.createElement('div');
+            packet.classList.add('data-packet');
+            
+            // Position at source node
+            const sourceRect = sourceNode.getBoundingClientRect();
+            const containerRect = networkContainer.getBoundingClientRect();
+            
+            const startX = ((sourceRect.left + sourceRect.width/2) - containerRect.left) / containerRect.width * 100;
+            const startY = ((sourceRect.top + sourceRect.height/2) - containerRect.top) / containerRect.height * 100;
+            
+            packet.style.left = `${startX}%`;
+            packet.style.top = `${startY}%`;
+            
+            // Add to container
+            networkContainer.appendChild(packet);
+            
+            // Calculate target position
+            const targetRect = targetNode.getBoundingClientRect();
+            const endX = ((targetRect.left + targetRect.width/2) - containerRect.left) / containerRect.width * 100;
+            const endY = ((targetRect.top + targetRect.height/2) - containerRect.top) / containerRect.height * 100;
+            
+            // Highlight the connection
+            selectedConnection.classList.add('active');
+            
+            // Animate packet
+            let progress = 0;
+            const animationDuration = 1000;
+            const animationStart = performance.now();
+            
+            function animatePacket(timestamp) {
+                const elapsed = timestamp - animationStart;
+                progress = Math.min(elapsed / animationDuration, 1);
+                
+                // Calculate current position
+                const currentX = startX + (endX - startX) * progress;
+                const currentY = startY + (endY - startY) * progress;
+                
+                packet.style.left = `${currentX}%`;
+                packet.style.top = `${currentY}%`;
+                
+                if (progress < 1) {
+                    requestAnimationFrame(animatePacket);
+                } else {
+                    // Animation complete
+                    setTimeout(() => {
+                        networkContainer.removeChild(packet);
+                        selectedConnection.classList.remove('active');
+                    }, 200);
+                }
+            }
+            
+            requestAnimationFrame(animatePacket);
+        }
+        
+        // Periodically animate random data transfers
+        function animateRandomData() {
+            animateData();
+        }
+        
+        // Architecture animation
+        function initArchitectureAnimation() {
+            const svg = document.getElementById('arch-svg');
+            if (!svg) return;
+            
+            // Clear previous content
+            while (svg.firstChild) {
+                if (svg.firstChild.nodeName !== 'defs') {
+                    svg.removeChild(svg.firstChild);
+                } else {
+                    break;
+                }
+            }
+            
+            const layers = [
+                { name: "Applications", color: "#3498db", y: 60 },
+                { name: "Services", color: "#2ecc71", y: 140 },
+                { name: "Transport", color: "#e67e22", y: 220 },
+                { name: "Foundation", color: "#9b59b6", y: 300 }
+            ];
+            
+            const connections = [
+                { from: 0, to: 1 },
+                { from: 1, to: 2 },
+                { from: 1, to: 3 },
+                { from: 2, to: 3 }
+            ];
+            
+            // Draw layers
+            layers.forEach((layer, index) => {
+                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
+                rect.setAttribute("x", "50");
+                rect.setAttribute("y", layer.y.toString());
+                rect.setAttribute("width", "300");
+                rect.setAttribute("height", "60");
+                rect.setAttribute("rx", "10");
+                rect.setAttribute("ry", "10");
+                rect.setAttribute("fill", layer.color);
+                rect.setAttribute("opacity", "0.8");
+                rect.setAttribute("data-layer-index", index.toString());
+                
+                // Add hover effect
+                rect.addEventListener("mouseenter", () => highlightArchLayer(index));
+                rect.addEventListener("mouseleave", resetArchLayers);
+                
+                // Add animation
+                rect.style.opacity = "0";
+                rect.style.transform = "translateX(-20px)";
+                rect.style.transition = `all 0.5s ease ${index * 0.2}s`;
+                
+                setTimeout(() => {
+                    rect.style.opacity = "0.8";
+                    rect.style.transform = "translateX(0)";
+                }, 100);
+                
+                svg.appendChild(rect);
+                
+                // Layer text
+                const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
+                text.setAttribute("x", "200");
+                text.setAttribute("y", (layer.y + 35).toString());
+                text.setAttribute("text-anchor", "middle");
+                text.setAttribute("fill", "white");
+                text.setAttribute("font-weight", "bold");
+                text.textContent = layer.name;
+                text.setAttribute("data-layer-text", index.toString());
+                
+                svg.appendChild(text);
+            });
+            
+            // Draw connections
+            connections.forEach((conn, index) => {
+                const fromLayer = layers[conn.from];
+                const toLayer = layers[conn.to];
+                
+                const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+                line.setAttribute("x1", "200");
+                line.setAttribute("y1", (fromLayer.y + 60).toString());
+                line.setAttribute("x2", "200");
+                line.setAttribute("y2", toLayer.y.toString());
+                line.setAttribute("stroke", "#666");
+                line.setAttribute("stroke-width", "2");
+                line.setAttribute("stroke-dasharray", "5,5");
+                line.setAttribute("data-connection", `${conn.from}-${conn.to}`);
+                line.setAttribute("opacity", "0.5");
+                
+                svg.appendChild(line);
+                
+                // Add animated circle on connection
+                const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+                circle.setAttribute("cx", "200");
+                circle.setAttribute("cy", (fromLayer.y + 60).toString());
+                circle.setAttribute("r", "4");
+                circle.setAttribute("fill", "#fff");
+                circle.setAttribute("filter", "url(#glow)");
+                circle.setAttribute("data-connection-circle", `${conn.from}-${conn.to}`);
+                
+                // Animation
+                const animateCircle = document.createElementNS("http://www.w3.org/2000/svg", "animate");
+                animateCircle.setAttribute("attributeName", "cy");
+                animateCircle.setAttribute("from", (fromLayer.y + 60).toString());
+                animateCircle.setAttribute("to", toLayer.y.toString());
+                animateCircle.setAttribute("dur", "3s");
+                animateCircle.setAttribute("begin", `${index * 1}s`);
+                animateCircle.setAttribute("repeatCount", "indefinite");
+                
+                circle.appendChild(animateCircle);
+                svg.appendChild(circle);
+            });
+        }
+        
+        // Highlight architecture layer on hover
+        function highlightArchLayer(index) {
+            const svg = document.getElementById('arch-svg');
+            if (!svg) return;
+            
+            // Dim all layers
+            const allLayers = svg.querySelectorAll('rect[data-layer-index]');
+            allLayers.forEach(layer => {
+                layer.setAttribute("opacity", "0.3");
+            });
+            
+            // Highlight selected layer
+            const selectedLayer = svg.querySelector(`rect[data-layer-index="${index}"]`);
+            if (selectedLayer) {
+                selectedLayer.setAttribute("opacity", "1");
+                selectedLayer.setAttribute("filter", "url(#glow)");
+            }
+            
+            // Highlight connections
+            const connections = svg.querySelectorAll('line[data-connection]');
+            connections.forEach(conn => {
+                const [from, to] = conn.getAttribute("data-connection").split('-');
+                if (from == index || to == index) {
+                    conn.setAttribute("stroke", "#fff");
+                    conn.setAttribute("stroke-width", "3");
+                    conn.setAttribute("opacity", "1");
+                } else {
+                    conn.setAttribute("opacity", "0.2");
+                }
+            });
+        }
+        
+        // Reset architecture layer highlighting
+        function resetArchLayers() {
+            const svg = document.getElementById('arch-svg');
+            if (!svg) return;
+            
+            // Reset all layers
+            const allLayers = svg.querySelectorAll('rect[data-layer-index]');
+            allLayers.forEach(layer => {
+                layer.setAttribute("opacity", "0.8");
+                layer.removeAttribute("filter");
+            });
+            
+            // Reset connections
+            const connections = svg.querySelectorAll('line[data-connection]');
+            connections.forEach(conn => {
+                conn.setAttribute("stroke", "#666");
+                conn.setAttribute("stroke-width", "2");
+                conn.setAttribute("opacity", "0.5");
+            });
+        }
+        
+        // Initialize subsystem animations
+        function initSubsystemAnimations() {
+            // DHT animation
+            const dhtAnimation = document.querySelector('#dht-card .subsystem-animation');
+            if (dhtAnimation) {
+                for (let i = 0; i < 10; i++) {
+                    const node = document.createElement('div');
+                    node.classList.add('network-node');
+                    node.style.backgroundColor = `var(--node-color-${(i % 5) + 1})`;
+                    node.style.width = '15px';
+                    node.style.height = '15px';
+                    node.style.left = `${10 + (i * 8)}%`;
+                    node.style.top = '50%';
+                    node.style.opacity = '0';
+                    node.style.transition = `opacity 0.5s ease ${i * 0.1}s`;
+                    
+                    setTimeout(() => {
+                        node.style.opacity = '1';
+                    }, 500);
+                    
+                    dhtAnimation.appendChild(node);
+                }
+                
+                // Create hash lookup animation
+                setInterval(() => {
+                    const packet = document.createElement('div');
+                    packet.classList.add('data-packet');
+                    packet.style.width = '8px';
+                    packet.style.height = '8px';
+                    packet.style.left = '5%';
+                    packet.style.top = '50%';
+                    packet.style.backgroundColor = '#27ae60';
+                    
+                    dhtAnimation.appendChild(packet);
+                    
+                    let pos = 5;
+                    const target = 70 + Math.random() * 20;
+                    
+                    const movePacket = () => {
+                        if (pos < target) {
+                            pos += 2;
+                            packet.style.left = `${pos}%`;
+                            requestAnimationFrame(movePacket);
+                        } else {
+                            packet.style.transform = 'scale(1.5)';
+                            packet.style.boxShadow = '0 0 10px #27ae60';
+                            
+                            setTimeout(() => {
+                                dhtAnimation.removeChild(packet);
+                            }, 500);
+                        }
+                    };
+                    
+                    movePacket();
+                }, 4000);
+            }
+            
+            // CADET animation
+            const cadetAnimation = document.querySelector('#cadet-card .subsystem-animation');
+            if (cadetAnimation) {
+                // Create source and destination nodes
+                const sourceNode = document.createElement('div');
+                sourceNode.classList.add('network-node');
+                sourceNode.style.backgroundColor = 'var(--node-color-1)';
+                sourceNode.style.left = '20%';
+                sourceNode.style.top = '50%';
+                
+                const destNode = document.createElement('div');
+                destNode.classList.add('network-node');
+                destNode.style.backgroundColor = 'var(--node-color-3)';
+                destNode.style.left = '80%';
+                destNode.style.top = '50%';
+                
+                cadetAnimation.appendChild(sourceNode);
+                cadetAnimation.appendChild(destNode);
+                
+                // Create encrypted tunnel visual
+                const tunnel = document.createElement('div');
+                tunnel.style.position = 'absolute';
+                tunnel.style.left = '20%';
+                tunnel.style.top = '50%';
+                tunnel.style.width = '60%';
+                tunnel.style.height = '5px';
+                tunnel.style.backgroundColor = 'rgba(46, 204, 113, 0.3)';
+                tunnel.style.transform = 'translateY(-50%)';
+                tunnel.style.borderRadius = '3px';
+                
+                cadetAnimation.appendChild(tunnel);
+                
+                // Animate packets through tunnel
+                setInterval(() => {
+                    const packet = document.createElement('div');
+                    packet.classList.add('data-packet');
+                    packet.style.left = '20%';
+                    packet.style.top = '50%';
+                    packet.style.backgroundColor = '#2ecc71';
+                    
+                    cadetAnimation.appendChild(packet);
+                    
+                    let pos = 20;
+                    
+                    const movePacket = () => {
+                        if (pos < 80) {
+                            pos += 1;
+                            packet.style.left = `${pos}%`;
+                            requestAnimationFrame(movePacket);
+                        } else {
+                            setTimeout(() => {
+                                cadetAnimation.removeChild(packet);
+                            }, 100);
+                        }
+                    };
+                    
+                    movePacket();
+                }, 1500);
+            }
+            
+            // GNS animation
+            const gnsAnimation = document.querySelector('#gns-card .subsystem-animation');
+            if (gnsAnimation) {
+                // Create visual for name resolution
+                const searchBar = document.createElement('div');
+                searchBar.style.position = 'absolute';
+                searchBar.style.left = '10%';
+                searchBar.style.top = '30%';
+                searchBar.style.width = '80%';
+                searchBar.style.height = '20px';
+                searchBar.style.backgroundColor = 'rgba(255, 255, 255, 0.8)';
+                searchBar.style.border = '2px solid #3498db';
+                searchBar.style.borderRadius = '10px';
+                
+                gnsAnimation.appendChild(searchBar);
+                
+                // Result box
+                const resultBox = document.createElement('div');
+                resultBox.style.position = 'absolute';
+                resultBox.style.left = '20%';
+                resultBox.style.top = '60%';
+                resultBox.style.width = '60%';
+                resultBox.style.height = '20px';
+                resultBox.style.backgroundColor = 'rgba(52, 152, 219, 0.2)';
+                resultBox.style.borderRadius = '5px';
+                resultBox.style.transform = 'scaleX(0)';
+                resultBox.style.transformOrigin = 'left';
+                resultBox.style.transition = 'transform 0.5s ease';
+                
+                gnsAnimation.appendChild(resultBox);
+                
+                // Periodic animation
+                setInterval(() => {
+                    // Show "typing" in search bar
+                    const text = document.createElement('div');
+                    text.textContent = "secure.gnu";
+                    text.style.position = 'absolute';
+                    text.style.left = '15%';
+                    text.style.top = '30%';
+                    text.style.fontFamily = 'monospace';
+                    text.style.fontSize = '12px';
+                    text.style.opacity = '0';
+                    text.style.transition = 'opacity 0.3s ease';
+                    
+                    gnsAnimation.appendChild(text);
+                    
+                    setTimeout(() => {
+                        text.style.opacity = '1';
+                    }, 100);
+                    
+                    // Show result after delay
+                    setTimeout(() => {
+                        resultBox.style.transform = 'scaleX(1)';
+                        
+                        const decentralizedPath = document.createElement('div');
+                        decentralizedPath.textContent = "DHT → Resolve → Verify";
+                        decentralizedPath.style.position = 'absolute';
+                        decentralizedPath.style.left = '25%';
+                        decentralizedPath.style.top = '60%';
+                        decentralizedPath.style.fontFamily = 'monospace';
+                        decentralizedPath.style.fontSize = '10px';
+                        decentralizedPath.style.opacity = '0';
+                        decentralizedPath.style.transition = 'opacity 0.3s ease';
+                        
+                        gnsAnimation.appendChild(decentralizedPath);
+                        
+                        setTimeout(() => {
+                            decentralizedPath.style.opacity = '1';
+                            
+                            setTimeout(() => {
+                                // Clean up
+                                decentralizedPath.style.opacity = '0';
+                                text.style.opacity = '0';
+                                resultBox.style.transform = 'scaleX(0)';
+                                
+                                setTimeout(() => {
+                                    gnsAnimation.removeChild(text);
+                                    gnsAnimation.removeChild(decentralizedPath);
+                                }, 300);
+                            }, 2000);
+                        }, 300);
+                    }, 1000);
+                }, 5000);
+            }
+            
+            // Transport animation
+            const transportAnimation = document.querySelector('#transport-card .subsystem-animation');
+            if (transportAnimation) {
+                // Create different protocol representations
+                const protocols = [
+                    { name: "TCP", color: "#3498db" },
+                    { name: "UDP", color: "#e74c3c" },
+                    { name: "HTTP", color: "#f39c12" },
+                    { name: "BT", color: "#9b59b6" }
+                ];
+                
+                protocols.forEach((protocol, index) => {
+                    const protocolEl = document.createElement('div');
+                    protocolEl.style.position = 'absolute';
+                    protocolEl.style.left = `${15 + index * 25}%`;
+                    protocolEl.style.top = '50%';
+                    protocolEl.style.transform = 'translateY(-50%)';
+                    protocolEl.style.backgroundColor = protocol.color;
+                    protocolEl.style.color = 'white';
+                    protocolEl.style.padding = '3px 5px';
+                    protocolEl.style.borderRadius = '3px';
+                    protocolEl.style.fontSize = '10px';
+                    protocolEl.style.fontWeight = 'bold';
+                    protocolEl.textContent = protocol.name;
+                    protocolEl.style.opacity = '0';
+                    protocolEl.style.transition = `opacity 0.5s ease ${index * 0.2}s`;
+                    
+                    setTimeout(() => {
+                        protocolEl.style.opacity = '1';
+                    }, 500);
+                    
+                    transportAnimation.appendChild(protocolEl);
+                    
+                    // Add packet animation
+                    setInterval(() => {
+                        if (Math.random() > 0.7) {
+                            const packet = document.createElement('div');
+                            packet.classList.add('data-packet');
+                            packet.style.backgroundColor = protocol.color;
+                            packet.style.left = `${15 + index * 25}%`;
+                            packet.style.top = '20%';
+                            
+                            transportAnimation.appendChild(packet);
+                            
+                            let pos = 20;
+                            
+                            const movePacket = () => {
+                                if (pos < 80) {
+                                    pos += 2;
+                                    packet.style.top = `${pos}%`;
+                                    requestAnimationFrame(movePacket);
+                                } else {
+                                    setTimeout(() => {
+                                        transportAnimation.removeChild(packet);
+                                    }, 100);
+                                }
+                            };
+                            
+                            movePacket();
+                        }
+                    }, 2000);
+                });
+            }
+        }
+        
+        // Traditional Internet Animation - showing vulnerabilities
+        function animateTraditionalInternet() {
+            const container = document.querySelector('.traditional-internet');
+            if (!container) return;
+            
+            // Clear container
+            container.innerHTML = '';
+            
+            // Create network nodes
+            const nodes = [];
+            const nodeCount = 6;
+            
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.classList.add('network-node');
+                node.style.backgroundColor = `var(--node-color-${(i % 5) + 1})`;
+                node.style.width = '20px';
+                node.style.height = '20px';
+                
+                const angle = (i / nodeCount) * Math.PI * 2;
+                const radius = 100;
+                const x = 50 + Math.cos(angle) * radius;
+                const y = 50 + Math.sin(angle) * radius;
+                
+                node.style.left = `${x}px`;
+                node.style.top = `${y}px`;
+                
+                container.appendChild(node);
+                nodes.push({ element: node, x, y });
+            }
+            
+            // Create central node (representing vulnerable central infrastructure)
+            const centralNode = document.createElement('div');
+            centralNode.classList.add('network-node');
+            centralNode.style.backgroundColor = 'var(--danger-color)';
+            centralNode.style.width = '30px';
+            centralNode.style.height = '30px';
+            centralNode.style.left = '50%';
+            centralNode.style.top = '50%';
+            centralNode.style.zIndex = '5';
+            
+            container.appendChild(centralNode);
+            
+            // Create connections
+            for (let i = 0; i < nodes.length; i++) {
+                const node = nodes[i];
+                const connection = document.createElement('div');
+                connection.classList.add('network-connection');
+                
+                const dx = 50 - node.x;
+                const dy = 50 - node.y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                connection.style.width = `${distance}px`;
+                connection.style.left = `${node.x}px`;
+                connection.style.top = `${node.y}px`;
+                connection.style.transform = `rotate(${angle}deg)`;
+                
+                container.appendChild(connection);
+            }
+            
+            // Animate attacker
+            setTimeout(() => {
+                const attacker = document.createElement('div');
+                attacker.classList.add('attack-animation');
+                attacker.style.backgroundColor = 'var(--danger-color)';
+                attacker.style.width = '25px';
+                attacker.style.height = '25px';
+                attacker.style.left = '80%';
+                attacker.style.top = '80%';
+                attacker.style.opacity = '0';
+                attacker.style.zIndex = '10';
+                attacker.style.boxShadow = '0 0 10px rgba(231, 76, 60, 0.7)';
+                attacker.style.transition = 'all 1s ease';
+                
+                container.appendChild(attacker);
+                
+                setTimeout(() => {
+                    attacker.style.opacity = '0.8';
+                    
+                    setTimeout(() => {
+                        attacker.style.left = '50%';
+                        attacker.style.top = '50%';
+                        
+                        // Show attack effect
+                        setTimeout(() => {
+                            centralNode.style.transform = 'scale(1.3)';
+                            centralNode.style.boxShadow = '0 0 20px rgba(231, 76, 60, 0.9)';
+                            
+                            // Propagate attack to all nodes
+                            setTimeout(() => {
+                                nodes.forEach((node, index) => {
+                                    setTimeout(() => {
+                                        node.element.style.backgroundColor = 'var(--danger-color)';
+                                        node.element.style.boxShadow = '0 0 10px rgba(231, 76, 60, 0.7)';
+                                    }, index * 200);
+                                });
+                                
+                                // Show text explaining vulnerability
+                                const vulnerableText = document.createElement('div');
+                                vulnerableText.textContent = "Central point of failure compromised!";
+                                vulnerableText.style.position = 'absolute';
+                                vulnerableText.style.left = '50%';
+                                vulnerableText.style.bottom = '10%';
+                                vulnerableText.style.transform = 'translateX(-50%)';
+                                vulnerableText.style.backgroundColor = 'rgba(231, 76, 60, 0.8)';
+                                vulnerableText.style.color = 'white';
+                                vulnerableText.style.padding = '5px 10px';
+                                vulnerableText.style.borderRadius = '5px';
+                                vulnerableText.style.fontSize = '14px';
+                                vulnerableText.style.fontWeight = 'bold';
+                                vulnerableText.style.opacity = '0';
+                                vulnerableText.style.transition = 'opacity 0.5s ease';
+                                
+                                container.appendChild(vulnerableText);
+                                
+                                setTimeout(() => {
+                                    vulnerableText.style.opacity = '1';
+                                    
+                                    // Reset after a while
+                                    setTimeout(() => {
+                                        vulnerableText.style.opacity = '0';
+                                        attacker.style.opacity = '0';
+                                        
+                                        setTimeout(() => {
+                                            container.removeChild(vulnerableText);
+                                            container.removeChild(attacker);
+                                            
+                                            // Reset nodes
+                                            centralNode.style.transform = 'scale(1)';
+                                            centralNode.style.boxShadow = '';
+                                            
+                                            nodes.forEach((node, index) => {
+                                                setTimeout(() => {
+                                                    node.element.style.backgroundColor = `var(--node-color-${(index % 5) + 1})`;
+                                                    node.element.style.boxShadow = '';
+                                                }, index * 100);
+                                            });
+                                            
+                                            // Restart animation cycle
+                                            setTimeout(animateTraditionalInternet, 3000);
+                                        }, 500);
+                                    }, 4000);
+                                }, 100);
+                            }, 1000);
+                        }, 500);
+                    }, 1000);
+                }, 200);
+            }, 1000);
+        }
+        
+        // Comparison Animation
+        function initComparisonAnimation() {
+            const traditionalSide = document.getElementById('traditional-side');
+            const gnunetSide = document.getElementById('gnunet-side');
+            
+            if (!traditionalSide || !gnunetSide) return;
+            
+            // Traditional side animation (vulnerable nodes)
+            const traditionalNodes = traditionalSide.querySelector('.h-40');
+            if (traditionalNodes) {
+                createTraditionalNetworkAnimation(traditionalNodes);
+            }
+            
+            // GNUnet side animation (secure nodes)
+            const gnunetNodes = gnunetSide.querySelector('.h-40');
+            if (gnunetNodes) {
+                createGnunetNetworkAnimation(gnunetNodes);
+            }
+        }
+        
+        function createTraditionalNetworkAnimation(container) {
+            // Create central server-client structure
+            const serverNode = document.createElement('div');
+            serverNode.classList.add('network-node');
+            serverNode.style.backgroundColor = '#7f8c8d';
+            serverNode.style.width = '30px';
+            serverNode.style.height = '30px';
+            serverNode.style.position = 'absolute';
+            serverNode.style.left = '50%';
+            serverNode.style.top = '50%';
+            
+            container.appendChild(serverNode);
+            
+            // Create client nodes
+            for (let i = 0; i < 5; i++) {
+                const clientNode = document.createElement('div');
+                clientNode.classList.add('network-node');
+                clientNode.style.backgroundColor = `var(--node-color-${i+1})`;
+                clientNode.style.width = '20px';
+                clientNode.style.height = '20px';
+                clientNode.style.position = 'absolute';
+                
+                const angle = (i / 5) * Math.PI * 2;
+                const radius = 70;
+                const x = Math.cos(angle) * radius + 50;
+                const y = Math.sin(angle) * radius + 50;
+                
+                clientNode.style.left = `${x}%`;
+                clientNode.style.top = `${y}%`;
+                
+                container.appendChild(clientNode);
+                
+                // Create connection
+                const connection = document.createElement('div');
+                connection.style.position = 'absolute';
+                connection.style.height = '2px';
+                connection.style.backgroundColor = 'rgba(44, 62, 80, 0.3)';
+                connection.style.left = '50%';
+                connection.style.top = '50%';
+                
+                const dx = x - 50;
+                const dy = y - 50;
+                const distance = Math.sqrt(dx*dx + dy*dy);
+                const angle2 = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                connection.style.width = `${distance}%`;
+                connection.style.transform = `rotate(${angle2}deg)`;
+                connection.style.transformOrigin = 'left center';
+                
+                container.appendChild(connection);
+            }
+            
+            // Add attacker node
+            const attackerNode = document.createElement('div');
+            attackerNode.classList.add('network-node');
+            attackerNode.style.backgroundColor = 'var(--danger-color)';
+            attackerNode.style.width = '25px';
+            attackerNode.style.height = '25px';
+            attackerNode.style.position = 'absolute';
+            attackerNode.style.left = '85%';
+            attackerNode.style.top = '30%';
+            attackerNode.style.opacity = '0.8';
+            attackerNode.style.zIndex = '10';
+            
+            container.appendChild(attackerNode);
+            
+            // Animate packets being intercepted
+            setInterval(() => {
+                // Create data packet
+                const packet = document.createElement('div');
+                packet.classList.add('data-packet');
+                packet.style.backgroundColor = 'var(--node-color-2)';
+                packet.style.left = '20%';
+                packet.style.top = '25%';
+                packet.style.position = 'absolute';
+                
+                container.appendChild(packet);
+                
+                // Animate to server
+                let progress = 0;
+                const animateTo = () => {
+                    if (progress < 50) {
+                        progress += 1;
+                        packet.style.left = `${20 + (50-20) * progress/50}%`;
+                        packet.style.top = `${25 + (50-25) * progress/50}%`;
+                        requestAnimationFrame(animateTo);
+                    } else {
+                        // Once at server, send to destination
+                        let progress2 = 0;
+                        const animateToDestination = () => {
+                            progress2 += 1;
+                            
+                            if (progress2 < 100) {
+                                // Intercept the packet
+                                if (progress2 === 50) {
+                                    packet.style.backgroundColor = 'var(--danger-color)';
+                                }
+                                
+                                packet.style.left = `${50 + (80-50) * progress2/100}%`;
+                                packet.style.top = `${50 + (70-50) * progress2/100}%`;
+                                requestAnimationFrame(animateToDestination);
+                            } else {
+                                container.removeChild(packet);
+                            }
+                        };
+                        
+                        animateToDestination();
+                    }
+                };
+                
+                animateTo();
+            }, 3000);
+        }
+        
+        function createGnunetNetworkAnimation(container) {
+            // Create decentralized p2p network
+            const nodes = [];
+            
+            for (let i = 0; i < 8; i++) {
+                const node = document.createElement('div');
+                node.classList.add('network-node');
+                node.style.backgroundColor = `var(--node-color-${(i % 5) + 1})`;
+                node.style.width = '20px';
+                node.style.height = '20px';
+                node.style.position = 'absolute';
+                
+                let x, y;
+                
+                // Position nodes in a more meshed pattern
+                if (i < 4) {
+                    const angle = (i / 4) * Math.PI * 2;
+                    const radius = 40;
+                    x = Math.cos(angle) * radius + 50;
+                    y = Math.sin(angle) * radius + 50;
+                } else {
+                    const angle = ((i - 4) / 4) * Math.PI * 2 + Math.PI/4;
+                    const radius = 70;
+                    x = Math.cos(angle) * radius + 50;
+                    y = Math.sin(angle) * radius + 50;
+                }
+                
+                node.style.left = `${x}%`;
+                node.style.top = `${y}%`;
+                
+                container.appendChild(node);
+                nodes.push({ x, y, element: node });
+            }
+            
+            // Create mesh connections
+            for (let i = 0; i < nodes.length; i++) {
+                for (let j = i+1; j < nodes.length; j++) {
+                    if (Math.random() > 0.6) continue; // Only some connections
+                    
+                    const node1 = nodes[i];
+                    const node2 = nodes[j];
+                    
+                    const connection = document.createElement('div');
+                    connection.style.position = 'absolute';
+                    connection.style.height = '2px';
+                    connection.style.backgroundColor = 'rgba(46, 204, 113, 0.3)';
+                    
+                    const dx = node2.x - node1.x;
+                    const dy = node2.y - node1.y;
+                    const distance = Math.sqrt(dx*dx + dy*dy);
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    
+                    connection.style.width = `${distance}%`;
+                    connection.style.left = `${node1.x}%`;
+                    connection.style.top = `${node1.y}%`;
+                    connection.style.transform = `rotate(${angle}deg)`;
+                    connection.style.transformOrigin = 'left center';
+                    
+                    container.appendChild(connection);
+                }
+            }
+            
+            // Add attacker node
+            const attackerNode = document.createElement('div');
+            attackerNode.classList.add('network-node');
+            attackerNode.style.backgroundColor = 'var(--danger-color)';
+            attackerNode.style.width = '25px';
+            attackerNode.style.height = '25px';
+            attackerNode.style.position = 'absolute';
+            attackerNode.style.left = '85%';
+            attackerNode.style.top = '30%';
+            attackerNode.style.opacity = '0.8';
+            attackerNode.style.zIndex = '10';
+            
+            container.appendChild(attackerNode);
+            
+            // Animate encrypted data transfer
+            setInterval(() => {
+                // Choose random source and destination
+                const sourceIndex = Math.floor(Math.random() * nodes.length);
+                let destIndex;
+                do {
+                    destIndex = Math.floor(Math.random() * nodes.length);
+                } while (destIndex === sourceIndex);
+                
+                const source = nodes[sourceIndex];
+                const dest = nodes[destIndex];
+                
+                // Create path through multiple nodes (onion routing simulation)
+                const path = [sourceIndex];
+                
+                // Add 2-3 random hops
+                const hopCount = 2 + Math.floor(Math.random() * 2);
+                for (let i = 0; i < hopCount; i++) {
+                    let nextHop;
+                    do {
+                        nextHop = Math.floor(Math.random() * nodes.length);
+                    } while (path.includes(nextHop) || nextHop === destIndex);
+                    
+                    path.push(nextHop);
+                }
+                
+                // Add destination
+                path.push(destIndex);
+                
+                // Create and animate packet
+                const packet = document.createElement('div');
+                packet.classList.add('data-packet');
+                packet.style.backgroundColor = 'var(--gnunet-green)';
+                packet.style.left = `${source.x}%`;
+                packet.style.top = `${source.y}%`;
+                packet.style.position = 'absolute';
+                packet.style.boxShadow = '0 0 5px var(--gnunet-green)';
+                packet.style.zIndex = '5';
+                
+                container.appendChild(packet);
+                
+                // Animate through path
+                let currentHop = 0;
+                
+                function moveToNextHop() {
+                    if (currentHop >= path.length - 1) {
+                        // Reached destination
+                        setTimeout(() => {
+                            container.removeChild(packet);
+                        }, 200);
+                        return;
+                    }
+                    
+                    const currentNode = nodes[path[currentHop]];
+                    const nextNode = nodes[path[currentHop + 1]];
+                    
+                    let progress = 0;
+                    
+                    function animate() {
+                        if (progress >= 100) {
+                            currentHop++;
+                            moveToNextHop();
+                            return;
+                        }
+                        
+                        progress += 4;
+                        
+                        const newX = currentNode.x + (nextNode.x - currentNode.x) * progress / 100;
+                        const newY = currentNode.y + (nextNode.y - currentNode.y) * progress / 100;
+                        
+                        packet.style.left = `${newX}%`;
+                        packet.style.top = `${newY}%`;
+                        
+                        requestAnimationFrame(animate);
+                    }
+                    
+                    animate();
+                }
+                
+                moveToNextHop();
+            }, 4000);
+        }
+    </script>
+</body>
+</html>

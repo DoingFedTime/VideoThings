@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ephemeral Access: Here Today, Gone Tomorrow</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.2/dist/TextPlugin.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #2d3748;
+            overflow-x: hidden;
+        }
+        
+        .section {
+            min-height: 100vh;
+            padding: 3rem 1rem;
+        }
+        
+        .title-gradient {
+            background: linear-gradient(90deg, #3498db, #9b59b6);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .message {
+            opacity: 1;
+            transition: opacity 1s ease-out;
+            position: relative;
+            padding: 15px;
+            border-radius: 8px;
+            background: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+            transform-origin: center;
+        }
+        
+        .message.fading {
+            animation: fadeAndDisintegrate 3s forwards;
+        }
+        
+        .key-container {
+            position: relative;
+            width: 100%;
+            height: 200px;
+        }
+        
+        .digital-key {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            transform: translateY(0);
+            opacity: 0;
+        }
+        
+        .data-bit {
+            width: 10px;
+            height: 10px;
+            background-color: #3498db;
+            border-radius: 50%;
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .timeline-point {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 30px;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        
+        .timeline-point:before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 10px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3498db, #2980b9);
+        }
+        
+        .timeline-point:after {
+            content: '';
+            position: absolute;
+            left: 7px;
+            top: 25px;
+            width: 2px;
+            height: calc(100% + 15px);
+            background: linear-gradient(180deg, #3498db, rgba(52, 152, 219, 0));
+        }
+        
+        .timeline-point:last-child:after {
+            display: none;
+        }
+        
+        .app-icon {
+            font-size: 2rem;
+            margin-right: 1rem;
+            color: #3498db;
+            transition: transform 0.3s ease;
+        }
+        
+        .app-card {
+            transform: translateY(50px);
+            opacity: 0;
+        }
+        
+        .security-benefit {
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+        
+        .device-container {
+            position: relative;
+            width: 100%;
+            height: 300px;
+        }
+        
+        .device {
+            position: absolute;
+            width: 200px;
+            height: 100px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            opacity: 0;
+        }
+        
+        @keyframes fadeAndDisintegrate {
+            0% { opacity: 1; transform: scale(1); }
+            70% { opacity: 0.7; transform: scale(1); }
+            90% { opacity: 0.3; transform: scale(0.95); }
+            100% { opacity: 0; transform: scale(0.9); }
+        }
+        
+        .particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: #3498db;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .counting-timer {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #e74c3c;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        
+        .secure-lock {
+            font-size: 5rem;
+            color: #27ae60;
+            text-align: center;
+            margin-bottom: 2rem;
+            opacity: 0;
+            transform: scale(0.5);
+        }
+        
+        .scroll-prompt {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            color: #3498db;
+            animation: bounce 2s infinite;
+            z-index: 100;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+        
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0) translateX(-50%); }
+            40% { transform: translateY(-20px) translateX(-50%); }
+            60% { transform: translateY(-10px) translateX(-50%); }
+        }
+    </style>
+</head>
+<body class="relative">
+    <div id="scrollPrompt" class="scroll-prompt">
+        <i class="fas fa-chevron-down"></i>
+    </div>
+
+    <section class="section flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-purple-50">
+        <h1 class="text-5xl md:text-6xl font-bold mb-6 text-center title-gradient">Ephemeral Access</h1>
+        <h2 class="text-2xl md:text-3xl mb-12 text-center text-gray-600">Here Today, Gone Tomorrow</h2>
+        
+        <div class="relative w-full max-w-3xl mx-auto mb-12 p-8 rounded-xl bg-white shadow-lg">
+            <div id="introAnimation" class="flex items-center justify-center">
+                <div class="secure-lock" id="secureLock">
+                    <i class="fas fa-lock"></i>
+                </div>
+            </div>
+            <p class="text-xl text-center text-gray-700 mb-6">Ephemeral access is like a digital key that <span class="font-bold text-blue-600">automatically disappears</span> after use.</p>
+        </div>
+        
+        <div class="key-container relative w-full max-w-3xl mx-auto">
+            <div id="digitalKey" class="digital-key">
+                <i class="fas fa-key"></i>
+            </div>
+        </div>
+    </section>
+
+    <section class="section flex flex-col items-center justify-center bg-gradient-to-b from-purple-50 to-blue-50 py-16">
+        <h2 class="text-4xl font-bold mb-12 text-center title-gradient">How Ephemeral Access Works</h2>
+        
+        <div class="w-full max-w-3xl mx-auto mb-12">
+            <h3 class="text-2xl font-semibold mb-6 text-center text-gray-700">Messages that self-destruct:</h3>
+            
+            <div id="messageContainer" class="flex flex-col items-center justify-center mb-12">
+                <div class="message w-full max-w-lg" id="message1">
+                    <div class="flex justify-between items-center">
+                        <span class="font-semibold">Secret Message</span>
+                        <span class="countdown text-red-500">10s</span>
+                    </div>
+                    <p class="mt-2">This confidential information will disappear after viewing!</p>
+                </div>
+            </div>
+            
+            <div class="mb-16 text-center">
+                <p class="text-lg text-gray-700 mb-2">Unlike permanent access:</p>
+                <div class="flex flex-col md:flex-row justify-around items-center gap-6 my-8">
+                    <div class="bg-white p-6 rounded-lg shadow-md w-full md:w-1/2">
+                        <h4 class="font-bold text-xl mb-4 text-red-500">Traditional Access</h4>
+                        <p class="mb-3"><i class="fas fa-infinity mr-2 text-red-400"></i> Remains available indefinitely</p>
+                        <p class="mb-3"><i class="fas fa-database mr-2 text-red-400"></i> Stored permanently on servers</p>
+                        <p><i class="fas fa-user-secret mr-2 text-red-400"></i> Potential security vulnerability</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow-md w-full md:w-1/2">
+                        <h4 class="font-bold text-xl mb-4 text-green-500">Ephemeral Access</h4>
+                        <p class="mb-3"><i class="fas fa-hourglass-end mr-2 text-green-400"></i> Self-destructs after use</p>
+                        <p class="mb-3"><i class="fas fa-trash-alt mr-2 text-green-400"></i> Leaves no traces</p>
+                        <p><i class="fas fa-shield-alt mr-2 text-green-400"></i> Enhanced security by design</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3 class="text-2xl font-semibold mb-6 text-center text-gray-700">The technical process:</h3>
+            
+            <div class="timeline mb-16">
+                <div class="timeline-point" id="timeline1">
+                    <h4 class="text-xl font-semibold mb-2 text-blue-600">1. Access Request</h4>
+                    <p>A user or system requests temporary access to data or resources.</p>
+                </div>
+                
+                <div class="timeline-point" id="timeline2">
+                    <h4 class="text-xl font-semibold mb-2 text-blue-600">2. Token Generation</h4>
+                    <p>A time-limited token or key is created with an expiration timestamp.</p>
+                </div>
+                
+                <div class="timeline-point" id="timeline3">
+                    <h4 class="text-xl font-semibold mb-2 text-blue-600">3. Access Granted</h4>
+                    <p>The token allows access only for a specified duration or single use.</p>
+                </div>
+                
+                <div class="timeline-point" id="timeline4">
+                    <h4 class="text-xl font-semibold mb-2 text-blue-600">4. Automatic Expiration</h4>
+                    <p>Once expired, the token becomes invalid and all access is revoked.</p>
+                </div>
+                
+                <div class="timeline-point" id="timeline5">
+                    <h4 class="text-xl font-semibold mb-2 text-blue-600">5. Data Removal</h4>
+                    <p>Any temporary data created during access is completely purged.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section flex flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-indigo-50">
+        <h2 class="text-4xl font-bold mb-12 text-center title-gradient">Real-World Applications</h2>
+        
+        <div class="w-full max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 mb-16">
+            <div class="app-card bg-white p-6 rounded-lg shadow-lg" id="app1">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-comment-alt app-icon"></i>
+                    <h3 class="text-2xl font-bold">Messaging Apps</h3>
+                </div>
+                <p class="text-gray-700">Messages that delete themselves after being read or after a set time period.</p>
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-gray-600"><i class="fas fa-info-circle mr-1 text-blue-500"></i> Examples: Snapchat, Signal, Telegram</p>
+                </div>
+            </div>
+            
+            <div class="app-card bg-white p-6 rounded-lg shadow-lg" id="app2">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-link app-icon"></i>
+                    <h3 class="text-2xl font-bold">File Sharing</h3>
+                </div>
+                <p class="text-gray-700">Links that expire after a certain number of downloads or after a time limit.</p>
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-gray-600"><i class="fas fa-info-circle mr-1 text-blue-500"></i> Examples: WeTransfer, Firefox Send</p>
+                </div>
+            </div>
+            
+            <div class="app-card bg-white p-6 rounded-lg shadow-lg" id="app3">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-shield-alt app-icon"></i>
+                    <h3 class="text-2xl font-bold">Cloud Security</h3>
+                </div>
+                <p class="text-gray-700">Temporary access credentials for cloud resources that auto-expire.</p>
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-gray-600"><i class="fas fa-info-circle mr-1 text-blue-500"></i> Examples: AWS STS, Azure AD Privileged Identity Management</p>
+                </div>
+            </div>
+            
+            <div class="app-card bg-white p-6 rounded-lg shadow-lg" id="app4">
+                <div class="flex items-center mb-4">
+                    <i class="fas fa-credit-card app-icon"></i>
+                    <h3 class="text-2xl font-bold">Financial Tech</h3>
+                </div>
+                <p class="text-gray-700">One-time use virtual credit card numbers for secure online shopping.</p>
+                <div class="mt-4 p-3 bg-blue-50 rounded-lg">
+                    <p class="text-sm text-gray-600"><i class="fas fa-info-circle mr-1 text-blue-500"></i> Examples: Privacy.com, Revolut Virtual Cards</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w-full max-w-4xl mx-auto mb-16">
+            <h3 class="text-2xl font-semibold mb-8 text-center text-gray-700">How Organizations Use Ephemeral Access</h3>
+            
+            <div class="device-container relative mb-12">
+                <div class="device" id="device1" style="top: 20px; left: 10%;">
+                    <i class="fas fa-laptop mr-2 text-blue-500"></i> Developer
+                </div>
+                <div class="device" id="device2" style="top: 120px; left: 30%;">
+                    <i class="fas fa-server mr-2 text-purple-500"></i> Server
+                </div>
+                <div class="device" id="device3" style="top: 180px; left: 60%;">
+                    <i class="fas fa-database mr-2 text-green-500"></i> Database
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section flex flex-col items-center justify-center bg-gradient-to-b from-indigo-50 to-purple-50">
+        <h2 class="text-4xl font-bold mb-12 text-center title-gradient">Benefits for Security & Privacy</h2>
+        
+        <div class="w-full max-w-4xl mx-auto mb-16 grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div class="security-benefit bg-white p-6 rounded-lg shadow-lg" id="benefit1">
+                <h3 class="text-2xl font-bold mb-4 text-blue-600">Reduced Attack Surface</h3>
+                <p class="text-gray-700 mb-4">Temporary access means less time for attackers to exploit vulnerabilities.</p>
+                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <div class="bg-blue-500 h-full" style="width: 0%" id="progressBar1"></div>
+                </div>
+            </div>
+            
+            <div class="security-benefit bg-white p-6 rounded-lg shadow-lg" id="benefit2">
+                <h3 class="text-2xl font-bold mb-4 text-blue-600">Data Minimization</h3>
+                <p class="text-gray-700 mb-4">Information exists only as long as needed, aligning with privacy laws like GDPR.</p>
+                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <div class="bg-blue-500 h-full" style="width: 0%" id="progressBar2"></div>
+                </div>
+            </div>
+            
+            <div class="security-benefit bg-white p-6 rounded-lg shadow-lg" id="benefit3">
+                <h3 class="text-2xl font-bold mb-4 text-blue-600">Damage Control</h3>
+                <p class="text-gray-700 mb-4">Even if credentials are compromised, they expire quickly, limiting damage.</p>
+                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <div class="bg-blue-500 h-full" style="width: 0%" id="progressBar3"></div>
+                </div>
+            </div>
+            
+            <div class="security-benefit bg-white p-6 rounded-lg shadow-lg" id="benefit4">
+                <h3 class="text-2xl font-bold mb-4 text-blue-600">Zero Data Retention</h3>
+                <p class="text-gray-700 mb-4">Information cannot be leaked in the future if it no longer exists.</p>
+                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden">
+                    <div class="bg-blue-500 h-full" style="width: 0%" id="progressBar4"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="w-full max-w-3xl mx-auto text-center mb-16">
+            <h3 class="text-2xl font-semibold mb-6 text-gray-700">The Security Impact</h3>
+            <div class="counting-timer" id="securityCounter">0%</div>
+            <p class="text-xl text-gray-700">reduction in sensitive data exposure compared to permanent access systems*</p>
+            <p class="text-sm text-gray-500 mt-2">*Based on average industry security assessments</p>
+        </div>
+    </section>
+
+    <section class="section flex flex-col items-center justify-center bg-gradient-to-b from-purple-50 to-blue-50">
+        <h2 class="text-4xl font-bold mb-12 text-center title-gradient">Why It Matters Today</h2>
+        
+        <div class="w-full max-w-3xl mx-auto mb-12">
+            <div class="bg-white p-8 rounded-lg shadow-lg">
+                <div class="mb-8">
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-600">Growing Digital Threats</h3>
+                    <p class="text-lg text-gray-700">In today's digital landscape, data breaches and privacy violations are increasingly common. Ephemeral access offers a modern solution to these pressing challenges.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                    <div class="bg-blue-50 p-4 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2 text-blue-800">Before Ephemeral Access</h4>
+                        <ul class="list-disc pl-5 text-gray-700">
+                            <li class="mb-2">Permanent credential storage</li>
+                            <li class="mb-2">Extensive data retention</li>
+                            <li>Wider attack windows</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg">
+                        <h4 class="font-bold text-lg mb-2 text-green-800">With Ephemeral Access</h4>
+                        <ul class="list-disc pl-5 text-gray-700">
+                            <li class="mb-2">Just-in-time access credentials</li>
+                            <li class="mb-2">Minimized data footprint</li>
+                            <li>Dramatically reduced risk exposure</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-600">The Future is Ephemeral</h3>
+                    <p class="text-lg text-gray-700">As privacy regulations tighten and security threats evolve, ephemeral systems will become the standard rather than the exception. Organizations that embrace this approach now will be better positioned for future security challenges.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-gray-800 text-white py-10">
+        <div class="container mx-auto px-4 text-center">
+            <h2 class="text-3xl font-bold mb-6">Ephemeral Access</h2>
+            <p class="mb-6">Security and privacy through temporary digital footprints</p>
+            <div class="flex justify-center space-x-6 mb-8">
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-shield-alt text-3xl text-blue-300 mb-2"></i>
+                    <span>Enhanced Security</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-user-shield text-3xl text-blue-300 mb-2"></i>
+                    <span>Privacy Protection</span>
+                </div>
+                <div class="flex flex-col items-center">
+                    <i class="fas fa-hourglass-end text-3xl text-blue-300 mb-2"></i>
+                    <span>Temporary Access</span>
+                </div>
+            </div>
+            <p class="text-sm text-gray-400">Created for educational purposes</p>
+        </div>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Handle scroll prompt visibility
+            const scrollPrompt = document.getElementById('scrollPrompt');
+            window.addEventListener('scroll', () => {
+                if (window.scrollY > 100) {
+                    scrollPrompt.style.opacity = '0';
+                } else {
+                    scrollPrompt.style.opacity = '0.8';
+                }
+            });
+            
+            // Initial animations
+            gsap.to('#secureLock', {
+                opacity: 1,
+                scale: 1,
+                duration: 1.5,
+                ease: 'elastic.out(1, 0.5)',
+                delay: 0.5
+            });
+            
+            // Digital key animation
+            gsap.to('#digitalKey', {
+                opacity: 1,
+                y: -50,
+                duration: 1,
+                delay: 2,
+                repeat: -1,
+                yoyo: true,
+                ease: 'power1.inOut'
+            });
+            
+            // Create self-destructing message
+            setTimeout(() => {
+                const message = document.getElementById('message1');
+                const countdownEl = message.querySelector('.countdown');
+                let countdown = 10;
+                
+                const timer = setInterval(() => {
+                    countdown--;
+                    countdownEl.textContent = countdown + 's';
+                    
+                    if (countdown <= 0) {
+                        clearInterval(timer);
+                        message.classList.add('fading');
+                        
+                        // Create particles for disintegration effect
+                        for (let i = 0; i < 20; i++) {
+                            createParticle(message);
+                        }
+                        
+                        setTimeout(() => {
+                            setTimeout(() => {
+                                message.style.display = 'none';
+                                
+                                // Create a new message after the old one disappears
+                                setTimeout(() => {
+                                    const newMessage = message.cloneNode(true);
+                                    newMessage.classList.remove('fading');
+                                    newMessage.style.display = 'block';
+                                    newMessage.style.opacity = '0';
+                                    document.getElementById('messageContainer').appendChild(newMessage);
+                                    
+                                    gsap.to(newMessage, {
+                                        opacity: 1,
+                                        duration: 0.5
+                                    });
+                                    
+                                    setTimeout(() => {
+                                        newMessage.classList.add('fading');
+                                        for (let i = 0; i < 20; i++) {
+                                            createParticle(newMessage);
+                                        }
+                                    }, 3000);
+                                }, 2000);
+                            }, 1000);
+                        }, 3000);
+                    }
+                }, 1000);
+            }, 4000);
+            
+            // Animation for timeline
+            gsap.registerPlugin(ScrollTrigger, TextPlugin);
+            
+            const timelinePoints = document.querySelectorAll('.timeline-point');
+            timelinePoints.forEach((point, index) => {
+                gsap.to(point, {
+                    scrollTrigger: {
+                        trigger: point,
+                        start: 'top 80%',
+                        toggleActions: 'play none none none'
+                    },
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    delay: index * 0.3
+                });
+            });
+            
+            // App cards animation
+            const appCards = document.querySelectorAll('.app-card');
+            appCards.forEach((card, index) => {
+                gsap.to(card, {
+                    scrollTrigger: {
+                        trigger: card,
+                        start: 'top 90%',
+                        toggleActions: 'play none none none'
+                    },
+                    opacity: 1,
+                    y: 0,
+                    duration: 0.8,
+                    delay: index * 0.2
+                });
+            });
+            
+            // Devices animation
+            const devices = document.querySelectorAll('.device');
+            devices.forEach((device, index) => {
+                gsap.to(device, {
+                    scrollTrigger: {
+                        trigger: '.device-container',
+                        start: 'top 70%',
+                        toggleActions: 'play none none none'
+                    },
+                    opacity: 1,
+                    duration: 0.8,
+                    delay: index * 0.7
+                });
+            });
+            
+            // Animate connection lines between devices
+            setTimeout(() => {
+                animateConnections();
+            }, 5000);
+            
+            // Security benefits animation
+            const benefits = document.querySelectorAll('.security-benefit');
+            benefits.forEach((benefit, index) => {
+                gsap.to(benefit, {
+                    scrollTrigger: {
+                        trigger: benefit,
+                        start: 'top 85%',
+                        toggleActions: 'play none none none'
+                    },
+                    opacity: 1,
+                    x: 0,
+                    duration: 0.8,
+                    delay: index * 0.3
+                });
+                
+                // Animate progress bars
+                const progressBar = document.getElementById('progressBar' + (index + 1));
+                if (progressBar) {
+                    gsap.to(progressBar, {
+                        scrollTrigger: {
+                            trigger: benefit,
+                            start: 'top 80%',
+                            toggleActions: 'play none none none'
+                        },
+                        width: (75 + index * 5) + '%',
+                        duration: 1.5,
+                        delay: index * 0.3 + 0.5,
+                        ease: 'power2.out'
+                    });
+                }
+            });
+            
+            // Security counter animation
+            gsap.to('#securityCounter', {
+                scrollTrigger: {
+                    trigger: '#securityCounter',
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                },
+                innerText: '87%',
+                duration: 2,
+                snap: 'innerText',
+                ease: 'power2.out'
+            });
+            
+            // Add hover effects for app icons
+            document.querySelectorAll('.app-icon').forEach(icon => {
+                icon.addEventListener('mouseenter', () => {
+                    gsap.to(icon, {
+                        rotate: '15deg',
+                        scale: 1.2,
+                        duration: 0.3
+                    });
+                });
+                
+                icon.addEventListener('mouseleave', () => {
+                    gsap.to(icon, {
+                        rotate: '0deg',
+                        scale: 1,
+                        duration: 0.3
+                    });
+                });
+            });
+        });
+        
+        function createParticle(parentElement) {
+            const particle = document.createElement('div');
+            particle.classList.add('particle');
+            
+            // Get parent element dimensions and position
+            const rect = parentElement.getBoundingClientRect();
+            const parentX = rect.left + window.scrollX;
+            const parentY = rect.top + window.scrollY;
+            
+            // Position particle randomly within the parent element
+            const x = Math.random() * rect.width;
+            const y = Math.random() * rect.height;
+            
+            particle.style.left = (parentX + x) + 'px';
+            particle.style.top = (parentY + y) + 'px';
+            
+            document.body.appendChild(particle);
+            
+            // Animate the particle
+            gsap.to(particle, {
+                opacity: 0.8,
+                duration: 0.2,
+                onComplete: () => {
+                    const angle = Math.random() * Math.PI * 2;
+                    const distance = 50 + Math.random() * 100;
+                    
+                    gsap.to(particle, {
+                        x: Math.cos(angle) * distance,
+                        y: Math.sin(angle) * distance,
+                        opacity: 0,
+                        duration: 1 + Math.random() * 1,
+                        ease: 'power2.out',
+                        onComplete: () => {
+                            particle.remove();
+                        }
+                    });
+                }
+            });
+        }
+        
+        function animateConnections() {
+            const device1 = document.getElementById('device1');
+            const device2 = document.getElementById('device2');
+            const device3 = document.getElementById('device3');
+            
+            if (!device1 || !device2 || !device3) return;
+            
+            // Get element positions
+            const rect1 = device1.getBoundingClientRect();
+            const rect2 = device2.getBoundingClientRect();
+            const rect3 = device3.getBoundingClientRect();
+            
+            // Create data transfer animation between devices
+            animateDataTransfer(
+                rect1.left + rect1.width/2 + window.scrollX, 
+                rect1.top + rect1.height/2 + window.scrollY,
+                rect2.left + rect2.width/2 + window.scrollX, 
+                rect2.top + rect2.height/2 + window.scrollY
+            );
+            
+            setTimeout(() => {
+                animateDataTransfer(
+                    rect2.left + rect2.width/2 + window.scrollX, 
+                    rect2.top + rect2.height/2 + window.scrollY,
+                    rect3.left + rect3.width/2 + window.scrollX, 
+                    rect3.top + rect3.height/2 + window.scrollY
+                );
+            }, 1000);
+            
+            // Repeat the animations
+            setTimeout(() => {
+                animateConnections();
+            }, 5000);
+        }
+        
+        function animateDataTransfer(x1, y1, x2, y2) {
+            // Calculate distance and angle
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            // Create multiple bits for the data transfer
+            for (let i = 0; i < 5; i++) {
+                const bit = document.createElement('div');
+                bit.classList.add('data-bit');
+                bit.style.left = x1 + 'px';
+                bit.style.top = y1 + 'px';
+                document.body.appendChild(bit);
+                
+                // Animate the data bit
+                gsap.to(bit, {
+                    opacity: 1,
+                    duration: 0.2
+                });
+                
+                gsap.to(bit, {
+                    left: x2 + 'px',
+                    top: y2 + 'px',
+                    delay: i * 0.2,
+                    duration: 0.8,
+                    ease: 'power1.in',
+                    onComplete: () => {
+                        gsap.to(bit, {
+                            opacity: 0,
+                            scale: 1.5,
+                            duration: 0.3,
+                            onComplete: () => {
+                                bit.remove();
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    </script>
+</body>
+</html>

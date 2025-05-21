@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VPS Attack Surface Animation</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #2c3e50;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #34495e;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 5px 5px 30px rgba(0, 0, 0, 0.4);
+            max-width: 700px;
+            overflow: hidden;
+        }
+
+        h1 {
+            color: #ecf0f1;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e74c3c;
+            display: inline-block;
+            padding-bottom: 5px;
+            box-sizing: border-box;
+        }
+
+        .animation-stage {
+            position: relative;
+            height: 300px;
+            margin-bottom: 30px;
+            border: 2px solid #7f8c8d;
+            border-radius: 10px;
+            background-color: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .vps-server {
+            font-size: 80px;
+            color: #3498db; /* Blue for server */
+            z-index: 10;
+        }
+
+        .attack-vector {
+            position: absolute;
+            font-size: 45px;
+            opacity: 0;
+            z-index: 5; /* Above attacks */
+            animation-duration: 10s;
+            animation-iteration-count: infinite;
+            animation-timing-function: ease-out;
+        }
+
+        .network-attack { /* DDoS / Scan */
+            top: 15%;
+            left: 10%;
+            color: #f1c40f; /* Yellow */
+            animation-name: attackMoveHorizontal;
+            animation-delay: 0s; /* Attack starts immediately */
+        }
+
+        .malware { /* Virus / Ransomware */
+            top: 15%;
+            left: 15%;
+            color: #2ecc71; /* Green (ironically) */
+            animation-name: attackMoveDiagonalUp;
+            animation-delay: 2s;
+        }
+
+        .brute-force { /* Password Attack */
+            bottom: 20%;
+            left: 10%;
+            color: #e67e22; /* Orange */
+            animation-name: attackMoveHorizontalReverse;
+            animation-delay: 4s;
+        }
+
+        .unpatched-vuln { /* CVE-2023-4911 (Looney Tunables) */
+            bottom: 20%;
+            right: 15%;
+            color: #9b59b6; /* Purple */
+            animation-name: attackMoveDiagonalDown;
+            animation-delay: 6s;
+        }
+
+        .sql-injection { /* SQL Injection */
+            top: 65%;
+            left: 20%;
+            color: #e67e22; /* Orange */
+            animation-name: attackMoveDiagonalUp;
+            animation-delay: 5s;
+        }
+
+        .defense {
+            position: absolute;
+        }
+
+        .firewall { /* Blocks network */
+            top: 15%;
+            left: 40%;
+            color: #c0392b; /* Red for block */
+            animation-name: defenseBlock;
+            animation-delay: 0.8s; /* Block after network attack starts */
+        }
+
+        .patch { /* Blocks vuln */
+            bottom: 20%;
+            right: 40%;
+            color: #1abc9c; /* Teal for patch */
+            animation-name: defenseBlock;
+            animation-delay: 6.8s; /* Block after vuln attack starts */
+        }
+
+
+        /* Keyframes */
+        @keyframes attackMoveHorizontal {
+            0% { left: 10%; opacity: 0; transform: scale(0.8); }
+            10% { opacity: 1; transform: scale(1); }
+            40% { left: 40%; opacity: 1; transform: scale(1); } /* Move towards center */
+            50% { left: 40%; opacity: 0; transform: scale(0.8); } /* Fade near center */
+            100% { opacity: 0; }
+        }
+        @keyframes attackMoveHorizontalReverse {
+             0% { right: 10%; opacity: 0; transform: scale(0.8); }
+             10% { opacity: 1; transform: scale(1); }
+             40% { right: 40%; opacity: 1; transform: scale(1); }
+             50% { right: 40%; opacity: 0; transform: scale(0.8); }
+             100% { opacity: 0; }
+        }
+         @keyframes attackMoveDiagonalUp {
+             0% { left: 15%; bottom: 15%; opacity: 0; transform: scale(0.8); }
+             10% { opacity: 1; transform: scale(1); }
+             40% { left: 40%; bottom: 40%; opacity: 1; transform: scale(1); }
+             50% { left: 40%; bottom: 40%; opacity: 0; transform: scale(0.8); }
+             100% { opacity: 0; }
+         }
+         @keyframes attackMoveDiagonalDown {
+              0% { right: 15%; bottom: 20%; opacity: 0; transform: scale(0.8); }
+              10% { opacity: 1; transform: scale(1); }
+              40% { right: 40%; bottom: 40%; opacity: 1; transform: scale(1); }
+              50% { right: 40%; bottom: 40%; opacity: 0; transform: scale(0.8); }
+              100% { opacity: 0; }
+         }
+
+         @keyframes defenseBlock {
+              0% { opacity: 0; transform: scale(0.5); }
+              5% { opacity: 1; transform: scale(1.2); } /* Appear large */
+              15% { opacity: 1; transform: scale(1); } /* Settle */
+              25% { opacity: 0; transform: scale(0.5); } /* Fade out */
+              100% { opacity: 0; }
+         }
+
+
+        .explanation {
+            margin-top: 40px;
+            color: #bdc3c7; /* Lighter gray */
+            line-height: 1.7;
+            text-align: left;
+        }
+
+        .explanation p {
+            margin-bottom: 15px;
+        }
+        .explanation strong {
+            color: #ecf0f1; /* White for emphasis */
+        }
+
+        .explanation ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .explanation li {
+            margin-bottom: 10px;
+            padding-left: 25px;
+            position: relative;
+        }
+        .explanation li::before {
+            content: '⚠️'; /* Warning symbol */
+            position: absolute;
+            left: 0;
+            top: 0;
+            color: #f1c40f; /* Yellow warning */
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>VPS Attack Surface</h1>
+
+        <div class="animation-stage">
+            <div class="vps-server">🖥️</div> <!-- VPS Server -->
+
+            <!-- Attack Vectors -->
+            <div class="attack-vector network-attack">🌐</div> <!-- Network Attack (DDoS, Scan) -->
+            <div class="attack-vector malware">🦠</div>       <!-- Malware -->
+            <div class="attack-vector brute-force">🔑💥</div> <!-- Brute Force -->
+            <div class="attack-vector unpatched-vuln">🩹❌</div> <!-- CVE-2023-4911 (Looney Tunables) -->
+            <div class="attack-vector sql-injection">💉</div> <!-- SQL Injection -->
+
+            <!-- Defenses -->
+            <div class="defense firewall">🛡️</div> <!-- Firewall -->
+            <div class="defense patch">🔄</div>    <!-- Patch/Update -->
+        </div>
+
+        <div class="explanation">
+            <p>A Virtual Private Server (VPS), like any internet-connected system, has an <strong>attack surface</strong> – the sum of different points where an unauthorized user (attacker) can try to enter or extract data.</p>
+            <p>The animation illustrates common vectors:</p>
+            <ul>
+                <li><strong>Network Attacks (🌐):</strong> Targeting open ports, DDoS attacks overwhelming the server. Blocked by Firewalls (🛡️).</li>
+                <li><strong>Malware (🦠):</strong> Viruses, ransomware, or spyware attempting to infect the system, often via software vulnerabilities or phishing.</li>
+                <li><strong>Brute Force Attacks (🔑💥):</strong> Repeatedly trying username/password combinations to gain access, especially via SSH or control panels.</li>
+                <li><strong>Unpatched Vulnerabilities (🩹❌):</strong> Exploiting known security flaws in the operating system or installed software that haven't been updated. Example: <a href="https://nvd.nist.gov/vuln/detail/CVE-2023-4911">CVE-2023-4911 (Looney Tunables)</a>. Mitigated by regular patching (🔄).</li>
+                <li><strong>SQL Injection (💉):</strong> Injecting malicious SQL code into input fields to manipulate the database. See <a href="https://owasp.org/www-community/attacks/SQL_Injection">OWASP SQL Injection</a> for more details.</li>
+            </ul>
+            <p><strong>Securing a VPS involves minimizing this attack surface</strong> through firewalls, regular updates, strong passwords, security audits, and the principle of least privilege.</p>
+        </div>
+    </div>
+</body>
+</html>

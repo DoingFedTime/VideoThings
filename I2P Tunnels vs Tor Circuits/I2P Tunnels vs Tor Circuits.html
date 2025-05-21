@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>I2P Tunnels vs Tor Circuits: A Visual Comparison</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        /* Network visualization containers */
+        .network-container {
+            height: 500px;
+            overflow: visible;
+            position: relative;
+        }
+
+        /* SVG styling */
+        .node {
+            fill: #1e293b;
+            stroke-width: 2px;
+        }
+
+        .i2p-node {
+            stroke: #6379b3;
+        }
+
+        .tor-node {
+            stroke: #a855f7;
+        }
+
+        .network-svg {
+            overflow: visible;
+        }
+
+        .alice-node {
+            stroke: #22c55e;
+            stroke-width: 3px;
+        }
+
+        .bob-node {
+            stroke: #f97316;
+            stroke-width: 3px;
+        }
+
+        .entry-node {
+            stroke: #22c55e;
+            stroke-width: 3px;
+        }
+
+        .middle-node {
+            stroke: #a855f7;
+            stroke-width: 2px;
+        }
+
+        .exit-node {
+            stroke: #f97316;
+            stroke-width: 3px;
+        }
+
+        .link {
+            fill: none;
+            stroke-width: 2px;
+        }
+
+        .i2p-link {
+            stroke: #6379b3;
+        }
+
+        .tor-link {
+            stroke: #a855f7;
+        }
+
+        .packet {
+            r: 6px;
+            opacity: 0.9;
+        }
+
+        .i2p-packet {
+            fill: #93c5fd;
+        }
+
+        .tor-packet {
+            fill: #d8b4fe;
+        }
+
+        .label {
+            fill: white;
+            font-size: 12px;
+            text-anchor: middle;
+            pointer-events: none;
+            font-weight: bold;
+        }
+
+        .description-label {
+            fill: #cbd5e1;
+            font-size: 14px;
+            text-anchor: middle;
+        }
+
+        .encryption-layer {
+            stroke-width: 2px;
+            fill: none;
+            opacity: 0.8;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 1s ease-in-out forwards;
+        }
+
+        /* Diagram title styling */
+        .diagram-title {
+            text-anchor: middle;
+            font-size: 18px;
+            fill: white;
+            font-weight: bold;
+        }
+
+        /* Button hover states */
+        button:hover {
+            opacity: 0.9;
+        }
+
+        /* Pulse animation for active tunnels/circuits */
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        .active-path {
+            animation: pulse 2s infinite;
+        }
+
+        /* Tooltip */
+        .tooltip {
+            position: absolute;
+            background-color: rgba(15, 23, 42, 0.95);
+            color: #f8fafc;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            z-index: 100;
+            pointer-events: none;
+            max-width: 250px;
+            font-size: 14px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .card-i2p {
+            border-color: #6379b3;
+        }
+        
+        .card-tor {
+            border-color: #a855f7;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-gradient-to-r from-slate-900 to-slate-800 py-12 px-4 md:px-8 lg:px-16">
+        <div class="container mx-auto max-w-5xl">
+            <h1 class="text-4xl md:text-5xl font-bold text-center mb-4 text-white">I2P Tunnels vs Tor Circuits</h1>
+            <p class="text-xl text-center text-slate-300 max-w-3xl mx-auto">A visual exploration of the architectural differences between I2P's unidirectional tunnels and Tor's bidirectional circuits</p>
+        </div>
+    </header>
+
+    <!-- Main content -->
+    <main class="container mx-auto max-w-6xl px-4 py-8 md:px-8">
+        <!-- Introduction -->
+        <section class="mb-16">
+            <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
+                <p class="text-lg text-slate-300">Both I2P and Tor are anonymity networks, but they use fundamentally different approaches to routing data. This visualization demonstrates how I2P's unidirectional tunnels differ from Tor's bidirectional circuits, and explains the implications for security, privacy, and performance.</p>
+            </div>
+        </section>
+
+        <!-- I2P Network -->
+        <section class="mb-16">
+            <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
+                <h2 class="text-3xl font-bold mb-6 text-center text-white">I2P Unidirectional Tunnels</h2>
+                <div class="network-container" id="i2p-container">
+                    <svg id="i2p-svg" class="network-svg w-full h-full" viewBox="0 0 1000 450" preserveAspectRatio="xMidYMid meet"></svg>
+                </div>
+                <div class="flex flex-wrap justify-center mt-6 gap-4">
+                    <button id="i2p-start" class="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition">
+                        Start Animation
+                    </button>
+                    <button id="i2p-stop" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded transition">
+                        Stop Animation
+                    </button>
+                    <button id="i2p-reset" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded transition">
+                        Reset
+                    </button>
+                </div>
+                <div class="mt-6 bg-slate-700 rounded-lg p-4">
+                    <h3 class="font-bold text-lg mb-2">Key I2P Tunnel Features:</h3>
+                    <ul class="list-disc pl-5 space-y-1 text-slate-300">
+                        <li>Unidirectional - separate tunnels for outbound and inbound traffic</li>
+                        <li>Short-lived - tunnels expire every ~10 minutes</li>
+                        <li>Uses garlic routing to bundle multiple messages together</li>
+                        <li>Packet-switched instead of circuit-switched</li>
+                        <li>Designed primarily for communication within the I2P network</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Tor Network -->
+        <section class="mb-16">
+            <div class="bg-slate-800 rounded-lg p-6 shadow-lg">
+                <h2 class="text-3xl font-bold mb-6 text-center text-white">Tor Bidirectional Circuits</h2>
+                <div class="network-container" id="tor-container">
+                    <svg id="tor-svg" class="network-svg w-full h-full" viewBox="0 0 1000 450" preserveAspectRatio="xMidYMid meet"></svg>
+                </div>
+                <div class="flex flex-wrap justify-center mt-6 gap-4">
+                    <button id="tor-start" class="bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded transition">
+                        Start Animation
+                    </button>
+                    <button id="tor-stop" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded transition">
+                        Stop Animation
+                    </button>
+                    <button id="tor-reset" class="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded transition">
+                        Reset
+                    </button>
+                </div>
+                <div class="mt-6 bg-slate-700 rounded-lg p-4">
+                    <h3 class="font-bold text-lg mb-2">Key Tor Circuit Features:</h3>
+                    <ul class="list-disc pl-5 space-y-1 text-slate-300">
+                        <li>Bidirectional - same circuit for outbound and inbound traffic</li>
+                        <li>Long-lived - circuits typically remain active longer</li>
+                        <li>Uses onion routing with layers of encryption</li>
+                        <li>Circuit-switched for entire connection</li>
+                        <li>Designed primarily for anonymous access to the regular internet</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Differences -->
+        <section class="mb-16">
+            <h2 class="text-3xl font-bold mb-8 text-center text-white">Key Architectural Differences</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- I2P Features -->
+                <div class="bg-slate-800 border-l-4 card-i2p rounded-lg p-6 shadow-lg transition-all duration-300 card-hover">
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">I2P: Unidirectional Tunnels</h3>
+                    <p class="text-slate-300 mb-4">I2P uses separate tunnels for inbound and outbound traffic, requiring 4 tunnels for a complete round trip. This separation makes traffic analysis more difficult but requires more complex route management.</p>
+                    <h4 class="font-bold text-white mt-4 mb-2">Security Implications:</h4>
+                    <ul class="list-disc pl-5 text-slate-300 space-y-1">
+                        <li>Reduces exposure of traffic patterns to tunnel participants</li>
+                        <li>Complicates timing analysis attacks</li>
+                        <li>Short-lived tunnels prevent long-term observations</li>
+                    </ul>
+                </div>
+
+                <!-- Tor Features -->
+                <div class="bg-slate-800 border-l-4 card-tor rounded-lg p-6 shadow-lg transition-all duration-300 card-hover">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">Tor: Bidirectional Circuits</h3>
+                    <p class="text-slate-300 mb-4">Tor uses the same circuit for both sending and receiving data. This simplifies circuit management and can be more efficient but might expose more traffic pattern information.</p>
+                    <h4 class="font-bold text-white mt-4 mb-2">Security Implications:</h4>
+                    <ul class="list-disc pl-5 text-slate-300 space-y-1">
+                        <li>Simplifies circuit establishment and maintenance</li>
+                        <li>May expose correlation between request and response</li>
+                        <li>Provides better performance for interactive browsing</li>
+                    </ul>
+                </div>
+
+                <!-- Garlic Routing -->
+                <div class="bg-slate-800 border-l-4 card-i2p rounded-lg p-6 shadow-lg transition-all duration-300 card-hover">
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">I2P: Garlic Routing</h3>
+                    <p class="text-slate-300 mb-4">Bundles multiple messages ("cloves") together under one encryption layer, each with its own delivery instructions. This allows multiple messages to be sent simultaneously with individual routing.</p>
+                    <h4 class="font-bold text-white mt-4 mb-2">Advantages:</h4>
+                    <ul class="list-disc pl-5 text-slate-300 space-y-1">
+                        <li>More efficient bandwidth usage through bundling</li>
+                        <li>Supports multiple independent messages in parallel</li>
+                        <li>Allows for complex routing strategies within a single package</li>
+                    </ul>
+                </div>
+
+                <!-- Onion Routing -->
+                <div class="bg-slate-800 border-l-4 card-tor rounded-lg p-6 shadow-lg transition-all duration-300 card-hover">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">Tor: Onion Routing</h3>
+                    <p class="text-slate-300 mb-4">Encrypts data in multiple layers, with each relay peeling off one layer to reveal instructions for the next hop, similar to peeling an onion.</p>
+                    <h4 class="font-bold text-white mt-4 mb-2">Advantages:</h4>
+                    <ul class="list-disc pl-5 text-slate-300 space-y-1">
+                        <li>Each relay only knows previous and next hop</li>
+                        <li>Exit nodes see unencrypted traffic but not its origin</li>
+                        <li>Well-studied and extensively tested encryption model</li>
+                    </ul>
+                </div>
+
+                <!-- Network Focus -->
+                <div class="bg-slate-800 border-l-4 card-i2p rounded-lg p-6 shadow-lg transition-all duration-300 card-hover">
+                    <h3 class="text-xl font-bold mb-4 text-blue-400">I2P: Internal Network Focus</h3>
+                    <p class="text-slate-300 mb-4">Optimized for hosting services within the I2P network (eepsites) with limited outproxy capabilities to the regular internet.</p>
+                    <h4 class="font-bold text-white mt-4 mb-2">Use Cases:</h4>
+                    <ul class="list-disc pl-5 text-slate-300 space-y-1">
+                        <li>Anonymous hosting of services</li>
+                        <li>Peer-to-peer applications</li>
+                        <li>Internal communication networks</li>
+                    </ul>
+                </div>
+
+                <!-- External Access Focus -->
+                <div class="bg-slate-800 border-l-4 card-tor rounded-lg p-6 shadow-lg transition-all duration-300 card-hover">
+                    <h3 class="text-xl font-bold mb-4 text-purple-400">Tor: External Access Focus</h3>
+                    <p class="text-slate-300 mb-4">Designed primarily for anonymous browsing of the regular internet through exit nodes, with onion services as a secondary feature.</p>
+                    <h4 class="font-bold text-white mt-4 mb-2">Use Cases:</h4>
+                    <ul class="list-disc pl-5 text-slate-300 space-y-1">
+                        <li>Anonymous web browsing of regular sites</li>
+                        <li>Circumventing censorship</li>
+                        <li>Accessing onion services (.onion sites)</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 py-8 px-4">
+        <div class="container mx-auto max-w-5xl text-center">
+            <p class="text-slate-400">This visualization is for educational purposes only</p>
+        </div>
+    </footer>
+
+    <!-- Tooltip div -->
+    <div id="tooltip" class="tooltip hidden"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tooltip functionality
+            const tooltip = document.getElementById('tooltip');
+            
+            function showTooltip(text, x, y) {
+                tooltip.textContent = text;
+                tooltip.style.left = `${x + 15}px`;
+                tooltip.style.top = `${y + 15}px`;
+                tooltip.classList.remove('hidden');
+            }
+            
+            function hideTooltip() {
+                tooltip.classList.add('hidden');
+            }
+
+            // ============ I2P Network Visualization ============
+            const i2pSvg = document.getElementById('i2p-svg');
+            const i2pStartBtn = document.getElementById('i2p-start');
+            const i2pStopBtn = document.getElementById('i2p-stop');
+            const i2pResetBtn = document.getElementById('i2p-reset');
+            
+            // Animation state
+            let i2pAnimationRunning = false;
+            let i2pAnimationFrameId = null;
+            let i2pOutboundAnimationComplete = false;
+            let i2pInboundAnimationComplete = false;
+            
+            // Initialize I2P network visualization
+            function initI2PVisualization() {
+                // Clear SVG
+                i2pSvg.innerHTML = '';
+                i2pAnimationRunning = false;
+                i2pOutboundAnimationComplete = false;
+                i2pInboundAnimationComplete = false;
+                
+                if (i2pAnimationFrameId) {
+                    cancelAnimationFrame(i2pAnimationFrameId);
+                    i2pAnimationFrameId = null;
+                }
+                
+                // Add title
+                const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                title.setAttribute('x', '500');
+                title.setAttribute('y', '30');
+                title.setAttribute('class', 'diagram-title');
+                title.textContent = 'I2P uses separate unidirectional tunnels for requests and responses';
+                i2pSvg.appendChild(title);
+                
+                // Define the arrowhead marker
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                i2pSvg.appendChild(defs);
+                
+                // Create I2P outbound arrow marker
+                const markerOutbound = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                markerOutbound.setAttribute('id', 'i2p-arrowhead-outbound');
+                markerOutbound.setAttribute('markerWidth', '10');
+                markerOutbound.setAttribute('markerHeight', '7');
+                markerOutbound.setAttribute('refX', '10');
+                markerOutbound.setAttribute('refY', '3.5');
+                markerOutbound.setAttribute('orient', 'auto');
+                
+                const outboundPolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                outboundPolygon.setAttribute('points', '0 0, 10 3.5, 0 7');
+                outboundPolygon.setAttribute('fill', '#6379b3');
+                markerOutbound.appendChild(outboundPolygon);
+                defs.appendChild(markerOutbound);
+                
+                // Create I2P inbound arrow marker
+                const markerInbound = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                markerInbound.setAttribute('id', 'i2p-arrowhead-inbound');
+                markerInbound.setAttribute('markerWidth', '10');
+                markerInbound.setAttribute('markerHeight', '7');
+                markerInbound.setAttribute('refX', '10');
+                markerInbound.setAttribute('refY', '3.5');
+                markerInbound.setAttribute('orient', 'auto');
+                
+                const inboundPolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                inboundPolygon.setAttribute('points', '0 0, 10 3.5, 0 7');
+                inboundPolygon.setAttribute('fill', '#6379b3');
+                markerInbound.appendChild(inboundPolygon);
+                defs.appendChild(markerInbound);
+                
+                // Create I2P nodes
+                const i2pNodes = [
+                    { id: 'alice', x: 100, y: 225, label: 'Alice', type: 'alice-node' },
+                    { id: 'out1', x: 250, y: 150, label: 'Outbound 1', type: 'i2p-node' },
+                    { id: 'out2', x: 400, y: 100, label: 'Outbound 2', type: 'i2p-node' },
+                    { id: 'out3', x: 550, y: 150, label: 'Outbound 3', type: 'i2p-node' },
+                    { id: 'bob', x: 900, y: 225, label: 'Bob', type: 'bob-node' },
+                    { id: 'in1', x: 750, y: 300, label: 'Inbound 1', type: 'i2p-node' },
+                    { id: 'in2', x: 600, y: 350, label: 'Inbound 2', type: 'i2p-node' },
+                    { id: 'in3', x: 450, y: 300, label: 'Inbound 3', type: 'i2p-node' }
+                ];
+                
+                // Create links group
+                const linksGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                i2pSvg.appendChild(linksGroup);
+                
+                // Create outbound tunnel links
+                const outboundLinks = [
+                    { source: 'alice', target: 'out1' },
+                    { source: 'out1', target: 'out2' },
+                    { source: 'out2', target: 'out3' },
+                    { source: 'out3', target: 'bob' }
+                ];
+                
+                // Create tunnel labels
+                const outboundLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                outboundLabel.setAttribute('x', '325');
+                outboundLabel.setAttribute('y', '80');
+                outboundLabel.setAttribute('class', 'description-label');
+                outboundLabel.textContent = 'Outbound Tunnel';
+                i2pSvg.appendChild(outboundLabel);
+                
+                const inboundLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                inboundLabel.setAttribute('x', '600');
+                inboundLabel.setAttribute('y', '385');
+                inboundLabel.setAttribute('class', 'description-label');
+                inboundLabel.textContent = 'Inbound Tunnel';
+                i2pSvg.appendChild(inboundLabel);
+                
+                // Draw outbound links
+                outboundLinks.forEach(link => {
+                    const source = i2pNodes.find(n => n.id === link.source);
+                    const target = i2pNodes.find(n => n.id === link.target);
+                    
+                    // Create curved path for outbound tunnel
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const d = `M${source.x},${source.y} C${(source.x + target.x) / 2},${Math.min(source.y, target.y) - 30} ${(source.x + target.x) / 2},${Math.min(source.y, target.y) - 30} ${target.x},${target.y}`;
+                    
+                    path.setAttribute('d', d);
+                    path.setAttribute('class', 'link i2p-link');
+                    path.setAttribute('id', `link-${source.id}-${target.id}`);
+                    path.setAttribute('stroke-dasharray', '5,5');
+                    path.setAttribute('marker-end', 'url(#i2p-arrowhead-outbound)');
+                    linksGroup.appendChild(path);
+                });
+                
+                // Create inbound tunnel links
+                const inboundLinks = [
+                    { source: 'bob', target: 'in1' },
+                    { source: 'in1', target: 'in2' },
+                    { source: 'in2', target: 'in3' },
+                    { source: 'in3', target: 'alice' }
+                ];
+                
+                // Draw inbound links
+                inboundLinks.forEach(link => {
+                    const source = i2pNodes.find(n => n.id === link.source);
+                    const target = i2pNodes.find(n => n.id === link.target);
+                    
+                    // Create curved path for inbound tunnel
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const d = `M${source.x},${source.y} C${(source.x + target.x) / 2},${Math.max(source.y, target.y) + 30} ${(source.x + target.x) / 2},${Math.max(source.y, target.y) + 30} ${target.x},${target.y}`;
+                    
+                    path.setAttribute('d', d);
+                    path.setAttribute('class', 'link i2p-link');
+                    path.setAttribute('id', `link-${source.id}-${target.id}`);
+                    path.setAttribute('stroke-dasharray', '5,5');
+                    path.setAttribute('marker-end', 'url(#i2p-arrowhead-inbound)');
+                    linksGroup.appendChild(path);
+                });
+                
+                // Create nodes group
+                const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                i2pSvg.appendChild(nodesGroup);
+                
+                // Draw nodes
+                i2pNodes.forEach(node => {
+                    const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    nodeGroup.setAttribute('id', `node-${node.id}`);
+                    nodeGroup.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+                    
+                    // Node circle
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('r', '25');
+                    circle.setAttribute('class', `node ${node.type}`);
+                    
+                    // Node label
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('y', '40');
+                    text.setAttribute('class', 'label');
+                    text.textContent = node.label;
+                    
+                    nodeGroup.appendChild(circle);
+                    nodeGroup.appendChild(text);
+                    nodesGroup.appendChild(nodeGroup);
+                    
+                    // Add tooltips
+                    nodeGroup.addEventListener('mouseover', (e) => {
+                        let tooltipText = '';
+                        if (node.id === 'alice') {
+                            tooltipText = 'Alice: Sender who creates both outbound and inbound tunnels';
+                        } else if (node.id === 'bob') {
+                            tooltipText = 'Bob: Receiver who also creates their own tunnels';
+                        } else if (node.id.startsWith('out')) {
+                            tooltipText = `${node.label}: Part of Alice's outbound tunnel, only forwards data in one direction`;
+                        } else if (node.id.startsWith('in')) {
+                            tooltipText = `${node.label}: Part of Alice's inbound tunnel, only forwards data in one direction`;
+                        }
+                        
+                        showTooltip(tooltipText, e.pageX, e.pageY);
+                    });
+                    
+                    nodeGroup.addEventListener('mouseout', hideTooltip);
+                });
+                
+                // Add explainer text for I2P
+                const explainerText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                explainerText.setAttribute('x', '500');
+                explainerText.setAttribute('y', '430');
+                explainerText.setAttribute('class', 'description-label');
+                explainerText.textContent = 'Data travels through separate tunnels in each direction, with different paths for requests and responses';
+                i2pSvg.appendChild(explainerText);
+            }
+            
+            // I2P animation function
+            function runI2PAnimation() {
+                if (!i2pAnimationRunning) return;
+                
+                // If there are existing packets, remove them
+                const existingPackets = i2pSvg.querySelectorAll('.packet-group');
+                existingPackets.forEach(packet => packet.remove());
+                
+                // Define the outbound path
+                const outboundPath = [
+                    { id: 'alice', x: 100, y: 225 },
+                    { id: 'out1', x: 250, y: 150 },
+                    { id: 'out2', x: 400, y: 100 },
+                    { id: 'out3', x: 550, y: 150 },
+                    { id: 'bob', x: 900, y: 225 }
+                ];
+                
+                // Define the inbound path
+                const inboundPath = [
+                    { id: 'bob', x: 900, y: 225 },
+                    { id: 'in1', x: 750, y: 300 },
+                    { id: 'in2', x: 600, y: 350 },
+                    { id: 'in3', x: 450, y: 300 },
+                    { id: 'alice', x: 100, y: 225 }
+                ];
+                
+                // Create a packet group for the outbound tunnel
+                const outboundPacketGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                outboundPacketGroup.setAttribute('class', 'packet-group outbound-packet');
+                i2pSvg.appendChild(outboundPacketGroup);
+                
+                // Create the outbound data packet
+                const outboundPacket = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                outboundPacket.setAttribute('cx', outboundPath[0].x);
+                outboundPacket.setAttribute('cy', outboundPath[0].y);
+                outboundPacket.setAttribute('r', '8');
+                outboundPacket.setAttribute('class', 'packet i2p-packet');
+                outboundPacketGroup.appendChild(outboundPacket);
+                
+                // Create encryption layers for outbound packet
+                for (let i = 0; i < 3; i++) {
+                    const layer = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    layer.setAttribute('cx', outboundPath[0].x);
+                    layer.setAttribute('cy', outboundPath[0].y);
+                    layer.setAttribute('r', (i + 1) * 4 + 8);
+                    layer.setAttribute('class', 'encryption-layer');
+                    layer.setAttribute('stroke', `hsl(${220 + i*10}, 70%, ${60 + i*10}%)`);
+                    layer.setAttribute('id', `out-layer-${i}`);
+                    outboundPacketGroup.appendChild(layer);
+                }
+                
+                // Create a packet group for the inbound tunnel
+                const inboundPacketGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                inboundPacketGroup.setAttribute('class', 'packet-group inbound-packet');
+                inboundPacketGroup.style.opacity = '0'; // Initially hidden
+                i2pSvg.appendChild(inboundPacketGroup);
+                
+                // Create the inbound data packet
+                const inboundPacket = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                inboundPacket.setAttribute('cx', inboundPath[0].x);
+                inboundPacket.setAttribute('cy', inboundPath[0].y);
+                inboundPacket.setAttribute('r', '8');
+                inboundPacket.setAttribute('class', 'packet i2p-packet');
+                inboundPacketGroup.appendChild(inboundPacket);
+                
+                // Create encryption layers for inbound packet
+                for (let i = 0; i < 3; i++) {
+                    const layer = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    layer.setAttribute('cx', inboundPath[0].x);
+                    layer.setAttribute('cy', inboundPath[0].y);
+                    layer.setAttribute('r', (i + 1) * 4 + 8);
+                    layer.setAttribute('class', 'encryption-layer');
+                    layer.setAttribute('stroke', `hsl(${220 + i*10}, 70%, ${60 + i*10}%)`);
+                    layer.setAttribute('id', `in-layer-${i}`);
+                    inboundPacketGroup.appendChild(layer);
+                }
+                
+                // Animation variables
+                let outboundStartTime = null;
+                let inboundStartTime = null;
+                const outboundDuration = 3000; // 3 seconds for outbound animation
+                const inboundDuration = 3000; // 3 seconds for inbound animation
+                
+                // Animation function
+                function animateI2P(timestamp) {
+                    if (!outboundStartTime) outboundStartTime = timestamp;
+                    const outboundElapsed = timestamp - outboundStartTime;
+                    
+                    // Outbound animation
+                    if (outboundElapsed < outboundDuration) {
+                        // Calculate progress between 0 and 1
+                        const outboundProgress = Math.min(outboundElapsed / outboundDuration, 1);
+                        
+                        // Get current segment
+                        const segmentCount = outboundPath.length - 1;
+                        const segmentProgress = outboundProgress * segmentCount;
+                        const currentSegment = Math.min(Math.floor(segmentProgress), segmentCount - 1);
+                        const segmentSpecificProgress = segmentProgress - currentSegment;
+                        
+                        // Get coordinates for current position
+                        const start = outboundPath[currentSegment];
+                        const end = outboundPath[currentSegment + 1];
+                        
+                        // Calculate position along the curve
+                        const controlX = (start.x + end.x) / 2;
+                        const controlY = Math.min(start.y, end.y) - 30;
+                        
+                        // Bezier curve formula for a single control point
+                        const t = segmentSpecificProgress;
+                        const mt = 1 - t;
+                        const x = mt*mt * start.x + 2*mt*t * controlX + t*t * end.x;
+                        const y = mt*mt * start.y + 2*mt*t * controlY + t*t * end.y;
+                        
+                        // Update packet position
+                        outboundPacket.setAttribute('cx', x);
+                        outboundPacket.setAttribute('cy', y);
+                        
+                        // Update encryption layers
+                        for (let i = 0; i < 3; i++) {
+                            const layer = outboundPacketGroup.querySelector(`#out-layer-${i}`);
+                            layer.setAttribute('cx', x);
+                            layer.setAttribute('cy', y);
+                            
+                            // Remove encryption layers as we pass through nodes
+                            if (currentSegment >= i + 1) {
+                                layer.style.opacity = '0';
+                            }
+                        }
+                        
+                        if (!i2pOutboundAnimationComplete && i2pAnimationRunning) {
+                            i2pAnimationFrameId = requestAnimationFrame(animateI2P);
+                        }
+                    } else {
+                        // Outbound animation complete
+                        i2pOutboundAnimationComplete = true;
+                        
+                        // Show inbound packet with a slight delay
+                        setTimeout(() => {
+                            inboundPacketGroup.style.opacity = '1';
+                            inboundStartTime = performance.now();
+                            
+                            // Start inbound animation
+                            requestAnimationFrame(animateInbound);
+                        }, 500);
+                    }
+                }
+                
+                // Inbound animation function
+                function animateInbound(timestamp) {
+                    if (!inboundStartTime) inboundStartTime = timestamp;
+                    const inboundElapsed = timestamp - inboundStartTime;
+                    
+                    if (inboundElapsed < inboundDuration) {
+                        // Calculate progress
+                        const inboundProgress = Math.min(inboundElapsed / inboundDuration, 1);
+                        
+                        // Get current segment
+                        const segmentCount = inboundPath.length - 1;
+                        const segmentProgress = inboundProgress * segmentCount;
+                        const currentSegment = Math.min(Math.floor(segmentProgress), segmentCount - 1);
+                        const segmentSpecificProgress = segmentProgress - currentSegment;
+                        
+                        // Get coordinates for current position
+                        const start = inboundPath[currentSegment];
+                        const end = inboundPath[currentSegment + 1];
+                        
+                        // Calculate position along the curve
+                        const controlX = (start.x + end.x) / 2;
+                        const controlY = Math.max(start.y, end.y) + 30;
+                        
+                        // Bezier curve formula for a single control point
+                        const t = segmentSpecificProgress;
+                        const mt = 1 - t;
+                        const x = mt*mt * start.x + 2*mt*t * controlX + t*t * end.x;
+                        const y = mt*mt * start.y + 2*mt*t * controlY + t*t * end.y;
+                        
+                        // Update packet position
+                        inboundPacket.setAttribute('cx', x);
+                        inboundPacket.setAttribute('cy', y);
+                        
+                        // Update encryption layers
+                        for (let i = 0; i < 3; i++) {
+                            const layer = inboundPacketGroup.querySelector(`#in-layer-${i}`);
+                            layer.setAttribute('cx', x);
+                            layer.setAttribute('cy', y);
+                            
+                            // Remove encryption layers as we pass through nodes
+                            if (currentSegment >= i + 1) {
+                                layer.style.opacity = '0';
+                            }
+                        }
+                        
+                        if (!i2pInboundAnimationComplete && i2pAnimationRunning) {
+                            i2pAnimationFrameId = requestAnimationFrame(animateInbound);
+                        }
+                    } else {
+                        // Inbound animation complete
+                        i2pInboundAnimationComplete = true;
+                        
+                        // Restart the animation after a brief pause if still running
+                        if (i2pAnimationRunning) {
+                            setTimeout(() => {
+                                if (i2pAnimationRunning) {
+                                    i2pOutboundAnimationComplete = false;
+                                    i2pInboundAnimationComplete = false;
+                                    outboundStartTime = null;
+                                    inboundStartTime = null;
+                                    runI2PAnimation();
+                                }
+                            }, 1000);
+                        }
+                    }
+                }
+                
+                // Start the outbound animation
+                i2pAnimationFrameId = requestAnimationFrame(animateI2P);
+            }
+            
+            // Initialize I2P visualization
+            initI2PVisualization();
+            
+            // Event listeners for I2P buttons
+            i2pStartBtn.addEventListener('click', () => {
+                i2pAnimationRunning = true;
+                i2pOutboundAnimationComplete = false;
+                i2pInboundAnimationComplete = false;
+                runI2PAnimation();
+            });
+            
+            i2pStopBtn.addEventListener('click', () => {
+                i2pAnimationRunning = false;
+                if (i2pAnimationFrameId) {
+                    cancelAnimationFrame(i2pAnimationFrameId);
+                    i2pAnimationFrameId = null;
+                }
+            });
+            
+            i2pResetBtn.addEventListener('click', () => {
+                i2pAnimationRunning = false;
+                if (i2pAnimationFrameId) {
+                    cancelAnimationFrame(i2pAnimationFrameId);
+                    i2pAnimationFrameId = null;
+                }
+                initI2PVisualization();
+            });
+            
+            // ============ Tor Network Visualization ============
+            const torSvg = document.getElementById('tor-svg');
+            const torStartBtn = document.getElementById('tor-start');
+            const torStopBtn = document.getElementById('tor-stop');
+            const torResetBtn = document.getElementById('tor-reset');
+            
+            // Animation state
+            let torAnimationRunning = false;
+            let torAnimationFrameId = null;
+            let torRequestAnimationComplete = false;
+            let torResponseAnimationComplete = false;
+            
+            // Initialize Tor network visualization
+            function initTorVisualization() {
+                // Clear SVG
+                torSvg.innerHTML = '';
+                torAnimationRunning = false;
+                torRequestAnimationComplete = false;
+                torResponseAnimationComplete = false;
+                
+                if (torAnimationFrameId) {
+                    cancelAnimationFrame(torAnimationFrameId);
+                    torAnimationFrameId = null;
+                }
+                
+                // Add title
+                const title = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                title.setAttribute('x', '500');
+                title.setAttribute('y', '30');
+                title.setAttribute('class', 'diagram-title');
+                title.textContent = 'Tor uses bidirectional circuits for both requests and responses';
+                torSvg.appendChild(title);
+                
+                // Define the arrowhead markers
+                const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+                torSvg.appendChild(defs);
+                
+                // Create Tor request arrow marker
+                const markerRequest = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                markerRequest.setAttribute('id', 'tor-arrowhead-request');
+                markerRequest.setAttribute('markerWidth', '10');
+                markerRequest.setAttribute('markerHeight', '7');
+                markerRequest.setAttribute('refX', '10');
+                markerRequest.setAttribute('refY', '3.5');
+                markerRequest.setAttribute('orient', 'auto');
+                
+                const requestPolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                requestPolygon.setAttribute('points', '0 0, 10 3.5, 0 7');
+                requestPolygon.setAttribute('fill', '#a855f7');
+                markerRequest.appendChild(requestPolygon);
+                defs.appendChild(markerRequest);
+                
+                // Create Tor response arrow marker
+                const markerResponse = document.createElementNS('http://www.w3.org/2000/svg', 'marker');
+                markerResponse.setAttribute('id', 'tor-arrowhead-response');
+                markerResponse.setAttribute('markerWidth', '10');
+                markerResponse.setAttribute('markerHeight', '7');
+                markerResponse.setAttribute('refX', '10');
+                markerResponse.setAttribute('refY', '3.5');
+                markerResponse.setAttribute('orient', 'auto');
+                
+                const responsePolygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+                responsePolygon.setAttribute('points', '0 0, 10 3.5, 0 7');
+                responsePolygon.setAttribute('fill', '#a855f7');
+                markerResponse.appendChild(responsePolygon);
+                defs.appendChild(markerResponse);
+                
+                // Create Tor nodes
+                const torNodes = [
+                    { id: 'client', x: 100, y: 225, label: 'Tor Client', type: 'entry-node' },
+                    { id: 'entry', x: 300, y: 225, label: 'Entry Node', type: 'entry-node' },
+                    { id: 'middle', x: 500, y: 225, label: 'Middle Node', type: 'middle-node' },
+                    { id: 'exit', x: 700, y: 225, label: 'Exit Node', type: 'exit-node' },
+                    { id: 'server', x: 900, y: 225, label: 'Destination', type: 'exit-node' }
+                ];
+                
+                // Create links group
+                const linksGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                torSvg.appendChild(linksGroup);
+                
+                // Create circuit path links (for requests)
+                const requestLinks = [
+                    { source: 'client', target: 'entry' },
+                    { source: 'entry', target: 'middle' },
+                    { source: 'middle', target: 'exit' },
+                    { source: 'exit', target: 'server' }
+                ];
+                
+                // Create tunnel label
+                const circuitLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                circuitLabel.setAttribute('x', '500');
+                circuitLabel.setAttribute('y', '110');
+                circuitLabel.setAttribute('class', 'description-label');
+                circuitLabel.textContent = 'Bidirectional Circuit';
+                torSvg.appendChild(circuitLabel);
+                
+                // Draw request links
+                requestLinks.forEach(link => {
+                    const source = torNodes.find(n => n.id === link.source);
+                    const target = torNodes.find(n => n.id === link.target);
+                    
+                    // Create curved path for request
+                    const requestPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const requestD = `M${source.x},${source.y - 5} C${(source.x + target.x) / 2},${Math.min(source.y, target.y) - 30} ${(source.x + target.x) / 2},${Math.min(source.y, target.y) - 30} ${target.x},${target.y - 5}`;
+                    
+                    requestPath.setAttribute('d', requestD);
+                    requestPath.setAttribute('class', 'link tor-link');
+                    requestPath.setAttribute('id', `link-${source.id}-${target.id}-request`);
+                    requestPath.setAttribute('stroke-dasharray', '5,5');
+                    requestPath.setAttribute('marker-end', 'url(#tor-arrowhead-request)');
+                    linksGroup.appendChild(requestPath);
+                    
+                    // Create curved path for response
+                    const responsePath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const responseD = `M${target.x},${target.y + 5} C${(source.x + target.x) / 2},${Math.max(source.y, target.y) + 30} ${(source.x + target.x) / 2},${Math.max(source.y, target.y) + 30} ${source.x},${source.y + 5}`;
+                    
+                    responsePath.setAttribute('d', responseD);
+                    responsePath.setAttribute('class', 'link tor-link');
+                    responsePath.setAttribute('id', `link-${target.id}-${source.id}-response`);
+                    responsePath.setAttribute('stroke-dasharray', '5,5');
+                    responsePath.setAttribute('marker-end', 'url(#tor-arrowhead-response)');
+                    linksGroup.appendChild(responsePath);
+                });
+                
+                // Create nodes group
+                const nodesGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                torSvg.appendChild(nodesGroup);
+                
+                // Draw nodes
+                torNodes.forEach(node => {
+                    const nodeGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                    nodeGroup.setAttribute('id', `node-${node.id}`);
+                    nodeGroup.setAttribute('transform', `translate(${node.x}, ${node.y})`);
+                    
+                    // Node circle
+                    const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    circle.setAttribute('r', '25');
+                    circle.setAttribute('class', `node ${node.type}`);
+                    
+                    // Node label
+                    const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    text.setAttribute('y', '40');
+                    text.setAttribute('class', 'label');
+                    text.textContent = node.label;
+                    
+                    nodeGroup.appendChild(circle);
+                    nodeGroup.appendChild(text);
+                    nodesGroup.appendChild(nodeGroup);
+                    
+                    // Add tooltips
+                    nodeGroup.addEventListener('mouseover', (e) => {
+                        let tooltipText = '';
+                        if (node.id === 'client') {
+                            tooltipText = 'Tor Client: The user application that initiates the connection';
+                        } else if (node.id === 'entry') {
+                            tooltipText = 'Entry Node: First relay in the circuit, knows the client but not the destination';
+                        } else if (node.id === 'middle') {
+                            tooltipText = 'Middle Node: Relay that knows neither client nor destination';
+                        } else if (node.id === 'exit') {
+                            tooltipText = 'Exit Node: Final relay that connects to the destination, knows the destination but not the client';
+                        } else if (node.id === 'server') {
+                            tooltipText = 'Destination: The website or service being accessed';
+                        }
+                        
+                        showTooltip(tooltipText, e.pageX, e.pageY);
+                    });
+                    
+                    nodeGroup.addEventListener('mouseout', hideTooltip);
+                });
+                
+                // Add explainer text for Tor
+                const explainerText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                explainerText.setAttribute('x', '500');
+                explainerText.setAttribute('y', '430');
+                explainerText.setAttribute('class', 'description-label');
+                explainerText.textContent = 'Data travels through the same circuit in both directions, with responses following the same path';
+                torSvg.appendChild(explainerText);
+            }
+            
+            // Tor animation function
+            function runTorAnimation() {
+                if (!torAnimationRunning) return;
+                
+                // Remove existing packets
+                const existingPackets = torSvg.querySelectorAll('.packet-group');
+                existingPackets.forEach(packet => packet.remove());
+                
+                // Define the path for requests
+                const requestPath = [
+                    { id: 'client', x: 100, y: 225 },
+                    { id: 'entry', x: 300, y: 225 },
+                    { id: 'middle', x: 500, y: 225 },
+                    { id: 'exit', x: 700, y: 225 },
+                    { id: 'server', x: 900, y: 225 }
+                ];
+                
+                // Define the path for responses (reverse of requests)
+                const responsePath = [...requestPath].reverse();
+                
+                // Create request packet group
+                const requestPacketGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                requestPacketGroup.setAttribute('class', 'packet-group request-packet');
+                torSvg.appendChild(requestPacketGroup);
+                
+                // Create request packet
+                const requestPacket = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                requestPacket.setAttribute('cx', requestPath[0].x);
+                requestPacket.setAttribute('cy', requestPath[0].y - 5); // Slightly offset
+                requestPacket.setAttribute('r', '8');
+                requestPacket.setAttribute('class', 'packet tor-packet');
+                requestPacketGroup.appendChild(requestPacket);
+                
+                // Create encryption layers for request
+                for (let i = 0; i < 3; i++) {
+                    const layer = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    layer.setAttribute('cx', requestPath[0].x);
+                    layer.setAttribute('cy', requestPath[0].y - 5);
+                    layer.setAttribute('r', (i + 1) * 4 + 8);
+                    layer.setAttribute('class', 'encryption-layer');
+                    layer.setAttribute('stroke', `hsl(${270 + i*10}, 70%, ${60 + i*10}%)`);
+                    layer.setAttribute('id', `req-layer-${i}`);
+                    requestPacketGroup.appendChild(layer);
+                }
+                
+                // Create response packet group (initially hidden)
+                const responsePacketGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                responsePacketGroup.setAttribute('class', 'packet-group response-packet');
+                responsePacketGroup.style.opacity = '0';
+                torSvg.appendChild(responsePacketGroup);
+                
+                // Create response packet
+                const responsePacket = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                responsePacket.setAttribute('cx', responsePath[0].x);
+                responsePacket.setAttribute('cy', responsePath[0].y + 5); // Slightly offset
+                responsePacket.setAttribute('r', '8');
+                responsePacket.setAttribute('class', 'packet tor-packet');
+                responsePacketGroup.appendChild(responsePacket);
+                
+                // Create encryption layers for response
+                for (let i = 0; i < 3; i++) {
+                    const layer = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    layer.setAttribute('cx', responsePath[0].x);
+                    layer.setAttribute('cy', responsePath[0].y + 5);
+                    layer.setAttribute('r', (i + 1) * 4 + 8);
+                    layer.setAttribute('class', 'encryption-layer');
+                    layer.setAttribute('stroke', `hsl(${270 + i*10}, 70%, ${60 + i*10}%)`);
+                    layer.setAttribute('id', `res-layer-${i}`);
+                    responsePacketGroup.appendChild(layer);
+                }
+                
+                // Animation variables
+                let requestStartTime = null;
+                let responseStartTime = null;
+                const requestDuration = 3000;
+                const responseDuration = 3000;
+                
+                // Request animation function
+                function animateRequest(timestamp) {
+                    if (!requestStartTime) requestStartTime = timestamp;
+                    const requestElapsed = timestamp - requestStartTime;
+                    
+                    // Request animation
+                    if (requestElapsed < requestDuration) {
+                        // Calculate progress
+                        const requestProgress = Math.min(requestElapsed / requestDuration, 1);
+                        
+                        // Get current segment
+                        const segmentCount = requestPath.length - 1;
+                        const segmentProgress = requestProgress * segmentCount;
+                        const currentSegment = Math.min(Math.floor(segmentProgress), segmentCount - 1);
+                        const segmentSpecificProgress = segmentProgress - currentSegment;
+                        
+                        // Get coordinates for current position
+                        const start = requestPath[currentSegment];
+                        const end = requestPath[currentSegment + 1];
+                        
+                        // Calculate position along the curve
+                        const controlX = (start.x + end.x) / 2;
+                        const controlY = Math.min(start.y, end.y) - 30;
+                        
+                        // Bezier curve formula for a single control point
+                        const t = segmentSpecificProgress;
+                        const mt = 1 - t;
+                        const x = mt*mt * start.x + 2*mt*t * controlX + t*t * end.x;
+                        const y = mt*mt * (start.y - 5) + 2*mt*t * controlY + t*t * (end.y - 5);
+                        
+                        // Update packet position
+                        requestPacket.setAttribute('cx', x);
+                        requestPacket.setAttribute('cy', y);
+                        
+                        // Update encryption layers
+                        for (let i = 0; i < 3; i++) {
+                            const layer = requestPacketGroup.querySelector(`#req-layer-${i}`);
+                            layer.setAttribute('cx', x);
+                            layer.setAttribute('cy', y);
+                            
+                            // Remove encryption layers as we pass through nodes
+                            if (currentSegment >= i + 1) {
+                                layer.style.opacity = '0';
+                            }
+                        }
+                        
+                        if (!torRequestAnimationComplete && torAnimationRunning) {
+                            torAnimationFrameId = requestAnimationFrame(animateRequest);
+                        }
+                    } else {
+                        // Request animation complete
+                        torRequestAnimationComplete = true;
+                        
+                        // Show response packet with a slight delay
+                        setTimeout(() => {
+                            responsePacketGroup.style.opacity = '1';
+                            responseStartTime = performance.now();
+                            
+                            // Start response animation
+                            requestAnimationFrame(animateResponse);
+                        }, 500);
+                    }
+                }
+                
+                // Response animation function
+                function animateResponse(timestamp) {
+                    if (!responseStartTime) responseStartTime = timestamp;
+                    const responseElapsed = timestamp - responseStartTime;
+                    
+                    if (responseElapsed < responseDuration) {
+                        // Calculate progress
+                        const responseProgress = Math.min(responseElapsed / responseDuration, 1);
+                        
+                        // Get current segment
+                        const segmentCount = responsePath.length - 1;
+                        const segmentProgress = responseProgress * segmentCount;
+                        const currentSegment = Math.min(Math.floor(segmentProgress), segmentCount - 1);
+                        const segmentSpecificProgress = segmentProgress - currentSegment;
+                        
+                        // Get coordinates for current position
+                        const start = responsePath[currentSegment];
+                        const end = responsePath[currentSegment + 1];
+                        
+                        // Calculate position along the curve
+                        const controlX = (start.x + end.x) / 2;
+                        const controlY = Math.max(start.y, end.y) + 30;
+                        
+                        // Bezier curve formula for a single control point
+                        const t = segmentSpecificProgress;
+                        const mt = 1 - t;
+                        const x = mt*mt * start.x + 2*mt*t * controlX + t*t * end.x;
+                        const y = mt*mt * (start.y + 5) + 2*mt*t * controlY + t*t * (end.y + 5);
+                        
+                        // Update packet position
+                        responsePacket.setAttribute('cx', x);
+                        responsePacket.setAttribute('cy', y);
+                        
+                        // Update encryption layers
+                        for (let i = 0; i < 3; i++) {
+                            const layer = responsePacketGroup.querySelector(`#res-layer-${i}`);
+                            layer.setAttribute('cx', x);
+                            layer.setAttribute('cy', y);
+                            
+                            // Add encryption layers as we go back through nodes
+                            const reverseIndex = Math.abs(currentSegment - (responsePath.length - 1));
+                            if (reverseIndex >= 3 - i) {
+                                layer.style.opacity = '1';
+                            } else {
+                                layer.style.opacity = '0';
+                            }
+                        }
+                        
+                        if (!torResponseAnimationComplete && torAnimationRunning) {
+                            torAnimationFrameId = requestAnimationFrame(animateResponse);
+                        }
+                    } else {
+                        // Response animation complete
+                        torResponseAnimationComplete = true;
+                        
+                        // Restart the animation after a brief pause if still running
+                        if (torAnimationRunning) {
+                            setTimeout(() => {
+                                if (torAnimationRunning) {
+                                    torRequestAnimationComplete = false;
+                                    torResponseAnimationComplete = false;
+                                    requestStartTime = null;
+                                    responseStartTime = null;
+                                    runTorAnimation();
+                                }
+                            }, 1000);
+                        }
+                    }
+                }
+                
+                // Start the request animation
+                torAnimationFrameId = requestAnimationFrame(animateRequest);
+            }
+            
+            // Initialize Tor visualization
+            initTorVisualization();
+            
+            // Event listeners for Tor buttons
+            torStartBtn.addEventListener('click', () => {
+                torAnimationRunning = true;
+                torRequestAnimationComplete = false;
+                torResponseAnimationComplete = false;
+                runTorAnimation();
+            });
+            
+            torStopBtn.addEventListener('click', () => {
+                torAnimationRunning = false;
+                if (torAnimationFrameId) {
+                    cancelAnimationFrame(torAnimationFrameId);
+                    torAnimationFrameId = null;
+                }
+            });
+            
+            torResetBtn.addEventListener('click', () => {
+                torAnimationRunning = false;
+                if (torAnimationFrameId) {
+                    cancelAnimationFrame(torAnimationFrameId);
+                    torAnimationFrameId = null;
+                }
+                initTorVisualization();
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,1451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding the Freenet Network: An Animated Exploration</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #333;
+            background-color: #f9fafb;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        section {
+            margin-bottom: 4rem;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+        
+        section.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .network-container {
+            position: relative;
+            height: 400px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin: 2rem 0;
+            overflow: hidden;
+            background-color: #f8fafc;
+        }
+        
+        .node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .node:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
+        }
+        
+        .active-node {
+            background-color: #ef4444;
+            transform: scale(1.2);
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+        }
+        
+        .data-node {
+            background-color: #10b981;
+        }
+        
+        .connection {
+            position: absolute;
+            height: 2px;
+            background-color: #cbd5e1;
+            transform-origin: left center;
+            z-index: 5;
+        }
+        
+        .active-connection {
+            background-color: #ef4444;
+            height: 3px;
+            box-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+            z-index: 6;
+        }
+        
+        .packet {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background-color: #f97316;
+            z-index: 15;
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+        }
+        
+        .key-value-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0;
+            justify-content: center;
+        }
+        
+        .key-value-pair {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            width: 200px;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: white;
+        }
+        
+        .key-value-pair:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .key {
+            font-weight: bold;
+            color: #3b82f6;
+            margin-bottom: 0.5rem;
+        }
+        
+        .value {
+            font-family: monospace;
+            background-color: #f8fafc;
+            padding: 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            overflow-wrap: break-word;
+        }
+        
+        .contract {
+            background-color: #ede9fe;
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .state {
+            background-color: #e0f2fe;
+            border-left: 4px solid #0ea5e9;
+        }
+        
+        /* Animations */
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite ease-in-out;
+        }
+        
+        .fade-in {
+            animation: fadeIn 1s ease-in-out;
+        }
+        
+        .slide-in {
+            animation: slideIn 0.5s ease-in-out;
+        }
+        
+        /* Small World Animation */
+        .small-world-container {
+            position: relative;
+            height: 500px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            margin: 2rem 0;
+            overflow: hidden;
+            background-color: #f8fafc;
+        }
+        
+        .small-world-node {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 0.8rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+        }
+        
+        .short-range {
+            background-color: #10b981;
+        }
+        
+        .long-range {
+            background-color: #8b5cf6;
+        }
+        
+        .sw-connection {
+            position: absolute;
+            height: 1px;
+            background-color: #cbd5e1;
+            transform-origin: left center;
+            z-index: 5;
+        }
+        
+        .short-range-connection {
+            background-color: #10b981;
+            height: 2px;
+        }
+        
+        .long-range-connection {
+            background-color: #8b5cf6;
+            height: 2px;
+            stroke-dasharray: 5;
+        }
+        
+        .routing-path {
+            background-color: #f97316;
+            height: 3px;
+            box-shadow: 0 0 10px rgba(249, 115, 22, 0.5);
+            z-index: 6;
+        }
+        
+        /* Contract Animation */
+        .contract-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin: 2rem 0;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        
+        .contract-step {
+            padding: 1rem;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease;
+            opacity: 0.7;
+            transform: translateX(-10px);
+        }
+        
+        .contract-step.active {
+            opacity: 1;
+            transform: translateX(0);
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .step-highlight {
+            background-color: #f0f9ff;
+            padding: 0.5rem;
+            border-radius: 4px;
+            margin-top: 0.5rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+        
+        /* Controls */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .btn {
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+            border: none;
+            outline: none;
+        }
+        
+        .btn:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background-color: #9ca3af;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #6b7280;
+        }
+        
+        /* Progress indicator */
+        .progress-bar {
+            height: 6px;
+            background-color: #e5e7eb;
+            border-radius: 3px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background-color: #3b82f6;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .network-container, .small-world-container {
+                height: 300px;
+            }
+            
+            .key-value-pair {
+                width: 100%;
+            }
+        }
+        
+        #interactive-demo {
+            margin-top: 3rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="text-center mb-12 fade-in">
+            <h1 class="text-4xl font-bold mb-4">Understanding the Freenet Network</h1>
+            <p class="text-xl text-gray-600">An animated exploration of decentralized architecture, key-value storage, and small-world routing</p>
+        </header>
+        
+        <section id="introduction" class="visible">
+            <h2 class="text-2xl font-bold mb-4">What is Freenet?</h2>
+            <p class="mb-4">
+                Freenet is a fully decentralized, peer-to-peer network designed as an alternative to the traditional client-server model of the web. It operates as a global shared computer, providing a platform for sophisticated decentralized software systems without central control or authorities.
+            </p>
+            <p class="mb-4">
+                Unlike other peer-to-peer systems, Freenet is a complete solution that allows you to build websites, group chat, marketplaces, or any real-time app directly on the network. The Freenet Core is a compact binary under 5MB that installs in seconds and connects to nearby peers, forming a resilient mesh network.
+            </p>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <p class="text-blue-800">
+                    <strong>Key Features:</strong> Fully decentralized, censorship-resistant, and designed for efficient routing of information without central servers.
+                </p>
+            </div>
+            
+            <div class="controls">
+                <button id="start-tour" class="btn">Start Animation Tour</button>
+                <button id="skip-to-interactive" class="btn btn-secondary">Skip to Interactive Demo</button>
+            </div>
+        </section>
+        
+        <section id="network-architecture">
+            <h2 class="text-2xl font-bold mb-4">Decentralized Network Architecture</h2>
+            <p class="mb-4">
+                The Freenet network consists of many individual nodes (computers) running the Freenet software. Each node contributes storage space and bandwidth to the network, creating a collaborative system where no single entity has control.
+            </p>
+            <p class="mb-4">
+                When you run Freenet, your computer becomes a node in this decentralized network, connecting to several other nodes to create a mesh of interconnected peers.
+            </p>
+            
+            <div class="network-container" id="architecture-animation">
+                <!-- Nodes and connections will be dynamically added here -->
+            </div>
+            
+            <div class="controls">
+                <button id="restart-architecture" class="btn">Restart Animation</button>
+                <button id="next-to-keyvalue" class="btn">Continue to Key-Value Store</button>
+            </div>
+        </section>
+        
+        <section id="key-value-store">
+            <h2 class="text-2xl font-bold mb-4">Global Key-Value Store</h2>
+            <p class="mb-4">
+                At its core, Freenet functions as a global decentralized key-value store. Unlike traditional key-value databases, the keys in Freenet are WebAssembly code called "Contracts" that define how the corresponding values (or "states") behave.
+            </p>
+            <p class="mb-4">
+                These contracts control what state is permitted, how it can be modified, and how it's efficiently synchronized between peers in the network. This approach provides powerful flexibility while maintaining decentralization.
+            </p>
+            
+            <div class="key-value-container" id="keyvalue-animation">
+                <!-- Key-value pairs will be dynamically added here -->
+            </div>
+            
+            <div class="progress-bar">
+                <div class="progress-fill" id="keyvalue-progress"></div>
+            </div>
+            
+            <div class="controls">
+                <button id="restart-keyvalue" class="btn">Restart Animation</button>
+                <button id="next-to-routing" class="btn">Continue to Small-World Routing</button>
+            </div>
+        </section>
+        
+        <section id="small-world-routing">
+            <h2 class="text-2xl font-bold mb-4">Small-World Routing</h2>
+            <p class="mb-4">
+                Freenet uses a principle called "small-world routing" to efficiently locate information in a decentralized way. This concept is inspired by Stanley Milgram's famous "six degrees of separation" experiment from the 1960s.
+            </p>
+            <p class="mb-4">
+                In a small-world network, most nodes are connected to their neighbors, with a few strategically placed long-range connections. This structure allows for efficient "greedy" routing, where each node forwards a request to the neighbor that appears closest to the destination.
+            </p>
+            
+            <div class="small-world-container" id="routing-animation">
+                <!-- Small world network will be dynamically created here -->
+            </div>
+            
+            <div class="controls">
+                <button id="restart-routing" class="btn">Restart Animation</button>
+                <button id="simulate-request" class="btn">Simulate Request</button>
+                <button id="next-to-contracts" class="btn">Continue to Contracts</button>
+            </div>
+        </section>
+        
+        <section id="contracts">
+            <h2 class="text-2xl font-bold mb-4">Contracts: The Building Blocks</h2>
+            <p class="mb-4">
+                Contracts are WebAssembly code that define how data is stored, retrieved, and modified in the Freenet network. They play a similar role to databases and real-time publish-subscribe mechanisms in traditional services, but in a completely decentralized way.
+            </p>
+            <p class="mb-4">
+                When you store data in Freenet, the contract validates it, ensuring it meets the defined rules. For example, a blog contract might verify that new posts are signed by the blog owner's cryptographic key before accepting them.
+            </p>
+            
+            <div class="contract-container" id="contract-animation">
+                <div class="contract-step" id="step-1">
+                    <h3 class="font-bold">Step 1: Contract Creation</h3>
+                    <p>A contract is written in a language like Rust and compiled to WebAssembly.</p>
+                    <div class="step-highlight">
+                        contract = new BlogContract(owner_public_key);
+                    </div>
+                </div>
+                
+                <div class="contract-step" id="step-2">
+                    <h3 class="font-bold">Step 2: State Validation</h3>
+                    <p>The contract defines rules for what constitutes valid state.</p>
+                    <div class="step-highlight">
+                        function validate_state(parameters, state) {
+                          return verify_signature(state.posts, parameters.owner_key);
+                        }
+                    </div>
+                </div>
+                
+                <div class="contract-step" id="step-3">
+                    <h3 class="font-bold">Step 3: State Synchronization</h3>
+                    <p>Contracts define how to efficiently synchronize state between peers.</p>
+                    <div class="step-highlight">
+                        function summarize_state(state) {
+                          return { post_count: state.posts.length };
+                        }
+                        
+                        function get_state_delta(state, summary) {
+                          if (state.posts.length > summary.post_count) {
+                            return state.posts.slice(summary.post_count);
+                          }
+                          return [];
+                        }
+                    </div>
+                </div>
+                
+                <div class="contract-step" id="step-4">
+                    <h3 class="font-bold">Step 4: State Updates</h3>
+                    <p>Contracts define how state can be modified by applying updates.</p>
+                    <div class="step-highlight">
+                        function update_state(state, data) {
+                          if (verify_signature(data, parameters.owner_key)) {
+                            state.posts.push(data);
+                            return state;
+                          }
+                          throw new Error("Invalid signature");
+                        }
+                    </div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <button id="restart-contracts" class="btn">Restart Animation</button>
+                <button id="next-to-interactive" class="btn">Continue to Interactive Demo</button>
+            </div>
+        </section>
+        
+        <section id="interactive-demo">
+            <h2 class="text-2xl font-bold mb-4">Interactive Freenet Simulator</h2>
+            <p class="mb-4">
+                Now that you understand the basic concepts, try this interactive demonstration that simulates the Freenet network in action. You can create nodes, establish connections, publish data, and observe how the small-world routing algorithm finds content efficiently.
+            </p>
+            
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mb-6">
+                <p class="text-yellow-800">
+                    <strong>Instructions:</strong> Use the buttons below to manipulate the network. Click on nodes to select them as sources or destinations for data transfers.
+                </p>
+            </div>
+            
+            <div class="network-container" id="interactive-network">
+                <!-- Interactive network will be dynamically created here -->
+            </div>
+            
+            <div class="controls">
+                <button id="add-node" class="btn">Add Node</button>
+                <button id="add-connection" class="btn">Add Connection</button>
+                <button id="publish-data" class="btn">Publish Data</button>
+                <button id="search-data" class="btn">Search for Data</button>
+                <button id="reset-network" class="btn btn-secondary">Reset Network</button>
+            </div>
+            
+            <div class="mt-6 p-4 bg-gray-100 rounded-md" id="stats-panel">
+                <h3 class="font-bold">Network Statistics</h3>
+                <div id="network-stats" class="grid grid-cols-2 gap-4 mt-2">
+                    <div>
+                        <span class="font-semibold">Nodes:</span>
+                        <span id="node-count">0</span>
+                    </div>
+                    <div>
+                        <span class="font-semibold">Connections:</span>
+                        <span id="connection-count">0</span>
+                    </div>
+                    <div>
+                        <span class="font-semibold">Data Objects:</span>
+                        <span id="data-count">0</span>
+                    </div>
+                    <div>
+                        <span class="font-semibold">Avg. Hops:</span>
+                        <span id="avg-hops">0</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="conclusion">
+            <h2 class="text-2xl font-bold mb-4">The Future of Decentralized Networks</h2>
+            <p class="mb-4">
+                Freenet represents a powerful approach to building truly decentralized applications. By combining key-value storage with WebAssembly contracts and efficient small-world routing, it creates a platform that is:
+            </p>
+            <ul class="list-disc pl-6 mb-6">
+                <li class="mb-2">Fully decentralized with no central points of failure</li>
+                <li class="mb-2">Scalable through efficient routing algorithms</li>
+                <li class="mb-2">Flexible through programmable contracts</li>
+                <li class="mb-2">User-friendly through browser-based interfaces</li>
+            </ul>
+            <p>
+                As the internet continues to evolve, technologies like Freenet offer a glimpse into a possible future where users have more control over their data and online experiences, free from centralized control and commercial interests.
+            </p>
+        </section>
+    </div>
+    
+    <script>
+        // Utility functions
+        function randomBetween(min, max) {
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+        
+        function distance(x1, y1, x2, y2) {
+            return Math.sqrt(Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2));
+        }
+        
+        // Section visibility control
+        const sections = document.querySelectorAll('section');
+        
+        function checkVisibility() {
+            sections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                const isVisible = (rect.top < window.innerHeight * 0.8 && rect.bottom > 0);
+                
+                if (isVisible) {
+                    section.classList.add('visible');
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', checkVisibility);
+        window.addEventListener('resize', checkVisibility);
+        checkVisibility(); // Initial check
+        
+        // Network Architecture Animation
+        let architectureNodes = [];
+        let architectureConnections = [];
+        const architectureContainer = document.getElementById('architecture-animation');
+        
+        function createArchitectureAnimation() {
+            // Clear previous animation
+            architectureContainer.innerHTML = '';
+            architectureNodes = [];
+            architectureConnections = [];
+            
+            // Create nodes
+            const nodeCount = 12;
+            for (let i = 0; i < nodeCount; i++) {
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.textContent = i + 1;
+                
+                const x = randomBetween(40, architectureContainer.offsetWidth - 40);
+                const y = randomBetween(40, architectureContainer.offsetHeight - 40);
+                
+                node.style.left = x + 'px';
+                node.style.top = y + 'px';
+                
+                architectureContainer.appendChild(node);
+                architectureNodes.push({ id: i + 1, element: node, x, y });
+            }
+            
+            // Create connections (with a slight delay)
+            setTimeout(() => {
+                // Create local connections (each node connects to 2-3 nearby nodes)
+                architectureNodes.forEach(node => {
+                    // Sort other nodes by distance
+                    const otherNodes = architectureNodes
+                        .filter(n => n.id !== node.id)
+                        .map(n => ({ 
+                            id: n.id, 
+                            dist: distance(node.x, node.y, n.x, n.y),
+                            x: n.x,
+                            y: n.y
+                        }))
+                        .sort((a, b) => a.dist - b.dist);
+                    
+                    // Connect to closest 2-3 nodes
+                    const connectCount = randomBetween(2, 3);
+                    for (let i = 0; i < Math.min(connectCount, otherNodes.length); i++) {
+                        if (!connectionExists(node.id, otherNodes[i].id)) {
+                            createConnection(node, otherNodes[i]);
+                        }
+                    }
+                    
+                    // Add one random long-distance connection
+                    const randomIdx = randomBetween(Math.floor(otherNodes.length / 2), otherNodes.length - 1);
+                    if (!connectionExists(node.id, otherNodes[randomIdx].id)) {
+                        createConnection(node, otherNodes[randomIdx]);
+                    }
+                });
+                
+                // Start node highlight animation
+                setTimeout(simulateDataFlow, 1000);
+            }, 800);
+        }
+        
+        function connectionExists(id1, id2) {
+            return architectureConnections.some(conn => 
+                (conn.from === id1 && conn.to === id2) || 
+                (conn.from === id2 && conn.to === id1)
+            );
+        }
+        
+        function createConnection(node1, node2) {
+            const conn = document.createElement('div');
+            conn.className = 'connection';
+            
+            const x1 = node1.x;
+            const y1 = node1.y;
+            const x2 = node2.x || node2.x;
+            const y2 = node2.y || node2.y;
+            
+            const length = distance(x1, y1, x2, y2);
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            conn.style.width = length + 'px';
+            conn.style.left = x1 + 'px';
+            conn.style.top = y1 + 'px';
+            conn.style.transform = `rotate(${angle}deg)`;
+            
+            architectureContainer.appendChild(conn);
+            architectureConnections.push({ 
+                from: node1.id, 
+                to: node2.id, 
+                element: conn 
+            });
+        }
+        
+        function simulateDataFlow() {
+            // Reset previous active elements
+            document.querySelectorAll('.active-node').forEach(node => {
+                node.classList.remove('active-node');
+            });
+            
+            document.querySelectorAll('.active-connection').forEach(conn => {
+                conn.classList.remove('active-connection');
+            });
+            
+            // Randomly select a source node
+            const sourceIdx = randomBetween(0, architectureNodes.length - 1);
+            const sourceNode = architectureNodes[sourceIdx];
+            sourceNode.element.classList.add('active-node');
+            
+            // Find a path through the network
+            const path = findRandomPath(sourceNode.id, 3 + randomBetween(0, 3));
+            
+            // Animate the path
+            let delay = 500;
+            for (let i = 0; i < path.length - 1; i++) {
+                const conn = findConnection(path[i], path[i + 1]);
+                
+                setTimeout(() => {
+                    const fromNode = architectureNodes.find(n => n.id === path[i]);
+                    fromNode.element.classList.add('active-node');
+                    
+                    if (conn) {
+                        conn.element.classList.add('active-connection');
+                        animatePacket(fromNode, architectureNodes.find(n => n.id === path[i + 1]));
+                    }
+                }, delay);
+                
+                delay += 1000;
+                
+                // Add next node after a delay
+                setTimeout(() => {
+                    const nextNode = architectureNodes.find(n => n.id === path[i + 1]);
+                    nextNode.element.classList.add('active-node');
+                }, delay);
+            }
+            
+            // Reset and repeat
+            setTimeout(() => {
+                simulateDataFlow();
+            }, delay + 2000);
+        }
+        
+        function findRandomPath(startId, length) {
+            const path = [startId];
+            let currentId = startId;
+            
+            for (let i = 0; i < length; i++) {
+                const connections = architectureConnections.filter(conn => 
+                    (conn.from === currentId || conn.to === currentId) && 
+                    !path.includes(conn.from === currentId ? conn.to : conn.from)
+                );
+                
+                if (connections.length === 0) break;
+                
+                const randomConn = connections[randomBetween(0, connections.length - 1)];
+                const nextId = randomConn.from === currentId ? randomConn.to : randomConn.from;
+                
+                path.push(nextId);
+                currentId = nextId;
+            }
+            
+            return path;
+        }
+        
+        function findConnection(id1, id2) {
+            return architectureConnections.find(conn => 
+                (conn.from === id1 && conn.to === id2) || 
+                (conn.from === id2 && conn.to === id1)
+            );
+        }
+        
+        function animatePacket(fromNode, toNode) {
+            const packet = document.createElement('div');
+            packet.className = 'packet';
+            
+            packet.style.left = fromNode.x + 'px';
+            packet.style.top = fromNode.y + 'px';
+            
+            architectureContainer.appendChild(packet);
+            
+            // Animate packet
+            setTimeout(() => {
+                packet.style.transition = 'left 0.8s ease, top 0.8s ease';
+                packet.style.left = toNode.x + 'px';
+                packet.style.top = toNode.y + 'px';
+                
+                // Remove packet after animation
+                setTimeout(() => {
+                    packet.remove();
+                }, 1000);
+            }, 50);
+        }
+        
+        // Key-Value Store Animation
+        const keyValueContainer = document.getElementById('keyvalue-animation');
+        const keyValueProgress = document.getElementById('keyvalue-progress');
+        
+        function createKeyValueAnimation() {
+            keyValueContainer.innerHTML = '';
+            keyValueProgress.style.width = '0%';
+            
+            const keyValuePairs = [
+                { key: 'BlogContract', value: 'WebAssembly code that validates blog posts', type: 'contract' },
+                { key: 'ChatContract', value: 'WebAssembly code for real-time messaging', type: 'contract' },
+                { key: 'ProfileContract', value: 'WebAssembly code for user profiles', type: 'contract' },
+                { key: 'blog-123', value: '{ "posts": [ ... ], "owner": "..." }', type: 'state' },
+                { key: 'chat-456', value: '{ "messages": [ ... ], "members": [ ... ] }', type: 'state' },
+                { key: 'profile-789', value: '{ "name": "Alice", "bio": "..." }', type: 'state' }
+            ];
+            
+            // Add key-value pairs with animation
+            let delay = 0;
+            keyValuePairs.forEach((pair, index) => {
+                setTimeout(() => {
+                    const element = document.createElement('div');
+                    element.className = `key-value-pair ${pair.type} slide-in`;
+                    
+                    const keyElement = document.createElement('div');
+                    keyElement.className = 'key';
+                    keyElement.textContent = pair.key;
+                    
+                    const valueElement = document.createElement('div');
+                    valueElement.className = 'value';
+                    valueElement.textContent = pair.value;
+                    
+                    element.appendChild(keyElement);
+                    element.appendChild(valueElement);
+                    keyValueContainer.appendChild(element);
+                    
+                    // Update progress bar
+                    keyValueProgress.style.width = ((index + 1) / keyValuePairs.length * 100) + '%';
+                    
+                    // Add pulse effect to the last added item
+                    if (index > 0) {
+                        const prevElement = keyValueContainer.children[index - 1];
+                        if (prevElement) {
+                            prevElement.classList.remove('pulse');
+                        }
+                    }
+                    
+                    element.classList.add('pulse');
+                    
+                    // Remove pulse from the last element after all animations
+                    if (index === keyValuePairs.length - 1) {
+                        setTimeout(() => {
+                            element.classList.remove('pulse');
+                        }, 4000);
+                    }
+                    
+                }, delay);
+                
+                delay += 800;
+            });
+        }
+        
+        // Small World Routing Animation
+        const routingContainer = document.getElementById('routing-animation');
+        let routingNodes = [];
+        let routingConnections = [];
+        
+        function createRoutingAnimation() {
+            routingContainer.innerHTML = '';
+            routingNodes = [];
+            routingConnections = [];
+            
+            // Create a grid of nodes (small world network)
+            const gridSize = 8;
+            const nodeSpacingX = routingContainer.offsetWidth / gridSize;
+            const nodeSpacingY = routingContainer.offsetHeight / gridSize;
+            
+            // Create nodes in a grid pattern
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j < gridSize; j++) {
+                    const node = document.createElement('div');
+                    node.className = 'small-world-node';
+                    node.textContent = (i * gridSize + j + 1);
+                    
+                    const x = nodeSpacingX * (i + 0.5);
+                    const y = nodeSpacingY * (j + 0.5);
+                    
+                    node.style.left = x + 'px';
+                    node.style.top = y + 'px';
+                    
+                    routingContainer.appendChild(node);
+                    routingNodes.push({ 
+                        id: i * gridSize + j + 1, 
+                        element: node, 
+                        x, 
+                        y, 
+                        gridX: i, 
+                        gridY: j 
+                    });
+                }
+            }
+            
+            // Add short-range connections (to neighbors)
+            routingNodes.forEach(node => {
+                const { gridX, gridY } = node;
+                
+                // Connect to right neighbor
+                if (gridX < gridSize - 1) {
+                    const rightNeighbor = routingNodes.find(n => n.gridX === gridX + 1 && n.gridY === gridY);
+                    createRoutingConnection(node, rightNeighbor, 'short-range-connection');
+                }
+                
+                // Connect to bottom neighbor
+                if (gridY < gridSize - 1) {
+                    const bottomNeighbor = routingNodes.find(n => n.gridX === gridX && n.gridY === gridY + 1);
+                    createRoutingConnection(node, bottomNeighbor, 'short-range-connection');
+                }
+            });
+            
+            // Add long-range connections (10-15 random long connections)
+            const longRangeCount = randomBetween(10, 15);
+            for (let i = 0; i < longRangeCount; i++) {
+                const sourceIdx = randomBetween(0, routingNodes.length - 1);
+                let targetIdx;
+                
+                do {
+                    targetIdx = randomBetween(0, routingNodes.length - 1);
+                } while (targetIdx === sourceIdx || 
+                         areNeighbors(routingNodes[sourceIdx], routingNodes[targetIdx]) ||
+                         connectionExistsInRouting(routingNodes[sourceIdx].id, routingNodes[targetIdx].id));
+                
+                createRoutingConnection(routingNodes[sourceIdx], routingNodes[targetIdx], 'long-range-connection');
+            }
+            
+            // Highlight node types
+            setTimeout(() => {
+                // Mark nodes with long-range connections
+                routingConnections.filter(conn => conn.element.classList.contains('long-range-connection'))
+                    .forEach(conn => {
+                        const fromNode = routingNodes.find(n => n.id === conn.from);
+                        const toNode = routingNodes.find(n => n.id === conn.to);
+                        fromNode.element.classList.add('long-range');
+                        toNode.element.classList.add('long-range');
+                    });
+                
+                // Mark remaining nodes as short-range
+                routingNodes.forEach(node => {
+                    if (!node.element.classList.contains('long-range')) {
+                        node.element.classList.add('short-range');
+                    }
+                });
+            }, 1000);
+        }
+        
+        function areNeighbors(node1, node2) {
+            return (Math.abs(node1.gridX - node2.gridX) <= 1 && 
+                    Math.abs(node1.gridY - node2.gridY) <= 1);
+        }
+        
+        function connectionExistsInRouting(id1, id2) {
+            return routingConnections.some(conn => 
+                (conn.from === id1 && conn.to === id2) || 
+                (conn.from === id2 && conn.to === id1)
+            );
+        }
+        
+        function createRoutingConnection(node1, node2, className = '') {
+            const conn = document.createElement('div');
+            conn.className = `sw-connection ${className}`;
+            
+            const x1 = node1.x;
+            const y1 = node1.y;
+            const x2 = node2.x;
+            const y2 = node2.y;
+            
+            const length = distance(x1, y1, x2, y2);
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            conn.style.width = length + 'px';
+            conn.style.left = x1 + 'px';
+            conn.style.top = y1 + 'px';
+            conn.style.transform = `rotate(${angle}deg)`;
+            
+            routingContainer.appendChild(conn);
+            routingConnections.push({ 
+                from: node1.id, 
+                to: node2.id, 
+                element: conn 
+            });
+        }
+        
+        function simulateRouting() {
+            // Reset any previous routing
+            document.querySelectorAll('.routing-path').forEach(el => {
+                el.classList.remove('routing-path');
+            });
+            
+            // Select random start and end nodes
+            const startIdx = randomBetween(0, routingNodes.length - 1);
+            let endIdx;
+            do {
+                endIdx = randomBetween(0, routingNodes.length - 1);
+            } while (endIdx === startIdx);
+            
+            const startNode = routingNodes[startIdx];
+            const endNode = routingNodes[endIdx];
+            
+            // Highlight start and end nodes
+            routingNodes.forEach(node => {
+                node.element.classList.remove('active-node');
+            });
+            
+            startNode.element.classList.add('active-node');
+            endNode.element.classList.add('active-node');
+            
+            // Simulate small-world routing (greedy routing based on grid distance)
+            let currentNode = startNode;
+            const path = [currentNode.id];
+            let pathFound = false;
+            
+            function animateRoutingStep(stepIndex) {
+                if (currentNode.id === endNode.id) {
+                    // Path found
+                    setTimeout(() => {
+                        endNode.element.classList.add('pulse');
+                        setTimeout(() => {
+                            endNode.element.classList.remove('pulse');
+                        }, 2000);
+                    }, 500);
+                    return;
+                }
+                
+                // Find neighbors
+                const neighbors = getNodeNeighbors(currentNode);
+                
+                // Filter out neighbors we've already visited
+                const unvisitedNeighbors = neighbors.filter(n => !path.includes(n.id));
+                
+                if (unvisitedNeighbors.length === 0) {
+                    // No unvisited neighbors, we're stuck
+                    return;
+                }
+                
+                // Find the neighbor closest to the destination (using grid distance as a heuristic)
+                unvisitedNeighbors.sort((a, b) => {
+                    const distA = gridDistance(a, endNode);
+                    const distB = gridDistance(b, endNode);
+                    return distA - distB;
+                });
+                
+                const nextNode = unvisitedNeighbors[0];
+                path.push(nextNode.id);
+                
+                // Highlight the connection
+                const connection = findRoutingConnection(currentNode.id, nextNode.id);
+                if (connection) {
+                    connection.element.classList.add('routing-path');
+                }
+                
+                // Move to next node after delay
+                setTimeout(() => {
+                    nextNode.element.classList.add('active-node');
+                    currentNode = nextNode;
+                    
+                    // Animate packet
+                    const packet = document.createElement('div');
+                    packet.className = 'packet';
+                    packet.style.left = (connection.fromNode.x) + 'px';
+                    packet.style.top = (connection.fromNode.y) + 'px';
+                    routingContainer.appendChild(packet);
+                    
+                    setTimeout(() => {
+                        packet.style.transition = 'left 0.5s ease, top 0.5s ease';
+                        packet.style.left = (connection.toNode.x) + 'px';
+                        packet.style.top = (connection.toNode.y) + 'px';
+                        
+                        setTimeout(() => {
+                            packet.remove();
+                            animateRoutingStep(stepIndex + 1);
+                        }, 500);
+                    }, 50);
+                }, 500);
+            }
+            
+            // Start the routing animation
+            setTimeout(() => {
+                animateRoutingStep(0);
+            }, 1000);
+        }
+        
+        function getNodeNeighbors(node) {
+            const connections = routingConnections.filter(conn => 
+                conn.from === node.id || conn.to === node.id
+            );
+            
+            return connections.map(conn => {
+                const neighborId = conn.from === node.id ? conn.to : conn.from;
+                return routingNodes.find(n => n.id === neighborId);
+            });
+        }
+        
+        function gridDistance(node1, node2) {
+            return Math.abs(node1.gridX - node2.gridX) + Math.abs(node1.gridY - node2.gridY);
+        }
+        
+        function findRoutingConnection(id1, id2) {
+            const connection = routingConnections.find(conn => 
+                (conn.from === id1 && conn.to === id2) || 
+                (conn.from === id2 && conn.to === id1)
+            );
+            
+            if (connection) {
+                const fromNode = routingNodes.find(n => n.id === id1);
+                const toNode = routingNodes.find(n => n.id === id2);
+                return { ...connection, fromNode, toNode };
+            }
+            
+            return null;
+        }
+        
+        // Contract Animation
+        function animateContractSteps() {
+            const steps = document.querySelectorAll('.contract-step');
+            steps.forEach(step => step.classList.remove('active'));
+            
+            let delay = 500;
+            steps.forEach((step, index) => {
+                setTimeout(() => {
+                    step.classList.add('active');
+                }, delay);
+                delay += 1500;
+            });
+        }
+        
+        // Interactive Demo
+        const interactiveContainer = document.getElementById('interactive-network');
+        let interactiveNodes = [];
+        let interactiveConnections = [];
+        let selectedNode = null;
+        let secondSelectedNode = null;
+        let dataNodes = [];
+        
+        function initializeInteractiveDemo() {
+            interactiveContainer.innerHTML = '';
+            interactiveNodes = [];
+            interactiveConnections = [];
+            dataNodes = [];
+            selectedNode = null;
+            secondSelectedNode = null;
+            
+            // Create initial network (5 nodes)
+            for (let i = 0; i < 5; i++) {
+                addInteractiveNode();
+            }
+            
+            // Add some initial connections
+            for (let i = 0; i < 8; i++) {
+                const node1 = interactiveNodes[randomBetween(0, interactiveNodes.length - 1)];
+                let node2;
+                
+                do {
+                    node2 = interactiveNodes[randomBetween(0, interactiveNodes.length - 1)];
+                } while (node1 === node2 || findInteractiveConnection(node1.id, node2.id));
+                
+                addInteractiveConnection(node1, node2);
+            }
+            
+            updateStats();
+        }
+        
+        function addInteractiveNode() {
+            const node = document.createElement('div');
+            node.className = 'node';
+            
+            const id = interactiveNodes.length + 1;
+            node.textContent = id;
+            
+            const x = randomBetween(40, interactiveContainer.offsetWidth - 40);
+            const y = randomBetween(40, interactiveContainer.offsetHeight - 40);
+            
+            node.style.left = x + 'px';
+            node.style.top = y + 'px';
+            
+            node.addEventListener('click', () => {
+                if (selectedNode === null) {
+                    selectedNode = interactiveNodes.find(n => n.id === id);
+                    node.classList.add('active-node');
+                } else if (secondSelectedNode === null && selectedNode.id !== id) {
+                    secondSelectedNode = interactiveNodes.find(n => n.id === id);
+                    node.classList.add('active-node');
+                } else {
+                    // Reset selection
+                    interactiveNodes.forEach(n => n.element.classList.remove('active-node'));
+                    selectedNode = interactiveNodes.find(n => n.id === id);
+                    node.classList.add('active-node');
+                    secondSelectedNode = null;
+                }
+            });
+            
+            interactiveContainer.appendChild(node);
+            
+            const newNode = { id, element: node, x, y };
+            interactiveNodes.push(newNode);
+            return newNode;
+        }
+        
+        function addInteractiveConnection(node1, node2) {
+            if (findInteractiveConnection(node1.id, node2.id)) {
+                return null; // Connection already exists
+            }
+            
+            const conn = document.createElement('div');
+            conn.className = 'connection';
+            
+            const x1 = node1.x;
+            const y1 = node1.y;
+            const x2 = node2.x;
+            const y2 = node2.y;
+            
+            const length = distance(x1, y1, x2, y2);
+            const angle = Math.atan2(y2 - y1, x2 - x1) * 180 / Math.PI;
+            
+            conn.style.width = length + 'px';
+            conn.style.left = x1 + 'px';
+            conn.style.top = y1 + 'px';
+            conn.style.transform = `rotate(${angle}deg)`;
+            
+            interactiveContainer.appendChild(conn);
+            
+            const newConnection = { 
+                from: node1.id, 
+                to: node2.id, 
+                element: conn 
+            };
+            
+            interactiveConnections.push(newConnection);
+            return newConnection;
+        }
+        
+        function findInteractiveConnection(id1, id2) {
+            return interactiveConnections.find(conn => 
+                (conn.from === id1 && conn.to === id2) || 
+                (conn.from === id2 && conn.to === id1)
+            );
+        }
+        
+        function publishData() {
+            if (!selectedNode) {
+                alert('Please select a node to publish data from.');
+                return;
+            }
+            
+            selectedNode.element.classList.add('data-node');
+            dataNodes.push(selectedNode.id);
+            
+            // Reset selection
+            interactiveNodes.forEach(n => n.element.classList.remove('active-node'));
+            selectedNode = null;
+            secondSelectedNode = null;
+            
+            updateStats();
+        }
+        
+        function searchData() {
+            if (!selectedNode) {
+                alert('Please select a source node to search from.');
+                return;
+            }
+            
+            if (dataNodes.length === 0) {
+                alert('No data has been published yet. Please publish data first.');
+                return;
+            }
+            
+            // Find closest data node using breadth-first search
+            const visited = new Set();
+            const queue = [{ node: selectedNode, path: [selectedNode.id], distance: 0 }];
+            visited.add(selectedNode.id);
+            
+            let shortestPath = null;
+            let hops = 0;
+            
+            while (queue.length > 0) {
+                const { node, path, distance } = queue.shift();
+                
+                if (dataNodes.includes(node.id)) {
+                    shortestPath = path;
+                    hops = distance;
+                    break;
+                }
+                
+                // Find neighbors
+                const neighbors = getInteractiveNodeNeighbors(node);
+                
+                for (const neighbor of neighbors) {
+                    if (!visited.has(neighbor.id)) {
+                        visited.add(neighbor.id);
+                        queue.push({ 
+                            node: neighbor, 
+                            path: [...path, neighbor.id], 
+                            distance: distance + 1 
+                        });
+                    }
+                }
+            }
+            
+            if (shortestPath) {
+                // Animate the search path
+                animateSearchPath(shortestPath);
+                
+                // Update stats
+                document.getElementById('avg-hops').textContent = hops;
+            } else {
+                alert('No path to data found from the selected node.');
+            }
+            
+            // Reset selection
+            setTimeout(() => {
+                interactiveNodes.forEach(n => n.element.classList.remove('active-node'));
+                selectedNode = null;
+                secondSelectedNode = null;
+            }, 2000);
+        }
+        
+        function getInteractiveNodeNeighbors(node) {
+            const connections = interactiveConnections.filter(conn => 
+                conn.from === node.id || conn.to === node.id
+            );
+            
+            return connections.map(conn => {
+                const neighborId = conn.from === node.id ? conn.to : conn.from;
+                return interactiveNodes.find(n => n.id === neighborId);
+            });
+        }
+        
+        function animateSearchPath(path) {
+            // Reset any active connections
+            interactiveConnections.forEach(conn => {
+                conn.element.classList.remove('active-connection');
+            });
+            
+            let delay = 0;
+            
+            // Highlight nodes in path
+            for (let i = 0; i < path.length; i++) {
+                const nodeId = path[i];
+                const node = interactiveNodes.find(n => n.id === nodeId);
+                
+                setTimeout(() => {
+                    node.element.classList.add('active-node');
+                    
+                    // Highlight connection to next node
+                    if (i < path.length - 1) {
+                        const nextNodeId = path[i + 1];
+                        const conn = findInteractiveConnection(nodeId, nextNodeId);
+                        
+                        if (conn) {
+                            conn.element.classList.add('active-connection');
+                            
+                            // Animate packet
+                            const node1 = interactiveNodes.find(n => n.id === conn.from);
+                            const node2 = interactiveNodes.find(n => n.id === conn.to);
+                            
+                            const fromNode = node1.id === nodeId ? node1 : node2;
+                            const toNode = node1.id === nodeId ? node2 : node1;
+                            
+                            const packet = document.createElement('div');
+                            packet.className = 'packet';
+                            packet.style.left = fromNode.x + 'px';
+                            packet.style.top = fromNode.y + 'px';
+                            interactiveContainer.appendChild(packet);
+                            
+                            setTimeout(() => {
+                                packet.style.transition = 'left 0.5s ease, top 0.5s ease';
+                                packet.style.left = toNode.x + 'px';
+                                packet.style.top = toNode.y + 'px';
+                                
+                                setTimeout(() => {
+                                    packet.remove();
+                                }, 500);
+                            }, 50);
+                        }
+                    }
+                }, delay);
+                
+                delay += 800;
+            }
+        }
+        
+        function updateStats() {
+            document.getElementById('node-count').textContent = interactiveNodes.length;
+            document.getElementById('connection-count').textContent = interactiveConnections.length;
+            document.getElementById('data-count').textContent = dataNodes.length;
+        }
+        
+        // Event Listeners
+        document.getElementById('start-tour').addEventListener('click', () => {
+            document.getElementById('network-architecture').scrollIntoView({ behavior: 'smooth' });
+            createArchitectureAnimation();
+        });
+        
+        document.getElementById('skip-to-interactive').addEventListener('click', () => {
+            document.getElementById('interactive-demo').scrollIntoView({ behavior: 'smooth' });
+            initializeInteractiveDemo();
+        });
+        
+        document.getElementById('restart-architecture').addEventListener('click', createArchitectureAnimation);
+        
+        document.getElementById('next-to-keyvalue').addEventListener('click', () => {
+            document.getElementById('key-value-store').scrollIntoView({ behavior: 'smooth' });
+            createKeyValueAnimation();
+        });
+        
+        document.getElementById('restart-keyvalue').addEventListener('click', createKeyValueAnimation);
+        
+        document.getElementById('next-to-routing').addEventListener('click', () => {
+            document.getElementById('small-world-routing').scrollIntoView({ behavior: 'smooth' });
+            createRoutingAnimation();
+        });
+        
+        document.getElementById('restart-routing').addEventListener('click', createRoutingAnimation);
+        document.getElementById('simulate-request').addEventListener('click', simulateRouting);
+        
+        document.getElementById('next-to-contracts').addEventListener('click', () => {
+            document.getElementById('contracts').scrollIntoView({ behavior: 'smooth' });
+            animateContractSteps();
+        });
+        
+        document.getElementById('restart-contracts').addEventListener('click', animateContractSteps);
+        
+        document.getElementById('next-to-interactive').addEventListener('click', () => {
+            document.getElementById('interactive-demo').scrollIntoView({ behavior: 'smooth' });
+            initializeInteractiveDemo();
+        });
+        
+        document.getElementById('add-node').addEventListener('click', () => {
+            addInteractiveNode();
+            updateStats();
+        });
+        
+        document.getElementById('add-connection').addEventListener('click', () => {
+            if (!selectedNode || !secondSelectedNode) {
+                alert('Please select two nodes to connect.');
+                return;
+            }
+            
+            addInteractiveConnection(selectedNode, secondSelectedNode);
+            
+            // Reset selection
+            interactiveNodes.forEach(n => n.element.classList.remove('active-node'));
+            selectedNode = null;
+            secondSelectedNode = null;
+            
+            updateStats();
+        });
+        
+        document.getElementById('publish-data').addEventListener('click', publishData);
+        document.getElementById('search-data').addEventListener('click', searchData);
+        document.getElementById('reset-network').addEventListener('click', initializeInteractiveDemo);
+        
+        // Initialize on load
+        window.addEventListener('load', () => {
+            createArchitectureAnimation();
+            // Initialize contract step animation
+            animateContractSteps();
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DDoS Attack Simulation</title>
+  <style>
+    body {
+      margin: 0;
+      background: #0a0a0a;
+      color: #fff;
+      font-family: 'Courier New', monospace;
+      overflow: hidden;
+    }
+    .label {
+      position: absolute;
+      font-size: 14px;
+      background: rgba(0,0,0,0.8);
+      padding: 4px 8px;
+      border-radius: 4px;
+      border: 1px solid #333;
+      pointer-events: none;
+    }
+    .stats {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: rgba(0,0,0,0.8);
+      padding: 10px;
+      border-radius: 4px;
+      border: 1px solid #333;
+      font-size: 14px;
+      text-align: right;
+    }
+    canvas {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div class="label" style="top: 20px; left: 20px;">Compromised Devices (Botnet)</div>
+  <div class="label" style="bottom: 20px; left: 20px;">Command & Control Server</div>
+  <div class="label" style="top: 50%; left: 50%; transform: translate(-50%, -50%);">Target Server</div>
+  <div class="stats" id="stats">
+    Packets sent: 0<br>
+    Active bots: 0<br>
+    Server load: 0%
+  </div>
+
+  <script>
+    // Initialize canvas
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    // Set up simulation constants
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const commandCenter = { x: 100, y: canvas.height - 100 };
+    
+    // Simulation variables
+    let bots = [];
+    let packets = [];
+    let serverLoad = 0;
+    let packetsSent = 0;
+    let hitFlash = 0;
+    let commandFlash = 0;
+    
+    // Control variables
+    const MAX_BOTS = 300;
+    const SERVER_CAPACITY = 100;
+    
+    // Colors with proper hex values
+    const COLORS = {
+      BOT: '#ff3333',
+      COMMAND: '#ff9900',
+      SERVER_NORMAL: '#33cc33',
+      SERVER_STRESSED: '#ffcc00',
+      SERVER_OVERLOAD: '#ff3333',
+      PACKET: '#00ccff',
+      COMMAND_PACKET: '#ffcc00'
+    };
+    
+    // Function to spawn botnet devices
+    function spawnBots(count = 25) {
+      if (bots.length >= MAX_BOTS) return;
+      
+      const actualCount = Math.min(count, MAX_BOTS - bots.length);
+      
+      for (let i = 0; i < actualCount; i++) {
+        // Position bots randomly but avoid center area
+        let bx, by;
+        do {
+          bx = Math.random() * canvas.width;
+          by = Math.random() * canvas.height;
+        } while (Math.hypot(bx - centerX, by - centerY) < 150);
+        
+        bots.push({
+          x: bx,
+          y: by,
+          size: 3 + Math.random() * 2,
+          lastCommand: 0,
+          active: true
+        });
+      }
+    }
+    
+    // Function to send commands from C&C to bots
+    function sendCommands() {
+      // Flash the command center to indicate activity
+      commandFlash = 255;
+      
+      // Send command packets to random subset of bots
+      const targetBotCount = Math.floor(bots.length * 0.3);
+      const targetBots = new Set();
+      
+      while (targetBots.size < targetBotCount && targetBots.size < bots.length) {
+        targetBots.add(Math.floor(Math.random() * bots.length));
+      }
+      
+      targetBots.forEach(index => {
+        if (bots[index]) {
+          const bot = bots[index];
+          
+          // Create command packet
+          packets.push({
+            x: commandCenter.x,
+            y: commandCenter.y,
+            targetX: bot.x,
+            targetY: bot.y,
+            speed: 3 + Math.random() * 2,
+            type: 'command',
+            ttl: 120
+          });
+          
+          // Mark bot as having received a command
+          bot.lastCommand = Date.now();
+        }
+      });
+    }
+    
+    // Function to draw the target server
+    function drawServer() {
+      // Calculate load level (0-1)
+      const loadLevel = Math.min(serverLoad / SERVER_CAPACITY, 1);
+      
+      // Server color based on load
+      let serverColor;
+      if (loadLevel > 0.8) {
+        serverColor = COLORS.SERVER_OVERLOAD;
+      } else if (loadLevel > 0.4) {
+        serverColor = COLORS.SERVER_STRESSED;
+      } else {
+        serverColor = COLORS.SERVER_NORMAL;
+      }
+      
+      // Apply hit flash effect if active
+      if (hitFlash > 0) {
+        const flashIntensity = hitFlash / 255;
+        serverColor = blendColors(serverColor, '#ffffff', flashIntensity);
+      }
+      
+      // Draw server as a rounded rectangle
+      roundRect(ctx, centerX - 40, centerY - 40, 80, 80, 5, serverColor);
+      
+      // Draw server load meter
+      ctx.fillStyle = '#000';
+      ctx.fillRect(centerX - 30, centerY + 20, 60, 8);
+      ctx.fillStyle = getLoadColor(loadLevel);
+      ctx.fillRect(centerX - 30, centerY + 20, 60 * loadLevel, 8);
+      
+      // Draw server rack lines
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 3; i++) {
+        ctx.beginPath();
+        ctx.moveTo(centerX - 40, centerY - 20 + i * 20);
+        ctx.lineTo(centerX + 40, centerY - 20 + i * 20);
+        ctx.stroke();
+      }
+    }
+    
+    // Function to draw the command & control server
+    function drawCommandCenter() {
+      // Apply command flash effect if active
+      let commandColor = COLORS.COMMAND;
+      if (commandFlash > 0) {
+        const flashIntensity = commandFlash / 255;
+        commandColor = blendColors(commandColor, '#ffffff', flashIntensity);
+      }
+      
+      // Draw C&C server as a hexagon
+      ctx.fillStyle = commandColor;
+      drawHexagon(ctx, commandCenter.x, commandCenter.y, 20);
+      
+      // Draw antenna
+      ctx.strokeStyle = '#888';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(commandCenter.x, commandCenter.y - 20);
+      ctx.lineTo(commandCenter.x, commandCenter.y - 40);
+      ctx.stroke();
+      
+      // Draw signal waves
+      ctx.strokeStyle = commandColor;
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 3; i++) {
+        const radius = 10 + i * 10;
+        ctx.globalAlpha = 0.3 - (i * 0.1);
+        ctx.beginPath();
+        ctx.arc(commandCenter.x, commandCenter.y - 30, radius, -Math.PI, 0);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+    }
+    
+    // Function to draw a bot device
+    function drawBot(bot) {
+      // Bot color - red for active, darker for inactive
+      const isRecentlyActive = Date.now() - bot.lastCommand < 2000;
+      ctx.fillStyle = isRecentlyActive ? COLORS.BOT : '#880000';
+      
+      // Draw bot as a circle
+      ctx.beginPath();
+      ctx.arc(bot.x, bot.y, bot.size, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Draw a small indicator if actively sending packets
+      if (isRecentlyActive) {
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(bot.x, bot.y, bot.size * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+    
+    // Function to update and draw packets
+    function updatePackets() {
+      const newPackets = [];
+      
+      for (let packet of packets) {
+        // Calculate direction vector
+        const dx = packet.targetX - packet.x;
+        const dy = packet.targetY - packet.y;
+        const dist = Math.hypot(dx, dy);
+        
+        // Move packet
+        if (dist > packet.speed) {
+          packet.x += (dx / dist) * packet.speed;
+          packet.y += (dy / dist) * packet.speed;
+          packet.ttl--;
+          
+          // Draw packet
+          drawPacket(packet);
+          
+          // Keep packet if still alive
+          if (packet.ttl > 0) {
+            newPackets.push(packet);
+          }
+        } else {
+          // Packet has reached its destination
+          if (packet.type === 'command') {
+            // Command packet reached bot - nothing specific to do here
+          } else if (packet.type === 'attack') {
+            // Attack packet reached server
+            serverLoad += 1 + Math.random();
+            hitFlash = 120;
+            packetsSent++;
+          }
+        }
+      }
+      
+      packets = newPackets;
+    }
+    
+    // Function to draw a packet
+    function drawPacket(packet) {
+      ctx.fillStyle = packet.type === 'command' ? COLORS.COMMAND_PACKET : COLORS.PACKET;
+      
+      ctx.beginPath();
+      if (packet.type === 'command') {
+        // Draw command packet as a triangle
+        const angle = Math.atan2(packet.targetY - packet.y, packet.targetX - packet.x);
+        drawTriangle(ctx, packet.x, packet.y, 4, angle);
+      } else {
+        // Draw attack packet as a small square
+        ctx.rect(packet.x - 2, packet.y - 2, 4, 4);
+      }
+      ctx.fill();
+      
+      // Draw packet trail
+      ctx.strokeStyle = packet.type === 'command' ? COLORS.COMMAND_PACKET : COLORS.PACKET;
+      ctx.globalAlpha = 0.3;
+      ctx.beginPath();
+      ctx.moveTo(packet.x, packet.y);
+      const trailLength = 10;
+      const angle = Math.atan2(packet.y - packet.targetY, packet.x - packet.targetX);
+      ctx.lineTo(
+        packet.x + Math.cos(angle) * trailLength,
+        packet.y + Math.sin(angle) * trailLength
+      );
+      ctx.stroke();
+      ctx.globalAlpha = 1;
+    }
+    
+    // Function to update bot behavior
+    function updateBots() {
+      for (let bot of bots) {
+        drawBot(bot);
+        
+        // Check if this bot should send attack packets
+        if (Date.now() - bot.lastCommand < 2000 && Math.random() < 0.1) {
+          // Create new attack packet
+          packets.push({
+            x: bot.x,
+            y: bot.y,
+            targetX: centerX + (Math.random() * 40 - 20),
+            targetY: centerY + (Math.random() * 40 - 20),
+            speed: 1 + Math.random() * 3,
+            type: 'attack',
+            ttl: 200
+          });
+        }
+      }
+    }
+    
+    // Function to update stats display
+    function updateStats() {
+      document.getElementById('stats').innerHTML = 
+        `Packets sent: ${packetsSent}<br>` + 
+        `Active bots: ${bots.length}<br>` + 
+        `Server load: ${Math.min(Math.floor(serverLoad / SERVER_CAPACITY * 100), 100)}%`;
+    }
+    
+    // Main animation loop
+    function animate() {
+      // Fade previous frame
+      ctx.fillStyle = 'rgba(10, 10, 10, 0.15)';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw connections between bots and command center
+      drawConnections();
+      
+      // Draw elements
+      drawServer();
+      drawCommandCenter();
+      updateBots();
+      updatePackets();
+      
+      // Spawn bots randomly
+      if (Math.random() < 0.05 && bots.length < MAX_BOTS) {
+        spawnBots(Math.floor(Math.random() * 10) + 5);
+      }
+      
+      // Send commands periodically
+      if (Math.random() < 0.02 && bots.length > 0) {
+        sendCommands();
+      }
+      
+      // Decrease effects
+      if (hitFlash > 0) hitFlash -= 5;
+      if (commandFlash > 0) commandFlash -= 10;
+      
+      // Server gradually recovers
+      serverLoad = Math.max(0, serverLoad - 0.2);
+      
+      // Update stats
+      updateStats();
+      
+      // Loop
+      requestAnimationFrame(animate);
+    }
+    
+    // Helper function to draw connections
+    function drawConnections() {
+      // Draw connections from active bots to server
+      ctx.strokeStyle = 'rgba(0, 204, 255, 0.1)';
+      ctx.lineWidth = 0.5;
+      
+      for (let bot of bots) {
+        if (Date.now() - bot.lastCommand < 2000) {
+          ctx.beginPath();
+          ctx.moveTo(bot.x, bot.y);
+          ctx.lineTo(centerX, centerY);
+          ctx.stroke();
+        }
+      }
+      
+      // Draw connections from C&C to some bots
+      ctx.strokeStyle = 'rgba(255, 153, 0, 0.1)';
+      for (let i = 0; i < bots.length; i += 5) {
+        const bot = bots[i];
+        if (bot) {
+          ctx.beginPath();
+          ctx.moveTo(commandCenter.x, commandCenter.y);
+          ctx.lineTo(bot.x, bot.y);
+          ctx.stroke();
+        }
+      }
+    }
+    
+    // Helper function to draw hexagon
+    function drawHexagon(ctx, x, y, size) {
+      ctx.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = Math.PI / 3 * i;
+        const px = x + size * Math.cos(angle);
+        const py = y + size * Math.sin(angle);
+        if (i === 0) ctx.moveTo(px, py);
+        else ctx.lineTo(px, py);
+      }
+      ctx.closePath();
+      ctx.fill();
+    }
+    
+    // Helper function to draw triangle
+    function drawTriangle(ctx, x, y, size, angle) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(angle);
+      ctx.beginPath();
+      ctx.moveTo(size, 0);
+      ctx.lineTo(-size, -size);
+      ctx.lineTo(-size, size);
+      ctx.closePath();
+      ctx.fill();
+      ctx.restore();
+    }
+    
+    // Helper function to draw rounded rectangle
+    function roundRect(ctx, x, y, width, height, radius, fillColor) {
+      ctx.fillStyle = fillColor;
+      ctx.beginPath();
+      ctx.moveTo(x + radius, y);
+      ctx.lineTo(x + width - radius, y);
+      ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+      ctx.lineTo(x + width, y + height - radius);
+      ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+      ctx.lineTo(x + radius, y + height);
+      ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+      ctx.lineTo(x, y + radius);
+      ctx.quadraticCurveTo(x, y, x + radius, y);
+      ctx.closePath();
+      ctx.fill();
+    }
+    
+    // Helper function to get load color
+    function getLoadColor(load) {
+      if (load > 0.8) return '#ff3333';
+      if (load > 0.6) return '#ff9900';
+      if (load > 0.3) return '#ffcc00';
+      return '#33cc33';
+    }
+    
+    // Helper function to blend colors
+    function blendColors(color1, color2, ratio) {
+      // Convert hex to RGB
+      const hex2rgb = (hex) => {
+        const r = parseInt(hex.slice(1, 3), 16);
+        const g = parseInt(hex.slice(3, 5), 16);
+        const b = parseInt(hex.slice(5, 7), 16);
+        return [r, g, b];
+      };
+      
+      // Convert RGB to hex
+      const rgb2hex = (r, g, b) => {
+        return '#' + [r, g, b].map(x => {
+          const hex = Math.floor(x).toString(16);
+          return hex.length === 1 ? '0' + hex : hex;
+        }).join('');
+      };
+      
+      const c1 = hex2rgb(color1);
+      const c2 = hex2rgb(color2);
+      
+      const r = c1[0] * (1 - ratio) + c2[0] * ratio;
+      const g = c1[1] * (1 - ratio) + c2[1] * ratio;
+      const b = c1[2] * (1 - ratio) + c2[2] * ratio;
+      
+      return rgb2hex(r, g, b);
+    }
+    
+    // Start animation
+    animate();
+    
+    // Add initial bots
+    spawnBots(50);
+    
+    // Handle window resize
+    window.addEventListener('resize', () => {
+      // Save state
+      const oldBots = bots;
+      const oldPackets = packets;
+      const oldServerLoad = serverLoad;
+      const oldPacketsSent = packetsSent;
+      
+      // Update canvas dimensions
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      
+      // Adjust center and command center
+      const newCenterX = canvas.width / 2;
+      const newCenterY = canvas.height / 2;
+      const scaleX = newCenterX / centerX;
+      const scaleY = newCenterY / centerY;
+      
+      // Update all positions
+      bots = oldBots.map(bot => ({
+        ...bot,
+        x: bot.x * scaleX,
+        y: bot.y * scaleY
+      }));
+      
+      packets = oldPackets.map(packet => ({
+        ...packet,
+        x: packet.x * scaleX,
+        y: packet.y * scaleY,
+        targetX: packet.targetX * scaleX,
+        targetY: packet.targetY * scaleY
+      }));
+      
+      // Reset command center position
+      commandCenter.x = 100;
+      commandCenter.y = canvas.height - 100;
+      
+      // Restore state
+      serverLoad = oldServerLoad;
+      packetsSent = oldPacketsSent;
+    });
+  </script>
+</body>
+</html>

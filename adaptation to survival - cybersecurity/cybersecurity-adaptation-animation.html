@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Adaptation: Key to Cybersecurity Survival</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #0a0a0a;
+            color: #f0f0f0;
+            font-family: 'Courier New', monospace;
+            overflow: hidden;
+        }
+        
+        .container {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            background-color: #111;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 255, 170, 0.3);
+        }
+        
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            border-radius: 10px;
+        }
+        
+        .title {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 28px;
+            font-weight: bold;
+            color: #0cf;
+            text-shadow: 0 0 10px rgba(0, 200, 255, 0.6);
+            z-index: 10;
+        }
+        
+        .subtitle {
+            position: absolute;
+            top: 65px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            color: #0fc;
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .message {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            font-size: 18px;
+            color: #fff;
+            opacity: 0;
+            z-index: 10;
+        }
+        
+        .grid {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(0deg, 
+                transparent 24%, 
+                rgba(0, 200, 255, 0.05) 25%, 
+                rgba(0, 200, 255, 0.05) 26%, 
+                transparent 27%, 
+                transparent 74%, 
+                rgba(0, 200, 255, 0.05) 75%, 
+                rgba(0, 200, 255, 0.05) 76%, 
+                transparent 77%),
+                linear-gradient(90deg, 
+                transparent 24%, 
+                rgba(0, 200, 255, 0.05) 25%, 
+                rgba(0, 200, 255, 0.05) 26%, 
+                transparent 27%, 
+                transparent 74%, 
+                rgba(0, 200, 255, 0.05) 75%, 
+                rgba(0, 200, 255, 0.05) 76%, 
+                transparent 77%);
+            background-size: 50px 50px;
+            perspective: 1000px;
+            transform-style: preserve-3d;
+        }
+        
+        .defender {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            background-color: #0cf;
+            border-radius: 50%;
+            top: 250px;
+            left: 150px;
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(0, 200, 255, 0.8);
+        }
+        
+        .attacker {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: #f55;
+            border-radius: 5px;
+            top: 255px;
+            left: 600px;
+            z-index: 2;
+            box-shadow: 0 0 15px rgba(255, 80, 80, 0.8);
+            transform: rotate(45deg);
+        }
+        
+        .shield {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 3px solid #0cf;
+            border-radius: 50%;
+            top: 240px;
+            left: 140px;
+            z-index: 1;
+            box-shadow: 0 0 10px rgba(0, 200, 255, 0.6);
+            opacity: 0;
+        }
+        
+        .attack {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f55;
+            border-radius: 50%;
+            top: 270px;
+            left: 600px;
+            z-index: 1;
+            box-shadow: 0 0 8px rgba(255, 80, 80, 0.8);
+            opacity: 0;
+        }
+        
+        .code-particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .particle {
+            position: absolute;
+            font-size: 12px;
+            color: #0fc;
+            opacity: 0.7;
+            user-select: none;
+            animation: fall linear infinite;
+        }
+        
+        @keyframes fall {
+            from {
+                transform: translateY(-100px);
+            }
+            to {
+                transform: translateY(600px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="scene">
+            <div class="grid"></div>
+            <div class="title">ADAPTATION: KEY TO CYBERSECURITY SURVIVAL</div>
+            <div class="subtitle" id="subtitle"></div>
+            <div class="message" id="message"></div>
+            <div class="defender" id="defender"></div>
+            <div class="attacker" id="attacker"></div>
+            <div class="shield" id="shield"></div>
+            <div class="attack" id="attack"></div>
+            <div class="code-particles" id="particles"></div>
+        </div>
+    </div>
+
+    <script>
+        // Create binary/code particles
+        const particles = document.getElementById('particles');
+        const characters = ['0', '1', '{', '}', ';', '()', '[]', '//', '&&', '||', '==', '!=', '++'];
+        
+        for (let i = 0; i < 80; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = `${Math.random() * 100}%`;
+            particle.style.animationDuration = `${Math.random() * 10 + 10}s`;
+            particle.style.animationDelay = `${Math.random() * 10}s`;
+            particle.textContent = characters[Math.floor(Math.random() * characters.length)];
+            particles.appendChild(particle);
+        }
+        
+        // Animation timeline
+        const defender = document.getElementById('defender');
+        const attacker = document.getElementById('attacker');
+        const shield = document.getElementById('shield');
+        const attack = document.getElementById('attack');
+        const subtitle = document.getElementById('subtitle');
+        const message = document.getElementById('message');
+        
+        // Messages for the animation
+        const subtitles = [
+            "The Cybersecurity Landscape",
+            "1. Threat Detection",
+            "2. Response & Adaptation",
+            "3. Evolution & Learning",
+            "4. Continuous Improvement"
+        ];
+        
+        const messages = [
+            "Security threats constantly evolve in the digital landscape",
+            "Detecting new attack vectors is critical",
+            "Adapting defenses in response to threats ensures survival",
+            "Learning from each encounter strengthens security posture",
+            "The continuous cycle of adaptation is essential"
+        ];
+        
+        // Animation sequence
+        let currentPhase = 0;
+        
+        function updateMessage() {
+            subtitle.style.opacity = 0;
+            message.style.opacity = 0;
+            
+            setTimeout(() => {
+                subtitle.textContent = subtitles[currentPhase];
+                message.textContent = messages[currentPhase];
+                subtitle.style.opacity = 1;
+                message.style.opacity = 1;
+            }, 500);
+        }
+        
+        function runAnimation() {
+            // Initial setup
+            updateMessage();
+            
+            // Phase 0: Initial state - landscape view
+            setTimeout(() => {
+                currentPhase = 1;
+                updateMessage();
+                
+                // Attacker begins to move
+                attacker.style.transition = "transform 2s, left 4s";
+                attacker.style.transform = "rotate(135deg)";
+                attacker.style.left = "400px";
+                
+                // Create attack
+                setTimeout(() => {
+                    attack.style.opacity = 1;
+                    attack.style.transition = "left 2s, top 2s";
+                    attack.style.left = "170px";
+                    attack.style.top = "270px";
+                    
+                    // Defender notices attack
+                    setTimeout(() => {
+                        defender.style.transition = "background-color 0.5s";
+                        defender.style.backgroundColor = "#ff9900";
+                        
+                        // Shield appears
+                        setTimeout(() => {
+                            currentPhase = 2;
+                            updateMessage();
+                            
+                            shield.style.transition = "opacity 0.5s, transform 0.5s";
+                            shield.style.opacity = 1;
+                            
+                            attack.style.opacity = 0;
+                            
+                            // Defender adapts
+                            setTimeout(() => {
+                                defender.style.backgroundColor = "#00ffaa";
+                                shield.style.borderColor = "#00ffaa";
+                                shield.style.transform = "scale(1.2)";
+                                
+                                // Attacker retreats
+                                setTimeout(() => {
+                                    attacker.style.left = "600px";
+                                    
+                                    // Phase 3: Evolution
+                                    setTimeout(() => {
+                                        currentPhase = 3;
+                                        updateMessage();
+                                        
+                                        defender.style.transform = "scale(1.1)";
+                                        defender.style.transition = "transform 2s, background-color 2s";
+                                        defender.style.backgroundColor = "#00ddff";
+                                        
+                                        shield.style.transform = "scale(1.5)";
+                                        shield.style.transition = "transform 2s, border-color 2s";
+                                        shield.style.borderColor = "#00ddff";
+                                        
+                                        // Attacker transforms
+                                        setTimeout(() => {
+                                            attacker.style.transform = "rotate(0deg) scale(0.8)";
+                                            attacker.style.borderRadius = "15px";
+                                            
+                                            // Phase 4: Continuous improvement
+                                            setTimeout(() => {
+                                                currentPhase = 4;
+                                                updateMessage();
+                                                
+                                                // Final state - continuous cycle visualization
+                                                defender.style.animation = "pulse 2s infinite";
+                                                shield.style.animation = "pulse 2s infinite alternate";
+                                                
+                                                // Reset and restart the animation after a delay
+                                                setTimeout(() => {
+                                                    resetAnimation();
+                                                }, 10000);
+                                            }, 5000);
+                                        }, 3000);
+                                    }, 3000);
+                                }, 2000);
+                            }, 2000);
+                        }, 1000);
+                    }, 2000);
+                }, 2000);
+            }, 5000);
+        }
+        
+        function resetAnimation() {
+            // Reset all elements to their starting positions
+            defender.style.transition = "none";
+            attacker.style.transition = "none";
+            shield.style.transition = "none";
+            attack.style.transition = "none";
+            
+            defender.style.backgroundColor = "#0cf";
+            defender.style.transform = "scale(1)";
+            defender.style.animation = "none";
+            
+            attacker.style.left = "600px";
+            attacker.style.transform = "rotate(45deg)";
+            attacker.style.borderRadius = "5px";
+            
+            shield.style.opacity = 0;
+            shield.style.transform = "scale(1)";
+            shield.style.borderColor = "#0cf";
+            shield.style.animation = "none";
+            
+            attack.style.opacity = 0;
+            attack.style.left = "600px";
+            attack.style.top = "270px";
+            
+            currentPhase = 0;
+            
+            // Start the animation again after a short delay
+            setTimeout(runAnimation, 1000);
+        }
+        
+        // Add a pulsing animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes pulse {
+                0% { box-shadow: 0 0 15px rgba(0, 200, 255, 0.8); }
+                50% { box-shadow: 0 0 25px rgba(0, 200, 255, 0.9); }
+                100% { box-shadow: 0 0 15px rgba(0, 200, 255, 0.8); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Start the animation when the page loads
+        window.onload = runAnimation;
+    </script>
+</body>
+</html>

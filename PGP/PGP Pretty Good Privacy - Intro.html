@@ -1,0 +1,1106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PGP: Pretty Good Privacy - Visual Guide</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Global styles */
+        body {
+            font-family: 'Inter', 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.5;
+            color: #333;
+            background-color: #f8fafc;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+        
+        .section {
+            margin-bottom: 4rem;
+            position: relative;
+        }
+        
+        /* Animation specific styles */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .animate-fadeIn {
+            animation: fadeIn 0.8s ease-in forwards;
+        }
+        
+        .animate-slideIn {
+            animation: slideIn 0.8s ease-out forwards;
+        }
+        
+        .key-generation-container {
+            height: 320px;
+            position: relative;
+        }
+        
+        .encryption-container {
+            height: 450px;
+            position: relative;
+        }
+        
+        .signature-container {
+            height: 450px;
+            position: relative;
+        }
+        
+        .trust-container {
+            height: 400px;
+            position: relative;
+        }
+        
+        .key {
+            transition: all 0.5s ease;
+        }
+        
+        .message {
+            transition: all 0.5s ease;
+        }
+        
+        .encrypted {
+            filter: url(#noise);
+        }
+        
+        .path {
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: dash 2s linear forwards;
+        }
+        
+        .delayed-1 {
+            animation-delay: 0.3s;
+        }
+        
+        .delayed-2 {
+            animation-delay: 0.6s;
+        }
+        
+        .delayed-3 {
+            animation-delay: 0.9s;
+        }
+        
+        .delayed-4 {
+            animation-delay: 1.2s;
+        }
+        
+        .delayed-5 {
+            animation-delay: 1.5s;
+        }
+        
+        .gear {
+            transform-origin: center;
+            animation: rotate 10s linear infinite;
+        }
+        
+        .gear-reverse {
+            transform-origin: center;
+            animation: rotate 10s linear infinite reverse;
+        }
+        
+        .btn {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .btn:hover {
+            background-color: #2563eb;
+        }
+        
+        /* SVG styling */
+        .svg-container {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        
+        .step-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            fill: #4b5563;
+        }
+        
+        .process-circle {
+            fill: #f3f4f6;
+            stroke: #d1d5db;
+            stroke-width: 2;
+        }
+        
+        .process-active {
+            fill: #dbeafe;
+            stroke: #3b82f6;
+        }
+        
+        .section-title {
+            position: relative;
+            display: inline-block;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -0.5rem;
+            left: 0;
+            width: 60px;
+            height: 4px;
+            background-color: #3b82f6;
+            border-radius: 2px;
+        }
+        
+        /* Controls & interactivity */
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="mb-12 text-center">
+            <h1 class="text-4xl font-bold text-gray-900 mb-4">PGP: Pretty Good Privacy</h1>
+            <p class="text-xl text-gray-600 max-w-3xl mx-auto">A visual guide to secure communication</p>
+        </header>
+        
+        <section class="section">
+            <h2 class="section-title text-2xl font-bold text-gray-800">What is PGP?</h2>
+            <div class="grid md:grid-cols-3 gap-6 mt-8">
+                <div class="bg-white shadow rounded-lg p-6 animate-slideIn">
+                    <div class="flex justify-center mb-4">
+                        <svg class="w-12 h-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-center mb-2">End-to-End Encryption</h3>
+                    <p class="text-sm text-gray-500 text-center">Secure messages from sender to recipient only</p>
+                </div>
+                
+                <div class="bg-white shadow rounded-lg p-6 animate-slideIn delayed-1">
+                    <div class="flex justify-center mb-4">
+                        <svg class="w-12 h-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-center mb-2">Data Protection</h3>
+                    <p class="text-sm text-gray-500 text-center">Guard emails, files, and messages</p>
+                </div>
+                
+                <div class="bg-white shadow rounded-lg p-6 animate-slideIn delayed-2">
+                    <div class="flex justify-center mb-4">
+                        <svg class="w-12 h-12 text-blue-500" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                            <circle cx="12" cy="7" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-semibold text-center mb-2">Authentication</h3>
+                    <p class="text-sm text-gray-500 text-center">Verify sender's identity</p>
+                </div>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title text-2xl font-bold text-gray-800">Key Generation</h2>
+            <div class="controls">
+                <button id="startKeyGen" class="btn">Start Animation</button>
+                <button id="resetKeyGen" class="btn bg-gray-500 hover:bg-gray-600">Reset</button>
+            </div>
+            <div class="bg-white shadow-lg rounded-lg p-6 key-generation-container">
+                <svg id="keyGenSvg" class="svg-container" viewBox="0 0 800 280" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Random seed input -->
+                    <g id="randomSeed" transform="translate(100, 80)">
+                        <rect x="0" y="0" width="140" height="60" rx="8" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2"/>
+                        <text x="70" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Random Seed</text>
+                        <circle class="gear" cx="30" cy="30" r="15" fill="#0ea5e9" opacity="0.3"/>
+                        <circle class="gear-reverse" cx="110" cy="30" r="18" fill="#0ea5e9" opacity="0.2"/>
+                    </g>
+                    
+                    <!-- Algorithm -->
+                    <g id="algorithm" transform="translate(320, 80)">
+                        <rect x="0" y="0" width="140" height="60" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+                        <text x="70" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Key Algorithm</text>
+                        <path class="gear" d="M30,15 L35,15 L36,20 L42,17 L45,22 L40,26 L43,31 L37,33 L35,28 L30,30 L27,24 L32,21 Z" fill="#10b981" opacity="0.4"/>
+                        <path class="gear-reverse" d="M100,20 L107,20 L109,28 L117,23 L122,30 L115,36 L119,44 L110,47 L107,39 L100,42 L95,34 L102,29 Z" fill="#10b981" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Key pair -->
+                    <g id="keyPair" transform="translate(540, 80)" opacity="0">
+                        <g id="privateKey" transform="translate(0, 0)">
+                            <rect x="0" y="0" width="140" height="60" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="2"/>
+                            <text x="70" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Private Key</text>
+                            <path d="M40,20 L50,20 L50,25 L60,25 L60,35 L50,35 L50,40 L40,40 L40,35 L30,35 L30,25 L40,25 Z" fill="#e11d48" opacity="0.3"/>
+                        </g>
+                        <g id="publicKey" transform="translate(0, 80)">
+                            <rect x="0" y="0" width="140" height="60" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+                            <text x="70" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Public Key</text>
+                            <circle cx="45" cy="30" r="15" fill="#10b981" opacity="0.3"/>
+                        </g>
+                    </g>
+                    
+                    <!-- Arrows -->
+                    <path id="arrow1" class="path" d="M240,110 L320,110" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                    <path id="arrow2" class="path delayed-2" d="M460,110 L540,110" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                    <path id="arrow3" class="path delayed-3" d="M610,140 L610,180" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)"/>
+                    
+                    <!-- Arrowhead marker -->
+                    <defs>
+                        <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                            <polygon points="0 0, 10 3.5, 0 7" fill="#64748b"/>
+                        </marker>
+                    </defs>
+                </svg>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title text-2xl font-bold text-gray-800">Encryption & Decryption Process</h2>
+            <div class="controls">
+                <button id="startEncryption" class="btn">Start Animation</button>
+                <button id="resetEncryption" class="btn bg-gray-500 hover:bg-gray-600">Reset</button>
+            </div>
+            <div class="bg-white shadow-lg rounded-lg p-6 encryption-container">
+                <svg id="encryptionSvg" class="svg-container" viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Filters for encryption effect -->
+                    <defs>
+                        <filter id="noise">
+                            <feTurbulence type="fractalNoise" baseFrequency="0.95" numOctaves="3" stitchTiles="stitch"/>
+                            <feColorMatrix type="matrix" values="1 0 0 0 0 0 1 0 0 0 0 0 1 0 0 0 0 0 1 0"/>
+                        </filter>
+                    </defs>
+                    
+                    <!-- Alice side -->
+                    <g id="alice" transform="translate(50, 50)">
+                        <circle cx="50" cy="50" r="40" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="50" y="50" text-anchor="middle" alignment-baseline="middle" class="step-label">Alice</text>
+                    </g>
+                    
+                    <!-- Bob side -->
+                    <g id="bob" transform="translate(800, 50)">
+                        <circle cx="50" cy="50" r="40" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="50" y="50" text-anchor="middle" alignment-baseline="middle" class="step-label">Bob</text>
+                    </g>
+                    
+                    <!-- Plain message -->
+                    <g id="plainMessage" transform="translate(160, 150)" opacity="1">
+                        <rect x="0" y="0" width="140" height="60" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+                        <text x="70" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Plain Message</text>
+                        <line x1="20" y1="20" x2="120" y2="20" stroke="#6b7280" stroke-width="2"/>
+                        <line x1="20" y1="30" x2="110" y2="30" stroke="#6b7280" stroke-width="2"/>
+                        <line x1="20" y1="40" x2="90" y2="40" stroke="#6b7280" stroke-width="2"/>
+                    </g>
+                    
+                    <!-- Bob's public key -->
+                    <g id="bobPublicKey" transform="translate(160, 50)" opacity="0">
+                        <rect x="0" y="0" width="140" height="60" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+                        <text x="70" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Bob's Public Key</text>
+                        <circle cx="35" cy="30" r="15" fill="#10b981" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Encryption process -->
+                    <g id="encryptionProcess" transform="translate(360, 100)" opacity="0">
+                        <rect x="0" y="0" width="180" height="80" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="90" y="40" text-anchor="middle" alignment-baseline="middle" class="step-label">Encryption Process</text>
+                        <path class="gear" d="M40,25 L48,25 L50,33 L58,28 L63,35 L56,41 L60,49 L51,52 L48,44 L41,47 L36,39 L43,34 Z" fill="#3b82f6" opacity="0.3"/>
+                        <path class="gear-reverse" d="M130,25 L138,25 L140,33 L148,28 L153,35 L146,41 L150,49 L141,52 L138,44 L131,47 L126,39 L133,34 Z" fill="#3b82f6" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Encrypted message -->
+                    <g id="encryptedMessage" transform="translate(360, 230)" opacity="0">
+                        <rect class="encrypted" x="0" y="0" width="140" height="60" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+                        <text x="70" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Encrypted Data</text>
+                    </g>
+                    
+                    <!-- Bob's private key -->
+                    <g id="bobPrivateKey" transform="translate(600, 50)" opacity="0">
+                        <rect x="0" y="0" width="140" height="60" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="2"/>
+                        <text x="70" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Bob's Private Key</text>
+                        <path d="M40,20 L50,20 L50,25 L60,25 L60,35 L50,35 L50,40 L40,40 L40,35 L30,35 L30,25 L40,25 Z" fill="#e11d48" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Decryption process -->
+                    <g id="decryptionProcess" transform="translate(600, 150)" opacity="0">
+                        <rect x="0" y="0" width="180" height="80" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="90" y="40" text-anchor="middle" alignment-baseline="middle" class="step-label">Decryption Process</text>
+                        <path class="gear-reverse" d="M40,25 L48,25 L50,33 L58,28 L63,35 L56,41 L60,49 L51,52 L48,44 L41,47 L36,39 L43,34 Z" fill="#3b82f6" opacity="0.3"/>
+                        <path class="gear" d="M130,25 L138,25 L140,33 L148,28 L153,35 L146,41 L150,49 L141,52 L138,44 L131,47 L126,39 L133,34 Z" fill="#3b82f6" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Decrypted message -->
+                    <g id="decryptedMessage" transform="translate(600, 280)" opacity="0">
+                        <rect x="0" y="0" width="140" height="60" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+                        <text x="70" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Decrypted Message</text>
+                        <line x1="20" y1="20" x2="120" y2="20" stroke="#6b7280" stroke-width="2"/>
+                        <line x1="20" y1="30" x2="110" y2="30" stroke="#6b7280" stroke-width="2"/>
+                        <line x1="20" y1="40" x2="90" y2="40" stroke="#6b7280" stroke-width="2"/>
+                    </g>
+                    
+                    <!-- Arrows for encryption flow -->
+                    <path id="arrowToEncrypt1" class="path" d="M230,180 L360,140" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowToEncrypt2" class="path" d="M230,80 L360,120" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowEncrypted" class="path" d="M450,180 L450,230" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowTransfer" class="path" d="M500,260 L600,260" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0"/>
+                    <path id="arrowToDecrypt1" class="path" d="M670,230 L670,190" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowToDecrypt2" class="path" d="M670,80 L670,150" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowDecrypted" class="path" d="M670,230 L670,280" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowToBob" class="path" d="M740,310 L825,100" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                </svg>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title text-2xl font-bold text-gray-800">Digital Signatures</h2>
+            <div class="controls">
+                <button id="startSignature" class="btn">Start Animation</button>
+                <button id="resetSignature" class="btn bg-gray-500 hover:bg-gray-600">Reset</button>
+            </div>
+            <div class="bg-white shadow-lg rounded-lg p-6 signature-container">
+                <svg id="signatureSvg" class="svg-container" viewBox="0 0 900 400" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Alice side -->
+                    <g id="sigAlice" transform="translate(50, 50)">
+                        <circle cx="50" cy="50" r="40" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="50" y="50" text-anchor="middle" alignment-baseline="middle" class="step-label">Alice</text>
+                    </g>
+                    
+                    <!-- Bob side -->
+                    <g id="sigBob" transform="translate(800, 50)">
+                        <circle cx="50" cy="50" r="40" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="50" y="50" text-anchor="middle" alignment-baseline="middle" class="step-label">Bob</text>
+                    </g>
+                    
+                    <!-- Document to sign -->
+                    <g id="document" transform="translate(160, 50)" opacity="1">
+                        <rect x="0" y="0" width="120" height="70" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+                        <text x="60" y="35" text-anchor="middle" alignment-baseline="middle" class="step-label">Document</text>
+                        <line x1="20" y1="20" x2="100" y2="20" stroke="#6b7280" stroke-width="1"/>
+                        <line x1="20" y1="30" x2="90" y2="30" stroke="#6b7280" stroke-width="1"/>
+                        <line x1="20" y1="40" x2="100" y2="40" stroke="#6b7280" stroke-width="1"/>
+                        <line x1="20" y1="50" x2="80" y2="50" stroke="#6b7280" stroke-width="1"/>
+                    </g>
+                    
+                    <!-- Hash function -->
+                    <g id="hashFunction" transform="translate(160, 160)" opacity="0">
+                        <rect x="0" y="0" width="120" height="60" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Hash Function</text>
+                        <path class="gear" d="M30,20 L36,20 L38,25 L43,22 L46,27 L42,31 L44,36 L38,38 L36,33 L32,35 L28,30 L33,27 Z" fill="#3b82f6" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Message digest -->
+                    <g id="digest" transform="translate(160, 260)" opacity="0">
+                        <rect x="0" y="0" width="120" height="50" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+                        <text x="60" y="25" text-anchor="middle" alignment-baseline="middle" class="step-label">Message Digest</text>
+                    </g>
+                    
+                    <!-- Alice's private key -->
+                    <g id="alicePrivateKey" transform="translate(320, 160)" opacity="0">
+                        <rect x="0" y="0" width="120" height="60" rx="8" fill="#fff1f2" stroke="#e11d48" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Alice's Private Key</text>
+                        <path d="M40,20 L50,20 L50,25 L60,25 L60,35 L50,35 L50,40 L40,40 L40,35 L30,35 L30,25 L40,25 Z" fill="#e11d48" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Signing process -->
+                    <g id="signingProcess" transform="translate(320, 260)" opacity="0">
+                        <rect x="0" y="0" width="120" height="60" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Sign Process</text>
+                        <path class="gear" d="M40,20 L46,20 L48,25 L53,22 L56,27 L52,31 L54,36 L48,38 L46,33 L42,35 L38,30 L43,27 Z" fill="#3b82f6" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Digital signature -->
+                    <g id="digitalSignature" transform="translate(480, 260)" opacity="0">
+                        <rect x="0" y="0" width="120" height="50" rx="8" fill="#e0f2fe" stroke="#0284c7" stroke-width="2"/>
+                        <text x="60" y="25" text-anchor="middle" alignment-baseline="middle" class="step-label">Digital Signature</text>
+                    </g>
+                    
+                    <!-- Signed document -->
+                    <g id="signedDoc" transform="translate(480, 160)" opacity="0">
+                        <rect x="0" y="0" width="120" height="70" rx="8" fill="#f9fafb" stroke="#d1d5db" stroke-width="2"/>
+                        <text x="60" y="35" text-anchor="middle" alignment-baseline="middle" class="step-label">Signed Document</text>
+                        <line x1="20" y1="20" x2="100" y2="20" stroke="#6b7280" stroke-width="1"/>
+                        <line x1="20" y1="30" x2="90" y2="30" stroke="#6b7280" stroke-width="1"/>
+                        <line x1="20" y1="40" x2="100" y2="40" stroke="#6b7280" stroke-width="1"/>
+                        <line x1="20" y1="50" x2="80" y2="50" stroke="#6b7280" stroke-width="1"/>
+                        <path d="M80,60 Q90,50 100,60" stroke="#e11d48" stroke-width="2" fill="none"/>
+                    </g>
+                    
+                    <!-- Verification side -->
+                    <!-- Hash function 2 -->
+                    <g id="verifyHash" transform="translate(650, 100)" opacity="0">
+                        <rect x="0" y="0" width="120" height="60" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Hash Function</text>
+                        <path class="gear" d="M30,20 L36,20 L38,25 L43,22 L46,27 L42,31 L44,36 L38,38 L36,33 L32,35 L28,30 L33,27 Z" fill="#3b82f6" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Computed digest -->
+                    <g id="computedDigest" transform="translate(650, 200)" opacity="0">
+                        <rect x="0" y="0" width="120" height="50" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+                        <text x="60" y="25" text-anchor="middle" alignment-baseline="middle" class="step-label">Computed Digest</text>
+                    </g>
+                    
+                    <!-- Alice's public key -->
+                    <g id="alicePublicKey" transform="translate(650, 290)" opacity="0">
+                        <rect x="0" y="0" width="120" height="60" rx="8" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Alice's Public Key</text>
+                        <circle cx="35" cy="30" r="12" fill="#10b981" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Verification process -->
+                    <g id="verifyProcess" transform="translate(800, 200)" opacity="0">
+                        <rect x="0" y="0" width="120" height="60" rx="8" fill="#eff6ff" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="60" y="30" text-anchor="middle" alignment-baseline="middle" class="step-label">Verify Process</text>
+                        <path class="gear-reverse" d="M40,20 L46,20 L48,25 L53,22 L56,27 L52,31 L54,36 L48,38 L46,33 L42,35 L38,30 L43,27 Z" fill="#3b82f6" opacity="0.3"/>
+                    </g>
+                    
+                    <!-- Verification result -->
+                    <g id="verifyResult" transform="translate(800, 290)" opacity="0">
+                        <rect x="0" y="0" width="120" height="50" rx="8" fill="#f0fdf4" stroke="#10b981" stroke-width="2"/>
+                        <text x="60" y="25" text-anchor="middle" alignment-baseline="middle" class="step-label">Valid Signature</text>
+                        <path d="M40,25 L50,35 L70,15" stroke="#10b981" stroke-width="3" fill="none" opacity="0" id="checkmark"/>
+                    </g>
+                    
+                    <!-- Arrows -->
+                    <path id="arrowDocToHash" class="path" d="M220,120 L220,160" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowHashToDigest" class="path" d="M220,220 L220,260" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowDigestToSign" class="path" d="M280,285 L320,285" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowKeyToSign" class="path" d="M380,220 L380,260" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowSignToSig" class="path" d="M440,285 L480,285" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowSigToDoc" class="path" d="M540,260 L540,195" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowDocToDoc" class="path" d="M280,85 L480,85 L480,160" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowTransferDoc" class="path" d="M600,195 L650,130" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0"/>
+                    <path id="arrowTransferSig" class="path" d="M600,285 L800,230" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" stroke-dasharray="5,5" opacity="0"/>
+                    <path id="arrowHashToComputed" class="path" d="M710,160 L710,200" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowComputedToVerify" class="path" d="M770,225 L800,225" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowKeyToVerify" class="path" d="M770,320 L800,260" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                    <path id="arrowVerifyToResult" class="path" d="M860,260 L860,290" stroke="#64748b" stroke-width="2" fill="none" marker-end="url(#arrowhead)" opacity="0"/>
+                </svg>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title text-2xl font-bold text-gray-800">Web of Trust</h2>
+            <div class="controls">
+                <button id="startTrust" class="btn">Start Animation</button>
+                <button id="resetTrust" class="btn bg-gray-500 hover:bg-gray-600">Reset</button>
+            </div>
+            <div class="bg-white shadow-lg rounded-lg p-6 trust-container">
+                <svg id="trustSvg" class="svg-container" viewBox="0 0 800 350" xmlns="http://www.w3.org/2000/svg">
+                    <!-- User circles -->
+                    <g id="userA" transform="translate(400, 100)" opacity="1">
+                        <circle cx="0" cy="0" r="40" fill="#dbeafe" stroke="#3b82f6" stroke-width="2"/>
+                        <text x="0" y="0" text-anchor="middle" alignment-baseline="middle" class="step-label">Alice</text>
+                    </g>
+                    
+                    <g id="userB" transform="translate(200, 200)" opacity="0">
+                        <circle cx="0" cy="0" r="40" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+                        <text x="0" y="0" text-anchor="middle" alignment-baseline="middle" class="step-label">Bob</text>
+                    </g>
+                    
+                    <g id="userC" transform="translate(600, 200)" opacity="0">
+                        <circle cx="0" cy="0" r="40" fill="#ecfdf5" stroke="#10b981" stroke-width="2"/>
+                        <text x="0" y="0" text-anchor="middle" alignment-baseline="middle" class="step-label">Charlie</text>
+                    </g>
+                    
+                    <g id="userD" transform="translate(300, 300)" opacity="0">
+                        <circle cx="0" cy="0" r="40" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2"/>
+                        <text x="0" y="0" text-anchor="middle" alignment-baseline="middle" class="step-label">Dave</text>
+                    </g>
+                    
+                    <g id="userE" transform="translate(500, 300)" opacity="0">
+                        <circle cx="0" cy="0" r="40" fill="#f0f9ff" stroke="#0ea5e9" stroke-width="2"/>
+                        <text x="0" y="0" text-anchor="middle" alignment-baseline="middle" class="step-label">Eve</text>
+                    </g>
+                    
+                    <!-- Trust connections -->
+                    <g id="connections">
+                        <path id="connAB" class="path" d="M370,130 L230,170" stroke="#10b981" stroke-width="3" fill="none" opacity="0">
+                            <title>Alice trusts Bob directly</title>
+                        </path>
+                        <path id="connAC" class="path delayed-1" d="M430,130 L570,170" stroke="#10b981" stroke-width="3" fill="none" opacity="0">
+                            <title>Alice trusts Charlie directly</title>
+                        </path>
+                        <path id="connBC" class="path delayed-2" d="M240,200 L560,200" stroke="#64748b" stroke-width="2" stroke-dasharray="6,3" fill="none" opacity="0">
+                            <title>Bob and Charlie know each other</title>
+                        </path>
+                        <path id="connBD" class="path delayed-3" d="M230,230 L270,270" stroke="#10b981" stroke-width="3" fill="none" opacity="0">
+                            <title>Bob trusts Dave directly</title>
+                        </path>
+                        <path id="connCE" class="path delayed-3" d="M570,230 L530,270" stroke="#10b981" stroke-width="3" fill="none" opacity="0">
+                            <title>Charlie trusts Eve directly</title>
+                        </path>
+                        <path id="connAD" class="path delayed-4" d="M380,140 L320,260" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3,2" fill="none" opacity="0">
+                            <title>Alice trusts Dave through Bob</title>
+                        </path>
+                        <path id="connAE" class="path delayed-4" d="M420,140 L480,260" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3,2" fill="none" opacity="0">
+                            <title>Alice trusts Eve through Charlie</title>
+                        </path>
+                    </g>
+                    
+                    <!-- Legend -->
+                    <g id="legend" transform="translate(20, 20)" opacity="0">
+                        <rect x="0" y="0" width="200" height="80" rx="5" fill="#ffffff" stroke="#d1d5db" stroke-width="1"/>
+                        <text x="10" y="20" class="step-label" style="font-weight:bold">Trust Legend:</text>
+                        <line x1="10" y1="40" x2="50" y2="40" stroke="#10b981" stroke-width="3"/>
+                        <text x="60" y="45" class="step-label" style="font-size:0.75rem">Direct Trust</text>
+                        <line x1="10" y1="60" x2="50" y2="60" stroke="#3b82f6" stroke-width="2" stroke-dasharray="3,2"/>
+                        <text x="60" y="65" class="step-label" style="font-size:0.75rem">Indirect Trust</text>
+                    </g>
+                </svg>
+            </div>
+            <div class="mt-6 text-sm text-gray-500 p-4 bg-gray-50 rounded-lg">
+                <p class="text-center">In PGP's Web of Trust, users validate each other's public keys through direct verification or through trusted intermediaries.</p>
+            </div>
+        </section>
+        
+        <section class="section">
+            <h2 class="section-title text-2xl font-bold text-gray-800">Key PGP Features</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">Applications</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Secure Email Communications</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>File Encryption</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Document Verification</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-green-500 mr-2 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                            </svg>
+                            <span>Disk and Storage Encryption</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="bg-white shadow-md rounded-lg p-6">
+                    <h3 class="text-xl font-semibold mb-4">Core Technologies</h3>
+                    <ul class="space-y-2">
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mr-2 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/>
+                            </svg>
+                            <span>RSA for Public/Private Key Operations</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mr-2 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/>
+                            </svg>
+                            <span>AES for Symmetric Encryption</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mr-2 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/>
+                            </svg>
+                            <span>SHA-256 Hashing Algorithms</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="w-5 h-5 text-blue-500 mr-2 mt-1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M11 3a1 1 0 10-2 0v1a1 1 0 102 0V3zM15.657 5.757a1 1 0 00-1.414-1.414l-.707.707a1 1 0 001.414 1.414l.707-.707zM18 10a1 1 0 01-1 1h-1a1 1 0 110-2h1a1 1 0 011 1zM5.05 6.464A1 1 0 106.464 5.05l-.707-.707a1 1 0 00-1.414 1.414l.707.707zM5 10a1 1 0 01-1 1H3a1 1 0 110-2h1a1 1 0 011 1zM8 16v-1h4v1a2 2 0 11-4 0zM12 14c.015-.34.208-.646.477-.859a4 4 0 10-4.954 0c.27.213.462.519.476.859h4.002z"/>
+                            </svg>
+                            <span>ZIP Compression</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <footer class="mt-16 text-center text-gray-500 text-sm">
+            <p>PGP: Pretty Good Privacy - Visual Guide</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Key Generation Animation
+            const startKeyGen = document.getElementById('startKeyGen');
+            const resetKeyGen = document.getElementById('resetKeyGen');
+            const keyPair = document.getElementById('keyPair');
+            const arrow2 = document.getElementById('arrow2');
+            const arrow3 = document.getElementById('arrow3');
+            
+            startKeyGen.addEventListener('click', function() {
+                // Animation sequence
+                keyPair.style.opacity = 0;
+                arrow2.style.opacity = 0;
+                arrow3.style.opacity = 0;
+                
+                setTimeout(() => {
+                    keyPair.style.opacity = 1;
+                    keyPair.style.transition = 'opacity 0.8s ease-in';
+                    arrow2.style.opacity = 1;
+                    arrow2.style.transition = 'opacity 0.8s ease-in';
+                }, 1000);
+                
+                setTimeout(() => {
+                    arrow3.style.opacity = 1;
+                    arrow3.style.transition = 'opacity 0.8s ease-in';
+                }, 2000);
+            });
+            
+            resetKeyGen.addEventListener('click', function() {
+                keyPair.style.opacity = 0;
+                arrow2.style.opacity = 0;
+                arrow3.style.opacity = 0;
+            });
+            
+            // Encryption Animation
+            const startEncryption = document.getElementById('startEncryption');
+            const resetEncryption = document.getElementById('resetEncryption');
+            const bobPublicKey = document.getElementById('bobPublicKey');
+            const encryptionProcess = document.getElementById('encryptionProcess');
+            const encryptedMessage = document.getElementById('encryptedMessage');
+            const bobPrivateKey = document.getElementById('bobPrivateKey');
+            const decryptionProcess = document.getElementById('decryptionProcess');
+            const decryptedMessage = document.getElementById('decryptedMessage');
+            const arrowToEncrypt1 = document.getElementById('arrowToEncrypt1');
+            const arrowToEncrypt2 = document.getElementById('arrowToEncrypt2');
+            const arrowEncrypted = document.getElementById('arrowEncrypted');
+            const arrowTransfer = document.getElementById('arrowTransfer');
+            const arrowToDecrypt1 = document.getElementById('arrowToDecrypt1');
+            const arrowToDecrypt2 = document.getElementById('arrowToDecrypt2');
+            const arrowDecrypted = document.getElementById('arrowDecrypted');
+            const arrowToBob = document.getElementById('arrowToBob');
+            
+            startEncryption.addEventListener('click', function() {
+                // Reset animation
+                resetEncryptionAnimation();
+                
+                // Animation sequence
+                setTimeout(() => {
+                    bobPublicKey.style.opacity = 1;
+                    bobPublicKey.style.transition = 'opacity 0.5s ease-in';
+                }, 500);
+                
+                setTimeout(() => {
+                    arrowToEncrypt1.style.opacity = 1;
+                    arrowToEncrypt2.style.opacity = 1;
+                    arrowToEncrypt1.style.transition = 'opacity 0.5s ease-in';
+                    arrowToEncrypt2.style.transition = 'opacity 0.5s ease-in';
+                }, 1000);
+                
+                setTimeout(() => {
+                    encryptionProcess.style.opacity = 1;
+                    encryptionProcess.style.transition = 'opacity 0.5s ease-in';
+                }, 1500);
+                
+                setTimeout(() => {
+                    arrowEncrypted.style.opacity = 1;
+                    arrowEncrypted.style.transition = 'opacity 0.5s ease-in';
+                }, 2000);
+                
+                setTimeout(() => {
+                    encryptedMessage.style.opacity = 1;
+                    encryptedMessage.style.transition = 'opacity 0.5s ease-in';
+                }, 2500);
+                
+                setTimeout(() => {
+                    arrowTransfer.style.opacity = 1;
+                    arrowTransfer.style.transition = 'opacity 0.5s ease-in';
+                }, 3000);
+                
+                setTimeout(() => {
+                    bobPrivateKey.style.opacity = 1;
+                    bobPrivateKey.style.transition = 'opacity 0.5s ease-in';
+                }, 3500);
+                
+                setTimeout(() => {
+                    arrowToDecrypt1.style.opacity = 1;
+                    arrowToDecrypt2.style.opacity = 1;
+                    arrowToDecrypt1.style.transition = 'opacity 0.5s ease-in';
+                    arrowToDecrypt2.style.transition = 'opacity 0.5s ease-in';
+                }, 4000);
+                
+                setTimeout(() => {
+                    decryptionProcess.style.opacity = 1;
+                    decryptionProcess.style.transition = 'opacity 0.5s ease-in';
+                }, 4500);
+                
+                setTimeout(() => {
+                    arrowDecrypted.style.opacity = 1;
+                    arrowDecrypted.style.transition = 'opacity 0.5s ease-in';
+                }, 5000);
+                
+                setTimeout(() => {
+                    decryptedMessage.style.opacity = 1;
+                    decryptedMessage.style.transition = 'opacity 0.5s ease-in';
+                }, 5500);
+                
+                setTimeout(() => {
+                    arrowToBob.style.opacity = 1;
+                    arrowToBob.style.transition = 'opacity 0.5s ease-in';
+                }, 6000);
+            });
+            
+            resetEncryption.addEventListener('click', function() {
+                resetEncryptionAnimation();
+            });
+            
+            function resetEncryptionAnimation() {
+                bobPublicKey.style.opacity = 0;
+                encryptionProcess.style.opacity = 0;
+                encryptedMessage.style.opacity = 0;
+                bobPrivateKey.style.opacity = 0;
+                decryptionProcess.style.opacity = 0;
+                decryptedMessage.style.opacity = 0;
+                arrowToEncrypt1.style.opacity = 0;
+                arrowToEncrypt2.style.opacity = 0;
+                arrowEncrypted.style.opacity = 0;
+                arrowTransfer.style.opacity = 0;
+                arrowToDecrypt1.style.opacity = 0;
+                arrowToDecrypt2.style.opacity = 0;
+                arrowDecrypted.style.opacity = 0;
+                arrowToBob.style.opacity = 0;
+            }
+            
+            // Signature Animation
+            const startSignature = document.getElementById('startSignature');
+            const resetSignature = document.getElementById('resetSignature');
+            const hashFunction = document.getElementById('hashFunction');
+            const digest = document.getElementById('digest');
+            const alicePrivateKey = document.getElementById('alicePrivateKey');
+            const signingProcess = document.getElementById('signingProcess');
+            const digitalSignature = document.getElementById('digitalSignature');
+            const signedDoc = document.getElementById('signedDoc');
+            const verifyHash = document.getElementById('verifyHash');
+            const computedDigest = document.getElementById('computedDigest');
+            const alicePublicKey = document.getElementById('alicePublicKey');
+            const verifyProcess = document.getElementById('verifyProcess');
+            const verifyResult = document.getElementById('verifyResult');
+            const checkmark = document.getElementById('checkmark');
+            const arrowDocToHash = document.getElementById('arrowDocToHash');
+            const arrowHashToDigest = document.getElementById('arrowHashToDigest');
+            const arrowDigestToSign = document.getElementById('arrowDigestToSign');
+            const arrowKeyToSign = document.getElementById('arrowKeyToSign');
+            const arrowSignToSig = document.getElementById('arrowSignToSig');
+            const arrowSigToDoc = document.getElementById('arrowSigToDoc');
+            const arrowDocToDoc = document.getElementById('arrowDocToDoc');
+            const arrowTransferDoc = document.getElementById('arrowTransferDoc');
+            const arrowTransferSig = document.getElementById('arrowTransferSig');
+            const arrowHashToComputed = document.getElementById('arrowHashToComputed');
+            const arrowComputedToVerify = document.getElementById('arrowComputedToVerify');
+            const arrowKeyToVerify = document.getElementById('arrowKeyToVerify');
+            const arrowVerifyToResult = document.getElementById('arrowVerifyToResult');
+            
+            startSignature.addEventListener('click', function() {
+                // Reset animation
+                resetSignatureAnimation();
+                
+                // Animation sequence - signing part
+                setTimeout(() => {
+                    arrowDocToHash.style.opacity = 1;
+                    arrowDocToHash.style.transition = 'opacity 0.4s ease-in';
+                }, 400);
+                
+                setTimeout(() => {
+                    hashFunction.style.opacity = 1;
+                    hashFunction.style.transition = 'opacity 0.4s ease-in';
+                }, 800);
+                
+                setTimeout(() => {
+                    arrowHashToDigest.style.opacity = 1;
+                    arrowHashToDigest.style.transition = 'opacity 0.4s ease-in';
+                }, 1200);
+                
+                setTimeout(() => {
+                    digest.style.opacity = 1;
+                    digest.style.transition = 'opacity 0.4s ease-in';
+                }, 1600);
+                
+                setTimeout(() => {
+                    alicePrivateKey.style.opacity = 1;
+                    alicePrivateKey.style.transition = 'opacity 0.4s ease-in';
+                }, 2000);
+                
+                setTimeout(() => {
+                    arrowKeyToSign.style.opacity = 1;
+                    arrowDigestToSign.style.opacity = 1;
+                    arrowKeyToSign.style.transition = 'opacity 0.4s ease-in';
+                    arrowDigestToSign.style.transition = 'opacity 0.4s ease-in';
+                }, 2400);
+                
+                setTimeout(() => {
+                    signingProcess.style.opacity = 1;
+                    signingProcess.style.transition = 'opacity 0.4s ease-in';
+                }, 2800);
+                
+                setTimeout(() => {
+                    arrowSignToSig.style.opacity = 1;
+                    arrowSignToSig.style.transition = 'opacity 0.4s ease-in';
+                }, 3200);
+                
+                setTimeout(() => {
+                    digitalSignature.style.opacity = 1;
+                    digitalSignature.style.transition = 'opacity 0.4s ease-in';
+                }, 3600);
+                
+                setTimeout(() => {
+                    arrowSigToDoc.style.opacity = 1;
+                    arrowDocToDoc.style.opacity = 1;
+                    arrowSigToDoc.style.transition = 'opacity 0.4s ease-in';
+                    arrowDocToDoc.style.transition = 'opacity 0.4s ease-in';
+                }, 4000);
+                
+                setTimeout(() => {
+                    signedDoc.style.opacity = 1;
+                    signedDoc.style.transition = 'opacity 0.4s ease-in';
+                }, 4400);
+                
+                // Animation sequence - verification part
+                setTimeout(() => {
+                    arrowTransferDoc.style.opacity = 1;
+                    arrowTransferSig.style.opacity = 1;
+                    arrowTransferDoc.style.transition = 'opacity 0.4s ease-in';
+                    arrowTransferSig.style.transition = 'opacity 0.4s ease-in';
+                }, 4800);
+                
+                setTimeout(() => {
+                    verifyHash.style.opacity = 1;
+                    verifyHash.style.transition = 'opacity 0.4s ease-in';
+                }, 5200);
+                
+                setTimeout(() => {
+                    arrowHashToComputed.style.opacity = 1;
+                    arrowHashToComputed.style.transition = 'opacity 0.4s ease-in';
+                }, 5600);
+                
+                setTimeout(() => {
+                    computedDigest.style.opacity = 1;
+                    computedDigest.style.transition = 'opacity 0.4s ease-in';
+                }, 6000);
+                
+                setTimeout(() => {
+                    alicePublicKey.style.opacity = 1;
+                    alicePublicKey.style.transition = 'opacity 0.4s ease-in';
+                }, 6400);
+                
+                setTimeout(() => {
+                    arrowComputedToVerify.style.opacity = 1;
+                    arrowKeyToVerify.style.opacity = 1;
+                    arrowComputedToVerify.style.transition = 'opacity 0.4s ease-in';
+                    arrowKeyToVerify.style.transition = 'opacity 0.4s ease-in';
+                }, 6800);
+                
+                setTimeout(() => {
+                    verifyProcess.style.opacity = 1;
+                    verifyProcess.style.transition = 'opacity 0.4s ease-in';
+                }, 7200);
+                
+                setTimeout(() => {
+                    arrowVerifyToResult.style.opacity = 1;
+                    arrowVerifyToResult.style.transition = 'opacity 0.4s ease-in';
+                }, 7600);
+                
+                setTimeout(() => {
+                    verifyResult.style.opacity = 1;
+                    verifyResult.style.transition = 'opacity 0.4s ease-in';
+                }, 8000);
+                
+                setTimeout(() => {
+                    checkmark.style.opacity = 1;
+                    checkmark.style.transition = 'opacity 0.4s ease-in';
+                }, 8400);
+            });
+            
+            resetSignature.addEventListener('click', function() {
+                resetSignatureAnimation();
+            });
+            
+            function resetSignatureAnimation() {
+                hashFunction.style.opacity = 0;
+                digest.style.opacity = 0;
+                alicePrivateKey.style.opacity = 0;
+                signingProcess.style.opacity = 0;
+                digitalSignature.style.opacity = 0;
+                signedDoc.style.opacity = 0;
+                verifyHash.style.opacity = 0;
+                computedDigest.style.opacity = 0;
+                alicePublicKey.style.opacity = 0;
+                verifyProcess.style.opacity = 0;
+                verifyResult.style.opacity = 0;
+                checkmark.style.opacity = 0;
+                arrowDocToHash.style.opacity = 0;
+                arrowHashToDigest.style.opacity = 0;
+                arrowDigestToSign.style.opacity = 0;
+                arrowKeyToSign.style.opacity = 0;
+                arrowSignToSig.style.opacity = 0;
+                arrowSigToDoc.style.opacity = 0;
+                arrowDocToDoc.style.opacity = 0;
+                arrowTransferDoc.style.opacity = 0;
+                arrowTransferSig.style.opacity = 0;
+                arrowHashToComputed.style.opacity = 0;
+                arrowComputedToVerify.style.opacity = 0;
+                arrowKeyToVerify.style.opacity = 0;
+                arrowVerifyToResult.style.opacity = 0;
+            }
+            
+            // Trust Animation
+            const startTrust = document.getElementById('startTrust');
+            const resetTrust = document.getElementById('resetTrust');
+            const userB = document.getElementById('userB');
+            const userC = document.getElementById('userC');
+            const userD = document.getElementById('userD');
+            const userE = document.getElementById('userE');
+            const connAB = document.getElementById('connAB');
+            const connAC = document.getElementById('connAC');
+            const connBC = document.getElementById('connBC');
+            const connBD = document.getElementById('connBD');
+            const connCE = document.getElementById('connCE');
+            const connAD = document.getElementById('connAD');
+            const connAE = document.getElementById('connAE');
+            const legend = document.getElementById('legend');
+            
+            startTrust.addEventListener('click', function() {
+                // Reset animation
+                resetTrustAnimation();
+                
+                // Animation sequence
+                setTimeout(() => {
+                    legend.style.opacity = 1;
+                    legend.style.transition = 'opacity 0.5s ease-in';
+                }, 400);
+                
+                setTimeout(() => {
+                    userB.style.opacity = 1;
+                    userB.style.transition = 'opacity 0.5s ease-in';
+                }, 800);
+                
+                setTimeout(() => {
+                    userC.style.opacity = 1;
+                    userC.style.transition = 'opacity 0.5s ease-in';
+                }, 1200);
+                
+                setTimeout(() => {
+                    connAB.style.opacity = 1;
+                    connAB.style.transition = 'opacity 0.5s ease-in';
+                }, 1600);
+                
+                setTimeout(() => {
+                    connAC.style.opacity = 1;
+                    connAC.style.transition = 'opacity 0.5s ease-in';
+                }, 2000);
+                
+                setTimeout(() => {
+                    connBC.style.opacity = 1;
+                    connBC.style.transition = 'opacity 0.5s ease-in';
+                }, 2400);
+                
+                setTimeout(() => {
+                    userD.style.opacity = 1;
+                    userD.style.transition = 'opacity 0.5s ease-in';
+                }, 2800);
+                
+                setTimeout(() => {
+                    userE.style.opacity = 1;
+                    userE.style.transition = 'opacity 0.5s ease-in';
+                }, 3200);
+                
+                setTimeout(() => {
+                    connBD.style.opacity = 1;
+                    connBD.style.transition = 'opacity 0.5s ease-in';
+                }, 3600);
+                
+                setTimeout(() => {
+                    connCE.style.opacity = 1;
+                    connCE.style.transition = 'opacity 0.5s ease-in';
+                }, 4000);
+                
+                setTimeout(() => {
+                    connAD.style.opacity = 1;
+                    connAD.style.transition = 'opacity 0.5s ease-in';
+                }, 4400);
+                
+                setTimeout(() => {
+                    connAE.style.opacity = 1;
+                    connAE.style.transition = 'opacity 0.5s ease-in';
+                }, 4800);
+            });
+            
+            resetTrust.addEventListener('click', function() {
+                resetTrustAnimation();
+            });
+            
+            function resetTrustAnimation() {
+                userB.style.opacity = 0;
+                userC.style.opacity = 0;
+                userD.style.opacity = 0;
+                userE.style.opacity = 0;
+                connAB.style.opacity = 0;
+                connAC.style.opacity = 0;
+                connBC.style.opacity = 0;
+                connBD.style.opacity = 0;
+                connCE.style.opacity = 0;
+                connAD.style.opacity = 0;
+                connAE.style.opacity = 0;
+                legend.style.opacity = 0;
+            }
+            
+            // Start animations automatically for better experience
+            setTimeout(() => {
+                startKeyGen.click();
+            }, 1000);
+            
+            setTimeout(() => {
+                startEncryption.click();
+            }, 5000);
+            
+            setTimeout(() => {
+                startSignature.click();
+            }, 14000);
+            
+            setTimeout(() => {
+                startTrust.click();
+            }, 24000);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Key Derivation Functions in Cryptography</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        /* Base styles */
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            overflow-x: hidden;
+        }
+
+        /* Title animation */
+        .title-text {
+            background: linear-gradient(45deg, #38bdf8, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradient 6s ease infinite;
+            background-size: 200% 200%;
+        }
+        
+        @keyframes gradient {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Container animations and styles */
+        .container-animation {
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeIn 1s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Password input animation */
+        .password-char {
+            display: inline-block;
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        /* Salt animation */
+        .salt-particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background-color: #38bdf8;
+            animation: saltMove 2s infinite;
+        }
+
+        @keyframes saltMove {
+            0% { transform: translate(0, 0); opacity: 0; }
+            50% { transform: translate(15px, 15px); opacity: 1; }
+            100% { transform: translate(30px, 0px); opacity: 0; }
+        }
+
+        /* Iteration animation */
+        .iteration-box {
+            transition: all 0.5s ease;
+            transform-origin: center;
+            opacity: 0.4;
+        }
+
+        /* Key output animation */
+        .key-bit {
+            width: 12px;
+            height: 12px;
+            margin: 2px;
+            display: inline-block;
+            opacity: 0;
+            transform: scale(0);
+        }
+
+        /* Diagram connections */
+        .connector {
+            stroke-dasharray: 12;
+            stroke-dashoffset: 24;
+            animation: dash 2s linear infinite;
+        }
+
+        @keyframes dash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        /* Function box pulsing */
+        .function-box {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        /* Attack visualization */
+        .attack-line {
+            stroke-dasharray: 10;
+            stroke-dashoffset: 20;
+            animation: attackDash 1s linear infinite;
+        }
+
+        @keyframes attackDash {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        .computation-bar {
+            transition: width 1.5s ease-in-out;
+        }
+
+        /* Use case icons */
+        .use-case-icon {
+            opacity: 0;
+            transform: scale(0.8);
+            transition: all 0.5s ease;
+        }
+
+        .use-case-icon.active {
+            opacity: 1;
+            transform: scale(1);
+        }
+
+        /* Animation delays for cascade effect */
+        .delay-1 { animation-delay: 0.2s; }
+        .delay-2 { animation-delay: 0.4s; }
+        .delay-3 { animation-delay: 0.6s; }
+        .delay-4 { animation-delay: 0.8s; }
+        .delay-5 { animation-delay: 1.0s; }
+    </style>
+</head>
+<body>
+    <div class="min-h-screen flex flex-col items-center py-8 px-4">
+        <!-- Title Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-4xl md:text-5xl font-bold title-text mb-4">Key Derivation Functions</h1>
+            <p class="text-blue-200 text-lg opacity-80">Transforming passwords into cryptographic keys</p>
+        </div>
+
+        <!-- Main Visualization Container -->
+        <div class="container-animation delay-1 max-w-4xl w-full bg-gray-800 bg-opacity-50 rounded-xl p-6 shadow-lg backdrop-filter backdrop-blur-sm border border-gray-700">
+            
+            <!-- Password Input Section -->
+            <div class="mb-10 relative">
+                <div class="text-sm text-blue-300 mb-2">Input Password</div>
+                <div id="password-container" class="bg-gray-900 p-3 rounded-md flex items-center justify-center text-xl font-mono h-12">
+                    <!-- Password characters will be inserted here by JS -->
+                </div>
+            </div>
+
+            <!-- KDF Process Visualization -->
+            <div class="relative mb-12">
+                <svg id="kdf-process" width="100%" height="320" class="container-animation delay-2"></svg>
+                
+                <!-- Labels for the KDF diagram will be positioned with JS -->
+                <div id="salt-label" class="absolute text-xs text-yellow-300 font-semibold">Salt</div>
+                <div id="iteration-label" class="absolute text-xs text-green-300 font-semibold">Multiple Iterations</div>
+                <div id="function-label" class="absolute text-xs text-purple-300 font-semibold">KDF Algorithm</div>
+            </div>
+
+            <!-- Output Key Section -->
+            <div class="container-animation delay-3 mb-10">
+                <div class="text-sm text-green-300 mb-2">Derived Key</div>
+                <div id="key-output" class="bg-gray-900 p-3 rounded-md flex flex-wrap justify-center h-20">
+                    <!-- Key bits will be inserted here by JS -->
+                </div>
+            </div>
+
+            <!-- Security Benefits -->
+            <div class="container-animation delay-4 grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
+                <div class="bg-gray-800 p-4 rounded-lg border border-blue-800">
+                    <div class="text-blue-400 font-semibold mb-2">Slow Computation</div>
+                    <div id="time-bar" class="w-full bg-gray-700 h-4 rounded overflow-hidden">
+                        <div class="computation-bar bg-blue-500 h-full" style="width: 0%"></div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 p-4 rounded-lg border border-purple-800">
+                    <div class="text-purple-400 font-semibold mb-2">Brute Force Resistant</div>
+                    <div id="attack-visualization" class="w-full h-16 relative">
+                        <!-- Attack visualization will be added here by JS -->
+                    </div>
+                </div>
+                
+                <div class="bg-gray-800 p-4 rounded-lg border border-green-800">
+                    <div class="text-green-400 font-semibold mb-2">Salt Prevents Rainbow Tables</div>
+                    <div id="salt-visualization" class="w-full h-16 relative">
+                        <!-- Salt visualization will be added here by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Use Cases -->
+            <div class="container-animation delay-5">
+                <div class="text-sm text-blue-300 mb-4">Common Applications</div>
+                <div id="use-cases" class="flex flex-wrap justify-around">
+                    <!-- Use cases will be added here by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- KDF Types -->
+        <div class="container-animation delay-5 mt-10 max-w-4xl w-full">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+                <div class="bg-gradient-to-br from-blue-900 to-blue-800 p-4 rounded-lg">
+                    <div class="font-semibold">PBKDF2</div>
+                    <div class="text-xs mt-1 text-blue-300">Password-Based KDF</div>
+                </div>
+                <div class="bg-gradient-to-br from-purple-900 to-purple-800 p-4 rounded-lg">
+                    <div class="font-semibold">Bcrypt</div>
+                    <div class="text-xs mt-1 text-purple-300">Blowfish-Based</div>
+                </div>
+                <div class="bg-gradient-to-br from-green-900 to-green-800 p-4 rounded-lg">
+                    <div class="font-semibold">Argon2</div>
+                    <div class="text-xs mt-1 text-green-300">Memory-Hard Function</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize animations
+            initPasswordAnimation();
+            drawKDFProcess();
+            animateKeyOutput();
+            initSecurityVisualizations();
+            initUseCases();
+        });
+
+        // Password animation
+        function initPasswordAnimation() {
+            const passwordContainer = document.getElementById('password-container');
+            const password = "P@s5w0rd!";
+            
+            // Clear any existing content
+            passwordContainer.innerHTML = '';
+            
+            // Create animated characters
+            for (let i = 0; i < password.length; i++) {
+                const charSpan = document.createElement('span');
+                charSpan.className = 'password-char';
+                charSpan.textContent = password[i];
+                charSpan.style.animationDelay = `${0.1 * i}s`;
+                charSpan.style.animation = 'fadeIn 0.5s forwards';
+                passwordContainer.appendChild(charSpan);
+            }
+        }
+
+        // Draw KDF process visualization
+        function drawKDFProcess() {
+            const svg = document.getElementById('kdf-process');
+            const svgNS = "http://www.w3.org/2000/svg";
+            
+            // Clear SVG
+            svg.innerHTML = '';
+            
+            // Set positions and dimensions
+            const width = svg.clientWidth;
+            const height = svg.clientHeight;
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // Create password input node
+            const inputNode = document.createElementNS(svgNS, 'rect');
+            inputNode.setAttribute('x', 20);
+            inputNode.setAttribute('y', centerY - 30);
+            inputNode.setAttribute('width', 100);
+            inputNode.setAttribute('height', 60);
+            inputNode.setAttribute('rx', 8);
+            inputNode.setAttribute('fill', '#1e293b');
+            inputNode.setAttribute('stroke', '#3b82f6');
+            inputNode.setAttribute('stroke-width', '2');
+            svg.appendChild(inputNode);
+            
+            // Input text
+            const inputText = document.createElementNS(svgNS, 'text');
+            inputText.setAttribute('x', 70);
+            inputText.setAttribute('y', centerY + 5);
+            inputText.setAttribute('text-anchor', 'middle');
+            inputText.setAttribute('fill', '#3b82f6');
+            inputText.setAttribute('font-size', '12');
+            inputText.textContent = 'Password';
+            svg.appendChild(inputText);
+            
+            // Create salt node
+            const saltNode = document.createElementNS(svgNS, 'rect');
+            saltNode.setAttribute('x', 70);
+            saltNode.setAttribute('y', centerY - 90);
+            saltNode.setAttribute('width', 80);
+            saltNode.setAttribute('height', 40);
+            saltNode.setAttribute('rx', 8);
+            saltNode.setAttribute('fill', '#1e293b');
+            saltNode.setAttribute('stroke', '#eab308');
+            saltNode.setAttribute('stroke-width', '2');
+            svg.appendChild(saltNode);
+            
+            // Salt text
+            const saltText = document.createElementNS(svgNS, 'text');
+            saltText.setAttribute('x', 110);
+            saltText.setAttribute('y', centerY - 70);
+            saltText.setAttribute('text-anchor', 'middle');
+            saltText.setAttribute('fill', '#eab308');
+            saltText.setAttribute('font-size', '12');
+            saltText.textContent = 'Random Salt';
+            svg.appendChild(saltText);
+            
+            // Create KDF function box
+            const kdfBox = document.createElementNS(svgNS, 'rect');
+            kdfBox.setAttribute('x', centerX - 80);
+            kdfBox.setAttribute('y', centerY - 40);
+            kdfBox.setAttribute('width', 160);
+            kdfBox.setAttribute('height', 80);
+            kdfBox.setAttribute('rx', 10);
+            kdfBox.setAttribute('fill', '#1e293b');
+            kdfBox.setAttribute('stroke', '#8b5cf6');
+            kdfBox.setAttribute('stroke-width', '2');
+            kdfBox.classList.add('function-box');
+            svg.appendChild(kdfBox);
+            
+            // KDF text
+            const kdfText = document.createElementNS(svgNS, 'text');
+            kdfText.setAttribute('x', centerX);
+            kdfText.setAttribute('y', centerY);
+            kdfText.setAttribute('text-anchor', 'middle');
+            kdfText.setAttribute('fill', '#8b5cf6');
+            kdfText.setAttribute('font-size', '14');
+            kdfText.textContent = 'Key Derivation Function';
+            svg.appendChild(kdfText);
+            
+            // Iterations text
+            const iterText = document.createElementNS(svgNS, 'text');
+            iterText.setAttribute('x', centerX);
+            iterText.setAttribute('y', centerY + 20);
+            iterText.setAttribute('text-anchor', 'middle');
+            iterText.setAttribute('fill', '#a78bfa');
+            iterText.setAttribute('font-size', '10');
+            iterText.textContent = 'Thousands of iterations';
+            svg.appendChild(iterText);
+            
+            // Create output key node
+            const outputNode = document.createElementNS(svgNS, 'rect');
+            outputNode.setAttribute('x', width - 120);
+            outputNode.setAttribute('y', centerY - 30);
+            outputNode.setAttribute('width', 100);
+            outputNode.setAttribute('height', 60);
+            outputNode.setAttribute('rx', 8);
+            outputNode.setAttribute('fill', '#1e293b');
+            outputNode.setAttribute('stroke', '#10b981');
+            outputNode.setAttribute('stroke-width', '2');
+            svg.appendChild(outputNode);
+            
+            // Output text
+            const outputText = document.createElementNS(svgNS, 'text');
+            outputText.setAttribute('x', width - 70);
+            outputText.setAttribute('y', centerY + 5);
+            outputText.setAttribute('text-anchor', 'middle');
+            outputText.setAttribute('fill', '#10b981');
+            outputText.setAttribute('font-size', '12');
+            outputText.textContent = 'Derived Key';
+            svg.appendChild(outputText);
+            
+            // Connectors
+            // Password to KDF
+            const conn1 = document.createElementNS(svgNS, 'path');
+            conn1.setAttribute('d', `M 120,${centerY} L ${centerX - 80},${centerY}`);
+            conn1.setAttribute('stroke', '#3b82f6');
+            conn1.setAttribute('stroke-width', '2');
+            conn1.setAttribute('fill', 'none');
+            conn1.classList.add('connector');
+            svg.appendChild(conn1);
+            
+            // Salt to KDF
+            const conn2 = document.createElementNS(svgNS, 'path');
+            conn2.setAttribute('d', `M 110,${centerY - 50} L 110,${centerY - 50} L ${centerX - 40},${centerY - 40}`);
+            conn2.setAttribute('stroke', '#eab308');
+            conn2.setAttribute('stroke-width', '2');
+            conn2.setAttribute('fill', 'none');
+            conn2.classList.add('connector');
+            svg.appendChild(conn2);
+            
+            // KDF to output
+            const conn3 = document.createElementNS(svgNS, 'path');
+            conn3.setAttribute('d', `M ${centerX + 80},${centerY} L ${width - 120},${centerY}`);
+            conn3.setAttribute('stroke', '#10b981');
+            conn3.setAttribute('stroke-width', '2');
+            conn3.setAttribute('fill', 'none');
+            conn3.classList.add('connector');
+            svg.appendChild(conn3);
+            
+            // Iteration circles
+            for (let i = 0; i < 5; i++) {
+                const iterCircle = document.createElementNS(svgNS, 'circle');
+                iterCircle.setAttribute('cx', centerX + 20 * i - 40);
+                iterCircle.setAttribute('cy', centerY + 40);
+                iterCircle.setAttribute('r', 5);
+                iterCircle.setAttribute('fill', '#a78bfa');
+                iterCircle.classList.add('iteration-box');
+                
+                // Animation for iteration circles
+                setTimeout(() => {
+                    iterCircle.style.opacity = '1';
+                    iterCircle.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        iterCircle.style.opacity = '0.4';
+                        iterCircle.style.transform = 'scale(1)';
+                    }, 300);
+                }, 500 + i * 400);
+                
+                svg.appendChild(iterCircle);
+            }
+            
+            // Position labels
+            document.getElementById('salt-label').style.top = (centerY - 100) + 'px';
+            document.getElementById('salt-label').style.left = '20px';
+            
+            document.getElementById('function-label').style.top = (centerY - 60) + 'px';
+            document.getElementById('function-label').style.left = (centerX - 40) + 'px';
+            
+            document.getElementById('iteration-label').style.top = (centerY + 50) + 'px';
+            document.getElementById('iteration-label').style.left = (centerX - 60) + 'px';
+            
+            // Add salt particles
+            for (let i = 0; i < 8; i++) {
+                const saltParticle = document.createElement('div');
+                saltParticle.className = 'salt-particle';
+                saltParticle.style.left = `${70 + Math.random() * 80}px`;
+                saltParticle.style.top = `${centerY - 90 + Math.random() * 40}px`;
+                saltParticle.style.animationDelay = `${Math.random() * 2}s`;
+                svg.parentNode.appendChild(saltParticle);
+            }
+        }
+
+        // Animate key output
+        function animateKeyOutput() {
+            const keyOutput = document.getElementById('key-output');
+            keyOutput.innerHTML = '';
+            
+            // Create hex key representation
+            const colors = ['#3b82f6', '#8b5cf6', '#10b981', '#f59e0b'];
+            
+            for (let i = 0; i < 32; i++) {
+                const keyBit = document.createElement('div');
+                keyBit.className = 'key-bit';
+                keyBit.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                keyBit.style.animation = `fadeIn 0.2s ${i * 0.05}s forwards`;
+                keyOutput.appendChild(keyBit);
+            }
+        }
+
+        // Initialize security visualizations
+        function initSecurityVisualizations() {
+            // Computation time bar animation
+            setTimeout(() => {
+                document.querySelector('.computation-bar').style.width = '100%';
+            }, 500);
+            
+            // Attack visualization
+            const attackViz = document.getElementById('attack-visualization');
+            const svgNS = "http://www.w3.org/2000/svg";
+            
+            const attackSvg = document.createElementNS(svgNS, 'svg');
+            attackSvg.setAttribute('width', '100%');
+            attackSvg.setAttribute('height', '100%');
+            attackViz.appendChild(attackSvg);
+            
+            // Draw lock
+            const lock = document.createElementNS(svgNS, 'rect');
+            lock.setAttribute('x', '70');
+            lock.setAttribute('y', '8');
+            lock.setAttribute('width', '24');
+            lock.setAttribute('height', '20');
+            lock.setAttribute('rx', '4');
+            lock.setAttribute('fill', '#475569');
+            attackSvg.appendChild(lock);
+            
+            const lockShackle = document.createElementNS(svgNS, 'path');
+            lockShackle.setAttribute('d', 'M 76,8 C 76,0 88,0 88,8 L 88,14');
+            lockShackle.setAttribute('stroke', '#475569');
+            lockShackle.setAttribute('stroke-width', '4');
+            lockShackle.setAttribute('fill', 'none');
+            attackSvg.appendChild(lockShackle);
+            
+            // Draw attack lines
+            for (let i = 0; i < 3; i++) {
+                const attackLine = document.createElementNS(svgNS, 'line');
+                attackLine.setAttribute('x1', '10');
+                attackLine.setAttribute('y1', 10 + i * 10);
+                attackLine.setAttribute('x2', '60');
+                attackLine.setAttribute('y2', 10 + i * 10);
+                attackLine.setAttribute('stroke', '#ef4444');
+                attackLine.setAttribute('stroke-width', '2');
+                attackLine.classList.add('attack-line');
+                attackLine.style.animationDelay = `${i * 0.2}s`;
+                attackSvg.appendChild(attackLine);
+                
+                // Add X mark showing failed attack
+                setTimeout(() => {
+                    const xMark = document.createElementNS(svgNS, 'g');
+                    const line1 = document.createElementNS(svgNS, 'line');
+                    line1.setAttribute('x1', '60');
+                    line1.setAttribute('y1', 5 + i * 10);
+                    line1.setAttribute('x2', '68');
+                    line1.setAttribute('y2', 15 + i * 10);
+                    line1.setAttribute('stroke', '#ef4444');
+                    line1.setAttribute('stroke-width', '2');
+                    
+                    const line2 = document.createElementNS(svgNS, 'line');
+                    line2.setAttribute('x1', '68');
+                    line2.setAttribute('y1', 5 + i * 10);
+                    line2.setAttribute('x2', '60');
+                    line2.setAttribute('y2', 15 + i * 10);
+                    line2.setAttribute('stroke', '#ef4444');
+                    line2.setAttribute('stroke-width', '2');
+                    
+                    xMark.appendChild(line1);
+                    xMark.appendChild(line2);
+                    attackSvg.appendChild(xMark);
+                }, 1000 + i * 800);
+            }
+            
+            // Salt visualization
+            const saltViz = document.getElementById('salt-visualization');
+            const saltSvg = document.createElementNS(svgNS, 'svg');
+            saltSvg.setAttribute('width', '100%');
+            saltSvg.setAttribute('height', '100%');
+            saltViz.appendChild(saltSvg);
+            
+            // Draw rainbow table (crossed out)
+            const table = document.createElementNS(svgNS, 'rect');
+            table.setAttribute('x', '10');
+            table.setAttribute('y', '5');
+            table.setAttribute('width', '50');
+            table.setAttribute('height', '40');
+            table.setAttribute('fill', '#475569');
+            table.setAttribute('rx', '2');
+            saltSvg.appendChild(table);
+            
+            const tableText = document.createElementNS(svgNS, 'text');
+            tableText.setAttribute('x', '35');
+            tableText.setAttribute('y', '25');
+            tableText.setAttribute('text-anchor', 'middle');
+            tableText.setAttribute('fill', '#94a3b8');
+            tableText.setAttribute('font-size', '6');
+            tableText.textContent = 'Rainbow';
+            saltSvg.appendChild(tableText);
+            
+            const tableText2 = document.createElementNS(svgNS, 'text');
+            tableText2.setAttribute('x', '35');
+            tableText2.setAttribute('y', '35');
+            tableText2.setAttribute('text-anchor', 'middle');
+            tableText2.setAttribute('fill', '#94a3b8');
+            tableText2.setAttribute('font-size', '6');
+            tableText2.textContent = 'Table';
+            saltSvg.appendChild(tableText2);
+            
+            // Salt crystal
+            const saltCrystal = document.createElementNS(svgNS, 'polygon');
+            saltCrystal.setAttribute('points', '85,10 95,20 90,35 80,35 75,20');
+            saltCrystal.setAttribute('fill', '#0ea5e9');
+            saltCrystal.setAttribute('opacity', '0.7');
+            saltSvg.appendChild(saltCrystal);
+            
+            // Cross out the table
+            setTimeout(() => {
+                const cross1 = document.createElementNS(svgNS, 'line');
+                cross1.setAttribute('x1', '5');
+                cross1.setAttribute('y1', '5');
+                cross1.setAttribute('x2', '65');
+                cross1.setAttribute('y2', '45');
+                cross1.setAttribute('stroke', '#ef4444');
+                cross1.setAttribute('stroke-width', '3');
+                saltSvg.appendChild(cross1);
+                
+                const cross2 = document.createElementNS(svgNS, 'line');
+                cross2.setAttribute('x1', '65');
+                cross2.setAttribute('y1', '5');
+                cross2.setAttribute('x2', '5');
+                cross2.setAttribute('y2', '45');
+                cross2.setAttribute('stroke', '#ef4444');
+                cross2.setAttribute('stroke-width', '3');
+                saltSvg.appendChild(cross2);
+            }, 1000);
+        }
+
+        // Initialize use cases
+        function initUseCases() {
+            const useCases = [
+                { name: "Password Storage", color: "#3b82f6" },
+                { name: "File Encryption", color: "#8b5cf6" },
+                { name: "Token Generation", color: "#10b981" },
+                { name: "Key Exchange", color: "#f59e0b" }
+            ];
+            
+            const useCasesContainer = document.getElementById('use-cases');
+            
+            useCases.forEach((useCase, i) => {
+                const caseElement = document.createElement('div');
+                caseElement.className = 'use-case-icon bg-gray-800 p-3 m-2 rounded-lg border';
+                caseElement.style.borderColor = useCase.color;
+                caseElement.innerHTML = `<div class="text-xs text-center" style="color:${useCase.color}">${useCase.name}</div>`;
+                useCasesContainer.appendChild(caseElement);
+                
+                // Animate each use case
+                setTimeout(() => {
+                    caseElement.classList.add('active');
+                }, 500 + i * 300);
+            });
+        }
+
+        // Animation loop to keep things moving
+        setInterval(() => {
+            // Restart password animation
+            initPasswordAnimation();
+            
+            // Restart key animation
+            animateKeyOutput();
+            
+            // Reset computation bar
+            const computationBar = document.querySelector('.computation-bar');
+            computationBar.style.width = '0%';
+            setTimeout(() => {
+                computationBar.style.width = '100%';
+            }, 200);
+        }, 8000);
+    </script>
+</body>
+</html>

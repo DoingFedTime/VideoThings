@@ -1,0 +1,1722 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding RetroShare: A Secure P2P Network</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.2.1/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .section {
+            margin-bottom: 4rem;
+        }
+
+        h1, h2, h3 {
+            color: #2563EB;
+        }
+
+        .node {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: #3B82F6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            position: absolute;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: all 0.5s ease;
+        }
+
+        .connection {
+            height: 2px;
+            background-color: #93C5FD;
+            position: absolute;
+            transform-origin: left center;
+            transition: all 0.8s ease;
+        }
+
+        .data-packet {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background-color: #F59E0B;
+            position: absolute;
+            transition: all 1s ease;
+            opacity: 0;
+        }
+
+        .feature-icon {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            color: #3B82F6;
+        }
+
+        .feature-card {
+            border: 1px solid #E5E7EB;
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .animation-container {
+            position: relative;
+            height: 400px;
+            background-color: #F9FAFB;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        .encryption-container {
+            position: relative;
+            height: 300px;
+            background-color: #F9FAFB;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            margin: 2rem 0;
+        }
+
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+            }
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; }
+            50% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .pulse-animation {
+            animation: pulse 2s infinite;
+        }
+
+        .tooltip {
+            position: absolute;
+            background-color: #1E3A8A;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+            z-index: 10;
+            max-width: 200px;
+        }
+
+        /* Key features styling */
+        .key-feature {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            border-radius: 0.5rem;
+            background-color: #F9FAFB;
+            transition: all 0.3s ease;
+        }
+
+        .key-feature:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .feature-icon-container {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: #EFF6FF;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 1rem;
+        }
+
+        .feature-demo {
+            height: 200px;
+            position: relative;
+            margin-top: 1.5rem;
+            background-color: #E5E7EB;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+
+        /* Encryption visualization */
+        .encryption-step {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+
+        .step-active {
+            opacity: 1;
+        }
+
+        .message-box {
+            padding: 1rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            position: relative;
+            transition: all 0.5s ease;
+        }
+
+        .lock-icon {
+            position: absolute;
+            font-size: 2rem;
+            color: #10B981;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        /* Network growth animation */
+        .network-node {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: #3B82F6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.5s ease;
+        }
+
+        .network-connection {
+            position: absolute;
+            height: 2px;
+            background-color: #93C5FD;
+            transform-origin: left center;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        /* File sharing visualization */
+        .file-container {
+            position: relative;
+            width: 60px;
+            height: 80px;
+            background-color: white;
+            border-radius: 0.25rem;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .file-icon {
+            font-size: 2rem;
+            color: #3B82F6;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-name {
+            font-size: 0.75rem;
+            text-align: center;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 90%;
+        }
+
+        .file-transfer {
+            position: absolute;
+            height: 3px;
+            background-color: #10B981;
+            transform-origin: left center;
+            transition: all 0.8s ease;
+        }
+
+        .chat-bubble {
+            position: absolute;
+            max-width: 150px;
+            padding: 0.75rem;
+            border-radius: 1rem;
+            background-color: #3B82F6;
+            color: white;
+            font-size: 0.875rem;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+
+        .chat-bubble.reply {
+            background-color: #E5E7EB;
+            color: #1F2937;
+        }
+
+        /* Progress bar for animations */
+        .progress-bar-container {
+            width: 100%;
+            height: 4px;
+            background-color: #E5E7EB;
+            border-radius: 2px;
+            margin-top: 1rem;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background-color: #3B82F6;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .control-button {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .control-button:hover {
+            background-color: #2563EB;
+        }
+
+        /* Dark mode toggle */
+        .dark-mode {
+            background-color: #1F2937;
+            color: #F3F4F6;
+        }
+
+        .dark-mode h1,
+        .dark-mode h2,
+        .dark-mode h3 {
+            color: #60A5FA;
+        }
+
+        .dark-mode .feature-card {
+            background-color: #374151;
+            border-color: #4B5563;
+        }
+
+        .dark-mode .animation-container,
+        .dark-mode .encryption-container,
+        .dark-mode .key-feature {
+            background-color: #374151;
+        }
+
+        .dark-mode .feature-icon-container {
+            background-color: #4B5563;
+        }
+
+        .dark-mode .feature-demo {
+            background-color: #4B5563;
+        }
+
+        .toggle-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+        }
+
+        .mode-toggle {
+            width: 50px;
+            height: 24px;
+            border-radius: 12px;
+            background-color: #E5E7EB;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .toggle-thumb {
+            width: 20px;
+            height: 20px;
+            background-color: #3B82F6;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: left 0.3s ease;
+        }
+
+        .dark-mode .toggle-thumb {
+            left: 28px;
+        }
+
+        .dark-mode .mode-toggle {
+            background-color: #4B5563;
+        }
+
+        .interactive-button {
+            background-color: #3B82F6;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.25rem;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .interactive-button:hover {
+            background-color: #2563EB;
+        }
+
+        /* Tooltips for the nodes */
+        .node-tooltip {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .node:hover .node-tooltip {
+            opacity: 1;
+        }
+    </style>
+</head>
+<body>
+    <div class="toggle-container">
+        <div class="mode-toggle" id="modeToggle">
+            <div class="toggle-thumb"></div>
+        </div>
+    </div>
+    <div class="container">
+        <header class="text-center my-8">
+            <h1 class="text-4xl font-bold mb-4">Understanding RetroShare</h1>
+            <h2 class="text-2xl text-gray-600">A Secure Peer-to-Peer Network</h2>
+        </header>
+
+        <section class="section" id="introduction">
+            <h2 class="text-3xl font-semibold mb-4">What is RetroShare?</h2>
+            <p class="mb-4">
+                RetroShare is a free and open-source peer-to-peer communication and file sharing application
+                that creates a secure, decentralized network through a friend-to-friend (F2F) connection model.
+                Unlike traditional P2P networks where you connect to random peers, RetroShare only connects you
+                to people you know and trust.
+            </p>
+            <p class="mb-4">
+                Founded in 2004, RetroShare uses strong encryption (GNU Privacy Guard and OpenSSL) to ensure your
+                communications remain private. It offers various features including chat, mail, forums, file sharing,
+                and more - all operating over an encrypted network that prioritizes your privacy.
+            </p>
+            <div class="flex justify-center mt-8">
+                <button id="startNetworkAnimation" class="interactive-button">
+                    See How the Network Forms
+                </button>
+            </div>
+            <div class="animation-container" id="networkFormation">
+                <!-- Nodes and connections will be generated here by JavaScript -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="networkProgress"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="f2f-network">
+            <h2 class="text-3xl font-semibold mb-4">Friend-to-Friend Network</h2>
+            <p class="mb-4">
+                RetroShare's security is built on a friend-to-friend (F2F) network model. Unlike traditional P2P networks:
+            </p>
+            <ul class="list-disc pl-8 mb-4">
+                <li>You only connect directly with people you know and trust</li>
+                <li>Your connections are authenticated through exchanged certificates</li>
+                <li>All communications are end-to-end encrypted</li>
+                <li>Your IP address is only visible to your direct friends</li>
+            </ul>
+            <p class="mb-4">
+                This design makes RetroShare resistant to monitoring and intrusion from outside parties,
+                creating what's sometimes called a "darknet" - a network that exists within the public internet
+                but is only accessible to a specific group of users.
+            </p>
+            <div class="flex justify-center mt-8">
+                <button id="startF2FAnimation" class="interactive-button">
+                    Demonstrate F2F Connections
+                </button>
+            </div>
+            <div class="animation-container" id="f2fAnimation">
+                <!-- F2F network animation will be generated here by JavaScript -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="f2fProgress"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="encryption">
+            <h2 class="text-3xl font-semibold mb-4">Security through Encryption</h2>
+            <p class="mb-4">
+                RetroShare uses multiple layers of encryption to protect your data:
+            </p>
+            <ul class="list-disc pl-8 mb-4">
+                <li>GNU Privacy Guard (GPG) for authentication and key exchange</li>
+                <li>OpenSSL for establishing encrypted connections between peers</li>
+                <li>End-to-end encryption for all communications</li>
+                <li>Optional Tor and I2P integration for additional anonymity</li>
+            </ul>
+            <div class="flex justify-center mt-8">
+                <button id="startEncryptionAnimation" class="interactive-button">
+                    Watch Encryption in Action
+                </button>
+            </div>
+            <div class="encryption-container" id="encryptionAnimation">
+                <!-- Encryption animation will be generated here by JavaScript -->
+                <div class="encryption-step" id="step1">
+                    <div class="message-box">Hello, this is a secure message!</div>
+                </div>
+                <div class="encryption-step" id="step2">
+                    <div class="message-box">
+                        <i class="fas fa-lock lock-icon"></i>
+                        Xbz19$kLm*@#pQ7r!
+                    </div>
+                </div>
+                <div class="encryption-step" id="step3">
+                    <div class="message-box">
+                        <i class="fas fa-unlock lock-icon"></i>
+                        Hello, this is a secure message!
+                    </div>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="encryptionProgress"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="key-features">
+            <h2 class="text-3xl font-semibold mb-6">Key Features of RetroShare</h2>
+
+            <!-- Chat Feature -->
+            <div class="key-feature" id="chatFeature">
+                <div class="feature-header">
+                    <div class="feature-icon-container">
+                        <i class="fas fa-comments feature-icon"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Secure Chat</h3>
+                </div>
+                <p class="mb-2">
+                    Exchange encrypted messages with friends and participate in decentralized chat rooms.
+                    RetroShare supports both private conversations and group chats with a rich set of emoticons.
+                </p>
+                <button id="startChatAnimation" class="control-button">
+                    Demonstrate Chat
+                </button>
+                <div class="feature-demo" id="chatDemo">
+                    <!-- Chat animation will be generated here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Mail Feature -->
+            <div class="key-feature" id="mailFeature">
+                <div class="feature-header">
+                    <div class="feature-icon-container">
+                        <i class="fas fa-envelope feature-icon"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Secure Mail</h3>
+                </div>
+                <p class="mb-2">
+                    Send encrypted messages that are stored on friends' nodes for delivery even when you're offline.
+                    This creates a decentralized, private messaging system without central servers.
+                </p>
+                <button id="startMailAnimation" class="control-button">
+                    Demonstrate Mail
+                </button>
+                <div class="feature-demo" id="mailDemo">
+                    <!-- Mail animation will be generated here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- File Sharing Feature -->
+            <div class="key-feature" id="fileSharingFeature">
+                <div class="feature-header">
+                    <div class="feature-icon-container">
+                        <i class="fas fa-file-alt feature-icon"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Secure File Sharing</h3>
+                </div>
+                <p class="mb-2">
+                    Share files with specific friends or the entire network using BitTorrent-like swarming for
+                    faster transfers. Files are transferred through trusted routes, maintaining privacy.
+                </p>
+                <button id="startFileSharingAnimation" class="control-button">
+                    Demonstrate File Sharing
+                </button>
+                <div class="feature-demo" id="fileSharingDemo">
+                    <!-- File sharing animation will be generated here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Forums Feature -->
+            <div class="key-feature" id="forumsFeature">
+                <div class="feature-header">
+                    <div class="feature-icon-container">
+                        <i class="fas fa-users feature-icon"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Forums</h3>
+                </div>
+                <p class="mb-2">
+                    Participate in decentralized discussion forums that can be read and written to while offline.
+                    Forums sync automatically when you connect, making them censorship-resistant by design.
+                </p>
+                <button id="startForumsAnimation" class="control-button">
+                    Demonstrate Forums
+                </button>
+                <div class="feature-demo" id="forumsDemo">
+                    <!-- Forums animation will be generated here by JavaScript -->
+                </div>
+            </div>
+
+            <!-- Channels Feature -->
+            <div class="key-feature" id="channelsFeature">
+                <div class="feature-header">
+                    <div class="feature-icon-container">
+                        <i class="fas fa-broadcast-tower feature-icon"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold">Channels</h3>
+                </div>
+                <p class="mb-2">
+                    Subscribe to content channels to automatically download files published by friends or other trusted sources.
+                    Comment on shared content and distribute it across your network.
+                </p>
+                <button id="startChannelsAnimation" class="control-button">
+                    Demonstrate Channels
+                </button>
+                <div class="feature-demo" id="channelsDemo">
+                    <!-- Channels animation will be generated here by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="tor-i2p">
+            <h2 class="text-3xl font-semibold mb-4">Enhanced Privacy with Tor/I2P</h2>
+            <p class="mb-4">
+                RetroShare can operate over the Tor or I2P networks for additional privacy:
+            </p>
+            <ul class="list-disc pl-8 mb-4">
+                <li>Hides your IP address even from your direct friends</li>
+                <li>Allows safe connections with unknown or less-trusted users</li>
+                <li>Special builds available with built-in Tor integration</li>
+                <li>Creates a truly anonymous communication channel</li>
+            </ul>
+            <div class="flex justify-center mt-8">
+                <button id="startTorAnimation" class="interactive-button">
+                    See Tor Protection at Work
+                </button>
+            </div>
+            <div class="animation-container" id="torAnimation">
+                <!-- Tor animation will be generated here by JavaScript -->
+                <div class="progress-bar-container">
+                    <div class="progress-bar" id="torProgress"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section" id="conclusion">
+            <h2 class="text-3xl font-semibold mb-4">Summary: Why Use RetroShare?</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="feature-card">
+                    <div class="text-center">
+                        <i class="fas fa-lock feature-icon"></i>
+                        <h3 class="text-xl font-semibold mb-2">Privacy by Design</h3>
+                    </div>
+                    <p>RetroShare's friend-to-friend model creates inherent privacy, limiting exposure of your information only to those you explicitly trust.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="text-center">
+                        <i class="fas fa-users feature-icon"></i>
+                        <h3 class="text-xl font-semibold mb-2">Decentralization</h3>
+                    </div>
+                    <p>No central servers means no single point of failure or control. Your network continues to function even if parts of it go offline.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="text-center">
+                        <i class="fas fa-shield-alt feature-icon"></i>
+                        <h3 class="text-xl font-semibold mb-2">Encryption</h3>
+                    </div>
+                    <p>Military-grade encryption protects all communications, ensuring your messages and files remain private.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="text-center">
+                        <i class="fas fa-globe feature-icon"></i>
+                        <h3 class="text-xl font-semibold mb-2">Cross-Platform</h3>
+                    </div>
+                    <p>Available on Windows, macOS, Linux, FreeBSD, and more - allowing you to connect with friends regardless of their operating system.</p>
+                </div>
+            </div>
+            <div class="mt-8 text-center">
+                <p class="text-lg font-semibold">RetroShare offers a truly private, secure, and decentralized alternative to mainstream social networks and communication tools.</p>
+            </div>
+        </section>
+
+        <footer class="mt-12 pt-8 border-t border-gray-200 text-center text-gray-600">
+            <p>Created for educational purposes. RetroShare is available at <a href="https://retroshare.cc/" class="text-blue-600 hover:underline">retroshare.cc</a></p>
+            <p class="mt-2">© 2025 - RetroShare is licensed under the GNU General Public License</p>
+        </footer>
+    </div>
+
+    <script>
+        // Dark mode toggle
+        const modeToggle = document.getElementById('modeToggle');
+        const body = document.body;
+
+        modeToggle.addEventListener('click', () => {
+            body.classList.toggle('dark-mode');
+        });
+
+        // Function to create a node element
+        function createNode(id, x, y, label, container) {
+            const node = document.createElement('div');
+            node.className = 'node';
+            node.id = `node-${id}`;
+            node.style.left = `${x}px`;
+            node.style.top = `${y}px`;
+            node.innerHTML = label;
+            container.appendChild(node);
+            return node;
+        }
+
+        // Function to create a connection between nodes
+        function createConnection(id, startNode, endNode, container) {
+            const startRect = startNode.getBoundingClientRect();
+            const endRect = endNode.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            const startX = startRect.left + startRect.width / 2 - containerRect.left;
+            const startY = startRect.top + startRect.height / 2 - containerRect.top;
+            const endX = endRect.left + endRect.width / 2 - containerRect.left;
+            const endY = endRect.top + endRect.height / 2 - containerRect.top;
+            
+            const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+            
+            const connection = document.createElement('div');
+            connection.className = 'connection';
+            connection.id = `connection-${id}`;
+            connection.style.width = `${length}px`;
+            connection.style.left = `${startX}px`;
+            connection.style.top = `${startY}px`;
+            connection.style.transform = `rotate(${angle}deg)`;
+            container.appendChild(connection);
+            
+            return connection;
+        }
+
+        // Function to create a data packet for animation
+        function createDataPacket(id, container) {
+            const packet = document.createElement('div');
+            packet.className = 'data-packet';
+            packet.id = `packet-${id}`;
+            container.appendChild(packet);
+            return packet;
+        }
+
+        // Function to animate data transfer between nodes
+        function animateDataTransfer(packet, startNode, endNode, container, callback) {
+            const startRect = startNode.getBoundingClientRect();
+            const endRect = endNode.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            const startX = startRect.left + startRect.width / 2 - containerRect.left;
+            const startY = startRect.top + startRect.height / 2 - containerRect.top;
+            const endX = endRect.left + endRect.width / 2 - containerRect.left;
+            const endY = endRect.top + endRect.height / 2 - containerRect.top;
+            
+            packet.style.left = `${startX - 10}px`;
+            packet.style.top = `${startY - 10}px`;
+            packet.style.opacity = '1';
+            
+            setTimeout(() => {
+                packet.style.left = `${endX - 10}px`;
+                packet.style.top = `${endY - 10}px`;
+                
+                setTimeout(() => {
+                    packet.style.opacity = '0';
+                    if (callback) callback();
+                }, 1000);
+            }, 100);
+        }
+
+        // Network Formation Animation
+        document.getElementById('startNetworkAnimation').addEventListener('click', function() {
+            const container = document.getElementById('networkFormation');
+            container.innerHTML = '<div class="progress-bar-container"><div class="progress-bar" id="networkProgress"></div></div>';
+            const progressBar = document.getElementById('networkProgress');
+            
+            // Create initial node (you)
+            const centerX = container.offsetWidth / 2;
+            const centerY = container.offsetHeight / 2;
+            const youNode = createNode('you', centerX - 30, centerY - 30, 'You', container);
+            youNode.classList.add('pulse-animation');
+            
+            setTimeout(() => {
+                progressBar.style.width = '20%';
+                // Create first friend
+                const friend1 = createNode('friend1', centerX - 150, centerY - 100, 'Friend', container);
+                const conn1 = createConnection('conn1', youNode, friend1, container);
+                
+                setTimeout(() => {
+                    progressBar.style.width = '40%';
+                    // Create second friend
+                    const friend2 = createNode('friend2', centerX + 100, centerY - 80, 'Friend', container);
+                    const conn2 = createConnection('conn2', youNode, friend2, container);
+                    
+                    setTimeout(() => {
+                        progressBar.style.width = '60%';
+                        // Create third friend
+                        const friend3 = createNode('friend3', centerX + 80, centerY + 100, 'Friend', container);
+                        const conn3 = createConnection('conn3', youNode, friend3, container);
+                        
+                        setTimeout(() => {
+                            progressBar.style.width = '80%';
+                            // Create connection between friends
+                            const conn4 = createConnection('conn4', friend1, friend2, container);
+                            
+                            setTimeout(() => {
+                                progressBar.style.width = '100%';
+                                // Create another connection between friends
+                                const conn5 = createConnection('conn5', friend2, friend3, container);
+                                
+                                // Add tooltip to explain the network
+                                const tooltip = document.createElement('div');
+                                tooltip.className = 'tooltip';
+                                tooltip.style.left = `${centerX}px`;
+                                tooltip.style.top = `${centerY - 120}px`;
+                                tooltip.textContent = 'A RetroShare network grows as friends connect to their own trusted friends.';
+                                container.appendChild(tooltip);
+                                
+                                setTimeout(() => {
+                                    tooltip.style.opacity = '1';
+                                    
+                                    setTimeout(() => {
+                                        tooltip.style.opacity = '0';
+                                    }, 4000);
+                                }, 500);
+                            }, 1000);
+                        }, 1000);
+                    }, 1000);
+                }, 1000);
+            }, 500);
+        });
+
+        // F2F Network Animation
+        document.getElementById('startF2FAnimation').addEventListener('click', function() {
+            const container = document.getElementById('f2fAnimation');
+            container.innerHTML = '<div class="progress-bar-container"><div class="progress-bar" id="f2fProgress"></div></div>';
+            const progressBar = document.getElementById('f2fProgress');
+            
+            // Create nodes
+            const centerX = container.offsetWidth / 2;
+            const centerY = container.offsetHeight / 2;
+            const youNode = createNode('you-f2f', centerX - 30, centerY - 30, 'You', container);
+            const friend1 = createNode('friend1-f2f', centerX - 150, centerY - 80, 'Alice', container);
+            const friend2 = createNode('friend2-f2f', centerX + 100, centerY - 60, 'Bob', container);
+            const friend3 = createNode('friend3-f2f', centerX - 80, centerY + 100, 'Carol', container);
+            const friend4 = createNode('friend4-f2f', centerX + 120, centerY + 80, 'Dave', container);
+            
+            // Hide nodes initially
+            [friend1, friend2, friend3, friend4].forEach(node => {
+                node.style.opacity = '0';
+            });
+            
+            progressBar.style.width = '10%';
+            
+            // Animate the connections
+            setTimeout(() => {
+                progressBar.style.width = '25%';
+                friend1.style.opacity = '1';
+                const conn1 = createConnection('conn1-f2f', youNode, friend1, container);
+                
+                // Show tooltip
+                const tooltip1 = document.createElement('div');
+                tooltip1.className = 'tooltip';
+                tooltip1.style.left = `${centerX - 100}px`;
+                tooltip1.style.top = `${centerY - 120}px`;
+                tooltip1.textContent = 'You connect directly only with your trusted friends';
+                container.appendChild(tooltip1);
+                
+                setTimeout(() => {
+                    tooltip1.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        progressBar.style.width = '50%';
+                        tooltip1.style.opacity = '0';
+                        friend2.style.opacity = '1';
+                        const conn2 = createConnection('conn2-f2f', youNode, friend2, container);
+                        
+                        setTimeout(() => {
+                            progressBar.style.width = '75%';
+                            friend3.style.opacity = '1';
+                            const conn3 = createConnection('conn3-f2f', youNode, friend3, container);
+                            
+                            setTimeout(() => {
+                                progressBar.style.width = '90%';
+                                const conn4 = createConnection('conn4-f2f', friend2, friend4, container);
+                                friend4.style.opacity = '1';
+                                
+                                // Create dotted connection to show indirect connection
+                                const indirectConn = document.createElement('div');
+                                indirectConn.className = 'connection';
+                                indirectConn.style.width = `${Math.sqrt(Math.pow(centerX + 120 - (centerX - 30), 2) + Math.pow(centerY + 80 - (centerY - 30), 2))}px`;
+                                indirectConn.style.left = `${centerX - 30 + 30}px`;
+                                indirectConn.style.top = `${centerY - 30 + 30}px`;
+                                indirectConn.style.transform = `rotate(${Math.atan2((centerY + 80) - (centerY - 30), (centerX + 120) - (centerX - 30)) * 180 / Math.PI}deg)`;
+                                indirectConn.style.background = 'none';
+                                indirectConn.style.border = '2px dashed #93C5FD';
+                                container.appendChild(indirectConn);
+                                
+                                const tooltip2 = document.createElement('div');
+                                tooltip2.className = 'tooltip';
+                                tooltip2.style.left = `${centerX + 30}px`;
+                                tooltip2.style.top = `${centerY + 30}px`;
+                                tooltip2.textContent = 'You can communicate with friends-of-friends indirectly through your mutual friend';
+                                container.appendChild(tooltip2);
+                                
+                                setTimeout(() => {
+                                    progressBar.style.width = '100%';
+                                    tooltip2.style.opacity = '1';
+                                    
+                                    setTimeout(() => {
+                                        tooltip2.style.opacity = '0';
+                                    }, 4000);
+                                }, 500);
+                            }, 1000);
+                        }, 1000);
+                    }, 2000);
+                }, 500);
+            }, 500);
+        });
+
+        // Encryption Animation
+        document.getElementById('startEncryptionAnimation').addEventListener('click', function() {
+            const step1 = document.getElementById('step1');
+            const step2 = document.getElementById('step2');
+            const step3 = document.getElementById('step3');
+            const progressBar = document.getElementById('encryptionProgress');
+            
+            // Reset animation
+            step1.classList.remove('step-active');
+            step2.classList.remove('step-active');
+            step3.classList.remove('step-active');
+            progressBar.style.width = '0%';
+            
+            // Start animation sequence
+            setTimeout(() => {
+                step1.classList.add('step-active');
+                progressBar.style.width = '33%';
+                
+                setTimeout(() => {
+                    step1.classList.remove('step-active');
+                    step2.classList.add('step-active');
+                    progressBar.style.width = '66%';
+                    document.querySelector('#step2 .lock-icon').style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        step2.classList.remove('step-active');
+                        step3.classList.add('step-active');
+                        progressBar.style.width = '100%';
+                        document.querySelector('#step3 .lock-icon').style.opacity = '1';
+                    }, 2000);
+                }, 2000);
+            }, 500);
+        });
+
+        // Chat Feature Animation
+        document.getElementById('startChatAnimation').addEventListener('click', function() {
+            const container = document.getElementById('chatDemo');
+            container.innerHTML = '';
+            
+            // Create chat interface elements
+            const userAvatar1 = document.createElement('div');
+            userAvatar1.className = 'node';
+            userAvatar1.style.left = '30px';
+            userAvatar1.style.top = '30px';
+            userAvatar1.style.width = '40px';
+            userAvatar1.style.height = '40px';
+            userAvatar1.innerHTML = 'You';
+            container.appendChild(userAvatar1);
+            
+            const userAvatar2 = document.createElement('div');
+            userAvatar2.className = 'node';
+            userAvatar2.style.left = `${container.offsetWidth - 70}px`;
+            userAvatar2.style.top = '30px';
+            userAvatar2.style.width = '40px';
+            userAvatar2.style.height = '40px';
+            userAvatar2.innerHTML = 'Bob';
+            container.appendChild(userAvatar2);
+            
+            // Create messaging bubbles
+            const message1 = document.createElement('div');
+            message1.className = 'chat-bubble';
+            message1.style.left = '80px';
+            message1.style.top = '40px';
+            message1.textContent = 'Hi Bob! How are you doing today?';
+            container.appendChild(message1);
+            
+            const message2 = document.createElement('div');
+            message2.className = 'chat-bubble reply';
+            message2.style.right = '80px';
+            message2.style.top = '100px';
+            message2.textContent = 'Hey! I\'m good. Working on that project we discussed.';
+            container.appendChild(message2);
+            
+            // Show lock icons to represent encryption
+            const lock1 = document.createElement('i');
+            lock1.className = 'fas fa-lock';
+            lock1.style.position = 'absolute';
+            lock1.style.left = '70px';
+            lock1.style.top = '80px';
+            lock1.style.color = '#10B981';
+            lock1.style.opacity = '0';
+            container.appendChild(lock1);
+            
+            const lock2 = document.createElement('i');
+            lock2.className = 'fas fa-lock';
+            lock2.style.position = 'absolute';
+            lock2.style.right = '70px';
+            lock2.style.top = '140px';
+            lock2.style.color = '#10B981';
+            lock2.style.opacity = '0';
+            container.appendChild(lock2);
+            
+            // Animate the chat sequence
+            setTimeout(() => {
+                message1.style.opacity = '1';
+                
+                setTimeout(() => {
+                    lock1.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        message2.style.opacity = '1';
+                        
+                        setTimeout(() => {
+                            lock2.style.opacity = '1';
+                        }, 500);
+                    }, 1500);
+                }, 500);
+            }, 500);
+        });
+
+        // Mail Feature Animation
+        document.getElementById('startMailAnimation').addEventListener('click', function() {
+            const container = document.getElementById('mailDemo');
+            container.innerHTML = '';
+            
+            // Create email interface
+            const emailIcon = document.createElement('i');
+            emailIcon.className = 'fas fa-envelope';
+            emailIcon.style.position = 'absolute';
+            emailIcon.style.left = '40px';
+            emailIcon.style.top = '40px';
+            emailIcon.style.fontSize = '2rem';
+            emailIcon.style.color = '#3B82F6';
+            container.appendChild(emailIcon);
+            
+            const emailSubject = document.createElement('div');
+            emailSubject.textContent = 'Project Update - Encrypted Email';
+            emailSubject.style.position = 'absolute';
+            emailSubject.style.left = '90px';
+            emailSubject.style.top = '30px';
+            emailSubject.style.fontWeight = 'bold';
+            container.appendChild(emailSubject);
+            
+            const emailTime = document.createElement('div');
+            emailTime.textContent = 'Sent: 10:45 AM';
+            emailTime.style.position = 'absolute';
+            emailTime.style.left = '90px';
+            emailTime.style.top = '55px';
+            emailTime.style.fontSize = '0.8rem';
+            emailTime.style.color = '#6B7280';
+            container.appendChild(emailTime);
+            
+            const emailBody = document.createElement('div');
+            emailBody.style.position = 'absolute';
+            emailBody.style.left = '40px';
+            emailBody.style.top = '90px';
+            emailBody.style.width = `${container.offsetWidth - 80}px`;
+            emailBody.style.padding = '1rem';
+            emailBody.style.borderRadius = '0.5rem';
+            emailBody.style.backgroundColor = 'white';
+            emailBody.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+            emailBody.style.opacity = '0';
+            emailBody.innerHTML = `
+                <p>Hi Team,</p>
+                <p>I've attached the latest project files. All communications are encrypted end-to-end and stored on trusted nodes.</p>
+                <p>This message will be delivered even when the recipient is offline!</p>
+                <p>Regards,<br>Alice</p>
+            `;
+            container.appendChild(emailBody);
+            
+            const nodes = document.createElement('div');
+            nodes.style.position = 'absolute';
+            nodes.style.bottom = '20px';
+            nodes.style.left = '40px';
+            nodes.style.right = '40px';
+            nodes.style.display = 'flex';
+            nodes.style.justifyContent = 'space-between';
+            nodes.style.opacity = '0';
+            container.appendChild(nodes);
+            
+            for (let i = 0; i < 3; i++) {
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.style.position = 'relative';
+                node.style.width = '40px';
+                node.style.height = '40px';
+                node.innerHTML = `F${i+1}`;
+                nodes.appendChild(node);
+            }
+            
+            // Animate the mail sequence
+            setTimeout(() => {
+                emailBody.style.opacity = '1';
+                
+                setTimeout(() => {
+                    nodes.style.opacity = '1';
+                    
+                    // Create animation to show message being stored on friend nodes
+                    const packet1 = document.createElement('div');
+                    packet1.className = 'data-packet';
+                    packet1.style.backgroundColor = '#3B82F6';
+                    container.appendChild(packet1);
+                    
+                    packet1.style.left = `${emailIcon.offsetLeft + 10}px`;
+                    packet1.style.top = `${emailIcon.offsetTop + 10}px`;
+                    packet1.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        packet1.style.left = `${nodes.childNodes[0].offsetLeft + 20}px`;
+                        packet1.style.top = `${nodes.childNodes[0].offsetTop + 20}px`;
+                        
+                        setTimeout(() => {
+                            const packet2 = document.createElement('div');
+                            packet2.className = 'data-packet';
+                            packet2.style.backgroundColor = '#3B82F6';
+                            container.appendChild(packet2);
+                            
+                            packet2.style.left = `${emailIcon.offsetLeft + 10}px`;
+                            packet2.style.top = `${emailIcon.offsetTop + 10}px`;
+                            packet2.style.opacity = '1';
+                            
+                            setTimeout(() => {
+                                packet2.style.left = `${nodes.childNodes[1].offsetLeft + 20}px`;
+                                packet2.style.top = `${nodes.childNodes[1].offsetTop + 20}px`;
+                                
+                                setTimeout(() => {
+                                    const packet3 = document.createElement('div');
+                                    packet3.className = 'data-packet';
+                                    packet3.style.backgroundColor = '#3B82F6';
+                                    container.appendChild(packet3);
+                                    
+                                    packet3.style.left = `${emailIcon.offsetLeft + 10}px`;
+                                    packet3.style.top = `${emailIcon.offsetTop + 10}px`;
+                                    packet3.style.opacity = '1';
+                                    
+                                    setTimeout(() => {
+                                        packet3.style.left = `${nodes.childNodes[2].offsetLeft + 20}px`;
+                                        packet3.style.top = `${nodes.childNodes[2].offsetTop + 20}px`;
+                                    }, 100);
+                                }, 800);
+                            }, 100);
+                        }, 800);
+                    }, 100);
+                    
+                    // Add explanation text
+                    const explanation = document.createElement('div');
+                    explanation.style.position = 'absolute';
+                    explanation.style.bottom = '70px';
+                    explanation.style.left = '0';
+                    explanation.style.width = '100%';
+                    explanation.style.textAlign = 'center';
+                    explanation.style.fontSize = '0.9rem';
+                    explanation.style.opacity = '0';
+                    explanation.textContent = 'Email is stored encrypted on multiple friend nodes for redundancy and offline delivery';
+                    container.appendChild(explanation);
+                    
+                    setTimeout(() => {
+                        explanation.style.opacity = '1';
+                    }, 2000);
+                }, 1500);
+            }, 500);
+        });
+
+        // File Sharing Animation
+        document.getElementById('startFileSharingAnimation').addEventListener('click', function() {
+            const container = document.getElementById('fileSharingDemo');
+            container.innerHTML = '';
+            
+            // Create file and nodes
+            const fileContainer = document.createElement('div');
+            fileContainer.className = 'file-container';
+            fileContainer.style.position = 'absolute';
+            fileContainer.style.left = '40px';
+            fileContainer.style.top = '40px';
+            container.appendChild(fileContainer);
+            
+            const fileIcon = document.createElement('i');
+            fileIcon.className = 'fas fa-file-pdf';
+            fileIcon.style.fontSize = '1.5rem';
+            fileIcon.style.color = '#EF4444';
+            fileContainer.appendChild(fileIcon);
+            
+            const fileName = document.createElement('div');
+            fileName.className = 'file-name';
+            fileName.textContent = 'Report.pdf';
+            fileContainer.appendChild(fileName);
+            
+            // Create nodes
+            const nodesContainer = document.createElement('div');
+            nodesContainer.style.position = 'absolute';
+            nodesContainer.style.right = '40px';
+            nodesContainer.style.top = '40px';
+            nodesContainer.style.display = 'flex';
+            nodesContainer.style.flexDirection = 'column';
+            nodesContainer.style.gap = '20px';
+            container.appendChild(nodesContainer);
+            
+            const nodes = [];
+            for (let i = 0; i < 3; i++) {
+                const node = document.createElement('div');
+                node.className = 'node';
+                node.style.position = 'relative';
+                node.style.width = '40px';
+                node.style.height = '40px';
+                node.innerHTML = `P${i+1}`;
+                nodesContainer.appendChild(node);
+                nodes.push(node);
+            }
+            
+            // Show file transfer progress
+            const progressText = document.createElement('div');
+            progressText.style.position = 'absolute';
+            progressText.style.left = '40px';
+            progressText.style.bottom = '40px';
+            progressText.style.fontWeight = 'bold';
+            progressText.textContent = 'File Transfer: 0%';
+            container.appendChild(progressText);
+            
+            const progressBarContainer = document.createElement('div');
+            progressBarContainer.style.position = 'absolute';
+            progressBarContainer.style.left = '40px';
+            progressBarContainer.style.bottom = '20px';
+            progressBarContainer.style.width = `${container.offsetWidth - 80}px`;
+            progressBarContainer.style.height = '10px';
+            progressBarContainer.style.backgroundColor = '#E5E7EB';
+            progressBarContainer.style.borderRadius = '5px';
+            progressBarContainer.style.overflow = 'hidden';
+            container.appendChild(progressBarContainer);
+            
+            const progressBarFill = document.createElement('div');
+            progressBarFill.style.height = '100%';
+            progressBarFill.style.width = '0%';
+            progressBarFill.style.backgroundColor = '#10B981';
+            progressBarFill.style.transition = 'width 0.5s ease';
+            progressBarContainer.appendChild(progressBarFill);
+            
+            // Animate file sharing
+            setTimeout(() => {
+                // Create connections
+                const transfers = [];
+                for (let i = 0; i < nodes.length; i++) {
+                    const transfer = document.createElement('div');
+                    transfer.className = 'file-transfer';
+                    transfer.style.left = `${fileContainer.offsetLeft + 30}px`;
+                    transfer.style.top = `${fileContainer.offsetTop + 30}px`;
+                    transfer.style.width = '0';
+                    container.appendChild(transfer);
+                    transfers.push(transfer);
+                    
+                    // Calculate angle
+                    const nodeRect = nodes[i].getBoundingClientRect();
+                    const fileRect = fileContainer.getBoundingClientRect();
+                    const containerRect = container.getBoundingClientRect();
+                    
+                    const startX = fileRect.left + fileRect.width / 2 - containerRect.left;
+                    const startY = fileRect.top + fileRect.height / 2 - containerRect.top;
+                    const endX = nodeRect.left + nodeRect.width / 2 - containerRect.left;
+                    const endY = nodeRect.top + nodeRect.height / 2 - containerRect.top;
+                    
+                    const length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+                    const angle = Math.atan2(endY - startY, endX - startX) * 180 / Math.PI;
+                    
+                    transfer.style.transform = `rotate(${angle}deg)`;
+                    
+                    setTimeout(() => {
+                        transfer.style.width = `${length}px`;
+                    }, i * 500 + 500);
+                }
+                
+                // Update progress bar
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    if (progress <= 100) {
+                        progressBarFill.style.width = `${progress}%`;
+                        progressText.textContent = `File Transfer: ${progress}%`;
+                    } else {
+                        clearInterval(interval);
+                    }
+                }, 500);
+                
+                // Add explanation text
+                const explanation = document.createElement('div');
+                explanation.style.position = 'absolute';
+                explanation.style.left = '40px';
+                explanation.style.bottom = '70px';
+                explanation.style.maxWidth = `${container.offsetWidth - 80}px`;
+                explanation.style.fontSize = '0.9rem';
+                explanation.style.opacity = '0';
+                explanation.textContent = 'Files are transferred through multiple trusted routes using BitTorrent-like swarming for faster downloads';
+                container.appendChild(explanation);
+                
+                setTimeout(() => {
+                    explanation.style.opacity = '1';
+                }, 3000);
+            }, 500);
+        });
+
+        // Forums Animation
+        document.getElementById('startForumsAnimation').addEventListener('click', function() {
+            const container = document.getElementById('forumsDemo');
+            container.innerHTML = '';
+            
+            // Create forum layout
+            const forumContainer = document.createElement('div');
+            forumContainer.style.position = 'absolute';
+            forumContainer.style.left = '20px';
+            forumContainer.style.top = '20px';
+            forumContainer.style.right = '20px';
+            forumContainer.style.bottom = '20px';
+            forumContainer.style.backgroundColor = 'white';
+            forumContainer.style.borderRadius = '0.5rem';
+            forumContainer.style.padding = '1rem';
+            forumContainer.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.1)';
+            forumContainer.style.overflow = 'hidden';
+            container.appendChild(forumContainer);
+            
+            // Create forum header
+            const forumHeader = document.createElement('div');
+            forumHeader.style.borderBottom = '1px solid #E5E7EB';
+            forumHeader.style.paddingBottom = '0.5rem';
+            forumHeader.style.marginBottom = '1rem';
+            forumHeader.style.display = 'flex';
+            forumHeader.style.justifyContent = 'space-between';
+            forumHeader.style.alignItems = 'center';
+            forumContainer.appendChild(forumHeader);
+            
+            const forumTitle = document.createElement('div');
+            forumTitle.textContent = 'Privacy Technology Forum';
+            forumTitle.style.fontWeight = 'bold';
+            forumTitle.style.fontSize = '1.2rem';
+            forumHeader.appendChild(forumTitle);
+            
+            const syncStatus = document.createElement('div');
+            syncStatus.style.display = 'flex';
+            syncStatus.style.alignItems = 'center';
+            syncStatus.style.gap = '0.5rem';
+            syncStatus.style.fontSize = '0.9rem';
+            syncStatus.style.color = '#6B7280';
+            forumHeader.appendChild(syncStatus);
+            
+            const syncIcon = document.createElement('i');
+            syncIcon.className = 'fas fa-sync';
+            syncStatus.appendChild(syncIcon);
+            
+            const syncText = document.createElement('span');
+            syncText.textContent = 'Syncing...';
+            syncStatus.appendChild(syncText);
+            
+            // Create forum posts with animation
+            const posts = [
+                {
+                    author: 'Alice',
+                    text: 'Has anyone tried the new encryption feature in RetroShare 0.6.7?',
+                    time: '10:30 AM'
+                },
+                {
+                    author: 'Bob',
+                    text: 'Yes, it works great! Much faster than the previous version.',
+                    time: '10:45 AM'
+                },
+                {
+                    author: 'Carol',
+                    text: 'I like how we can read these posts even when offline!',
+                    time: '11:00 AM'
+                }
+            ];
+            
+            // Animate forum posts appearing
+            posts.forEach((post, index) => {
+                setTimeout(() => {
+                    const postDiv = document.createElement('div');
+                    postDiv.style.padding = '0.75rem';
+                    postDiv.style.marginBottom = '1rem';
+                    postDiv.style.backgroundColor = '#F9FAFB';
+                    postDiv.style.borderRadius = '0.5rem';
+                    postDiv.style.borderLeft = '3px solid #3B82F6';
+                    postDiv.style.opacity = '0';
+                    postDiv.style.transform = 'translateY(20px)';
+                    postDiv.style.transition = 'all 0.5s ease';
+                    forumContainer.appendChild(postDiv);
+                    
+                    const postHeader = document.createElement('div');
+                    postHeader.style.display = 'flex';
+                    postHeader.style.justifyContent = 'space-between';
+                    postHeader.style.marginBottom = '0.5rem';
+                    postDiv.appendChild(postHeader);
+                    
+                    const author = document.createElement('div');
+                    author.style.fontWeight = 'bold';
+                    author.textContent = post.author;
+                    postHeader.appendChild(author);
+                    
+                    const time = document.createElement('div');
+                    time.style.color = '#6B7280';
+                    time.style.fontSize = '0.85rem';
+                    time.textContent = post.time;
+                    postHeader.appendChild(time);
+                    
+                    const text = document.createElement('div');
+                    text.textContent = post.text;
+                    postDiv.appendChild(text);
+                    
+                    // Show the post with animation
+                    setTimeout(() => {
+                        postDiv.style.opacity = '1';
+                        postDiv.style.transform = 'translateY(0)';
+                    }, 100);
+                    
+                    // Update sync status for the last post
+                    if (index === posts.length - 1) {
+                        setTimeout(() => {
+                            syncIcon.classList.add('fa-check-circle');
+                            syncIcon.classList.remove('fa-sync');
+                            syncText.textContent = 'Synced';
+                            syncIcon.style.color = '#10B981';
+                            
+                            // Add explanation
+                            const explanation = document.createElement('div');
+                            explanation.style.marginTop = '1rem';
+                            explanation.style.padding = '0.75rem';
+                            explanation.style.backgroundColor = '#EFF6FF';
+                            explanation.style.borderRadius = '0.5rem';
+                            explanation.style.fontSize = '0.9rem';
+                            explanation.textContent = 'Forums synchronize automatically when you connect. You can read and write posts even when offline.';
+                            explanation.style.opacity = '0';
+                            explanation.style.transition = 'opacity 0.5s ease';
+                            forumContainer.appendChild(explanation);
+                            
+                            setTimeout(() => {
+                                explanation.style.opacity = '1';
+                            }, 500);
+                        }, 2000);
+                    }
+                }, index * 1500 + 500);
+            });
+        });
+
+        // Channels Animation
+        document.getElementById('startChannelsAnimation').addEventListener('click', function() {
+            const container = document.getElementById('channelsDemo');
+            container.innerHTML = '';
+            
+            // Create channels layout
+            const channelContainer = document.createElement('div');
+            channelContainer.style.position = 'absolute';
+            channelContainer.style.left = '20px';
+            channelContainer.style.top = '20px';
+            channelContainer.style.width = `${container.offsetWidth - 40}px`;
+            channelContainer.style.height = `${container.offsetHeight - 40}px`;
+            channelContainer.style.display = 'flex';
+            channelContainer.style.flexDirection = 'column';
+            container.appendChild(channelContainer);
+            
+            // Create channel header
+            const channelHeader = document.createElement('div');
+            channelHeader.style.padding = '0.75rem';
+            channelHeader.style.backgroundColor = '#3B82F6';
+            channelHeader.style.color = 'white';
+            channelHeader.style.borderRadius = '0.5rem 0.5rem 0 0';
+            channelHeader.style.display = 'flex';
+            channelHeader.style.alignItems = 'center';
+            channelHeader.style.gap = '0.5rem';
+            channelContainer.appendChild(channelHeader);
+            
+            const channelIcon = document.createElement('i');
+            channelIcon.className = 'fas fa-broadcast-tower';
+            channelHeader.appendChild(channelIcon);
+            
+            const channelTitle = document.createElement('span');
+            channelTitle.textContent = 'Tech News Channel';
+            channelTitle.style.fontWeight = 'bold';
+            channelHeader.appendChild(channelTitle);
+            
+            // Create channel content
+            const channelContent = document.createElement('div');
+            channelContent.style.flex = '1';
+            channelContent.style.backgroundColor = 'white';
+            channelContent.style.padding = '1rem';
+            channelContent.style.borderRadius = '0 0 0.5rem 0.5rem';
+            channelContent.style.overflow = 'hidden';
+            channelContainer.appendChild(channelContent);
+            
+            // Create content items
+            const items = [
+                {
+                    title: 'New Privacy Features Tutorial',
+                    type: 'PDF Document',
+                    icon: 'fa-file-pdf',
+                    color: '#EF4444'
+                },
+                {
+                    title: 'RetroShare Security Overview',
+                    type: 'Video',
+                    icon: 'fa-film',
+                    color: '#8B5CF6'
+                },
+                {
+                    title: 'How to Configure Tor with RetroShare',
+                    type: 'Tutorial',
+                    icon: 'fa-file-alt',
+                    color: '#10B981'
+                }
+            ];
+            
+            // Animate content items appearing
+            items.forEach((item, index) => {
+                setTimeout(() => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.style.display = 'flex';
+                    itemDiv.style.alignItems = 'center';
+                    itemDiv.style.padding = '0.75rem';
+                    itemDiv.style.marginBottom = '1rem';
+                    itemDiv.style.backgroundColor = '#F9FAFB';
+                    itemDiv.style.borderRadius = '0.5rem';
+                    itemDiv.style.borderLeft = '3px solid #3B82F6';
+                    itemDiv.style.opacity = '0';
+                    itemDiv.style.transform = 'translateX(-20px)';
+                    itemDiv.style.transition = 'all 0.5s ease';
+                    channelContent.appendChild(itemDiv);
+                    
+                    const itemIcon = document.createElement('i');
+                    itemIcon.className = `fas ${item.icon}`;
+                    itemIcon.style.fontSize = '1.5rem';
+                    itemIcon.style.color = item.color;
+                    itemIcon.style.marginRight = '1rem';
+                    itemDiv.appendChild(itemIcon);
+                    
+                    const itemInfo = document.createElement('div');
+                    itemDiv.appendChild(itemInfo);
+                    
+                    const itemTitle = document.createElement('div');
+                    itemTitle.textContent = item.title;
+                    itemTitle.style.fontWeight = 'bold';
+                    itemInfo.appendChild(itemTitle);
+                    
+                    const itemType = document.createElement('div');
+                    itemType.textContent = item.type;
+                    itemType.style.fontSize = '0.85rem';
+                    itemType.style.color = '#6B7280';
+                    itemInfo.appendChild(itemType);
+                    
+                    const downloadBtn = document.createElement('button');
+                    downloadBtn.textContent = 'Download';
+                    downloadBtn.style.marginLeft = 'auto';
+                    downloadBtn.style.backgroundColor = '#3B82F6';
+                    downloadBtn.style.color = 'white';
+                    downloadBtn.style.border = 'none';
+                    downloadBtn.style.padding = '0.5rem 1rem';
+                    downloadBtn.style.borderRadius = '0.25rem';
+                    downloadBtn.style.cursor = 'pointer';
+                    itemDiv.appendChild(downloadBtn);
+                    
+                    // Show the item with animation
+                    setTimeout(() => {
+                        itemDiv.style.opacity = '1';
+                        itemDiv.style.transform = 'translateX(0)';
+                    }, 100);
+                }, index * 800 + 500);
+            });
+            
+            // Add subscription notification
+            setTimeout(() => {
+                const notification = document.createElement('div');
+                notification.style.position = 'absolute';
+                notification.style.bottom = '10px';
+                notification.style.left = '50%';
+                notification.style.transform = 'translateX(-50%)';
+                notification.style.backgroundColor = 'rgba(16, 185, 129, 0.9)';
+                notification.style.color = 'white';
+                notification.style.padding = '0.75rem 1.5rem';
+                notification.style.borderRadius = '2rem';
+                notification.style.display = 'flex';
+                notification.style.alignItems = 'center';
+                notification.style.gap = '0.5rem';
+                notification.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.2)';
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.5s ease';
+                container.appendChild(notification);
+                
+                const notificationIcon = document.createElement('i');
+                notificationIcon.className = 'fas fa-bell';
+                notification.appendChild(notificationIcon);
+                
+                const notificationText = document.createElement('span');
+                notificationText.textContent = 'Automatically downloading new channel content...';
+                notification.appendChild(notificationText);
+                
+                setTimeout(() => {
+                    notification.style.opacity = '1';
+                    
+                    setTimeout(() => {
+                        notification.style.opacity = '0';
+                    }, 4000);
+                }, 100);
+            }, items.length * 800 + 1500);
+        });
+
+        // Tor Protection Animation
+        document.getElementById('startTorAnimation').addEventListener('click', function() {
+            const container = document.getElementById('torAnimation');
+            container.innerHTML = '<div class="progress-bar-container"><div class="progress-bar" id="torProgress"></div></div>';
+            const progressBar = document.getElementById('torProgress');
+            
+            // Create nodes
+            const centerX = container.offsetWidth / 2;
+            const centerY = container.offsetHeight / 2;
+            const yourNode = createNode('you-tor', centerX - 30, centerY - 30, 'You', container);
+            
+            const friendNode = createNode('friend-tor', centerX + 120, centerY - 80, 'Friend', container);
+            friendNode.style.opacity = '0';
+            
+            const torNodes = [];
+            for (let i = 0; i < 3; i++) {
+                const angle = (i * 2 * Math.PI / 3) + Math.PI / 6;
+                const x = centerX + 100 * Math.cos(angle) - 20;
+                const y = centerY + 100 * Math.sin(angle) - 20;
+                
+                const torNode = createNode(`tor-${i}`, x, y, 'Tor', container);
+                torNode.style.backgroundColor = '#7D4698';
+                torNode.style.opacity = '0';
+                torNodes.push(torNode);
+            }
+            
+            // Start animation
+            progressBar.style.width = '10%';
+            
+            setTimeout(() => {
+                yourNode.style.boxShadow = '0 0 0 4px rgba(125, 70, 152, 0.5)';
+                progressBar.style.width = '20%';
+                
+                setTimeout(() => {
+                    progressBar.style.width = '40%';
+                    torNodes.forEach(node => {
+                        node.style.opacity = '1';
+                    });
+                    
+                    // Create connections to Tor nodes
+                    const torConns = [];
+                    torNodes.forEach((node, i) => {
+                        const conn = createConnection(`tor-conn-${i}`, yourNode, node, container);
+                        conn.style.backgroundColor = '#7D4698';
+                        torConns.push(conn);
+                    });
+                    
+                    setTimeout(() => {
+                        progressBar.style.width = '60%';
+                        friendNode.style.opacity = '1';
+                        
+                        // Create connection from last Tor node to friend
+                        const friendConn = createConnection('friend-conn', torNodes[2], friendNode, container);
+                        friendConn.style.backgroundColor = '#7D4698';
+                        
+                        setTimeout(() => {
+                            progressBar.style.width = '80%';
+                            
+                            // Create packet for animation
+                            const packet = createDataPacket('tor-packet', container);
+                            packet.style.backgroundColor = '#7D4698';
+                            
+                            // Animate through Tor network
+                            setTimeout(() => {
+                                progressBar.style.width = '90%';
+                                animateDataTransfer(packet, yourNode, torNodes[0], container, () => {
+                                    setTimeout(() => {
+                                        animateDataTransfer(packet, torNodes[0], torNodes[1], container, () => {
+                                            setTimeout(() => {
+                                                animateDataTransfer(packet, torNodes[1], torNodes[2], container, () => {
+                                                    setTimeout(() => {
+                                                        animateDataTransfer(packet, torNodes[2], friendNode, container);
+                                                    }, 300);
+                                                });
+                                            }, 300);
+                                        });
+                                    }, 300);
+                                });
+                                
+                                // Add explanation
+                                const explanation = document.createElement('div');
+                                explanation.className = 'tooltip';
+                                explanation.style.left = `${centerX - 150}px`;
+                                explanation.style.bottom = '30px';
+                                explanation.style.width = '300px';
+                                explanation.textContent = 'Using Tor hides your IP address even from your direct friends by routing communications through multiple encrypted relays';
+                                container.appendChild(explanation);
+                                
+                                setTimeout(() => {
+                                    progressBar.style.width = '100%';
+                                    explanation.style.opacity = '1';
+                                    
+                                    setTimeout(() => {
+                                        explanation.style.opacity = '0';
+                                    }, 4000);
+                                }, 500);
+                            }, 500);
+                        }, 800);
+                    }, 800);
+                }, 800);
+            }, 500);
+        });
+    </script>
+</body>
+</html>

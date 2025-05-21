@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stylometry Explained</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+        #animation-container {
+            width: 800px;
+            height: 600px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        .scene {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .scene.active {
+            opacity: 1;
+        }
+        .scene h2 {
+            margin-top: 0;
+            color: #007bff;
+        }
+        .text-sample {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            font-family: monospace;
+            white-space: pre-wrap; /* Preserve whitespace and newlines */
+        }
+        .author-a { color: #28a745; }
+        .author-b { color: #dc3545; }
+        .highlight {
+            background-color: yellow;
+            font-weight: bold;
+        }
+        #scene1-textA, #scene1-textB {
+            width: 45%;
+            display: inline-block;
+            vertical-align: top;
+        }
+        .bar-chart-container {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 150px;
+            width: 80%;
+            margin-top: 20px;
+            border-bottom: 2px solid #333;
+        }
+        .bar {
+            width: 30px;
+            background-color: #007bff;
+            margin: 0 5px;
+            transition: height 0.5s ease-out;
+            position: relative;
+        }
+        .bar-label {
+            position: absolute;
+            bottom: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 12px;
+        }
+        .algorithm-box {
+            border: 2px dashed #007bff;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 5px;
+            width: 70%;
+        }
+        .application-icon {
+            font-size: 40px;
+            margin: 10px;
+        }
+        .controls {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+        }
+        .controls button {
+            padding: 10px 15px;
+            margin: 0 5px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .controls button:disabled {
+            background-color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div id="animation-container">
+        <!-- Scene 1: Introduction to Writing Patterns -->
+        <div id="scene1" class="scene active">
+            <h2>Scene 1: Unique Writing Fingerprints</h2>
+            <p>Different authors have distinct writing styles, like fingerprints. Let's look at two examples.</p>
+            <div style="display: flex; justify-content: space-around; width: 100%;">
+                <div id="scene1-textA" class="text-sample author-a">
+                    <strong>Author A:</strong><br>
+                    The <span class="highlight">quick</span> brown fox <span class="highlight">jumps</span> over the lazy dog. This is a <span class="highlight">very</span> common phrase, <span class="highlight">indeed</span>. I <span class="highlight">believe</span> it demonstrates a <span class="highlight">particular</span> style.
+                </div>
+                <div id="scene1-textB" class="text-sample author-b">
+                    <strong>Author B:</strong><br>
+                    A <span class="highlight">fast</span>, agile canine <span class="highlight">leaps</span> above the tired hound. It's a <span class="highlight">truly</span> well-known saying, <span class="highlight">certainly</span>. My <span class="highlight">contention</span> is that it shows a <span class="highlight">specific</span> way of writing.
+                </div>
+            </div>
+            <p>Notice the different word choices (e.g., "quick" vs "fast", "jumps" vs "leaps").</p>
+        </div>
+
+        <!-- Scene 2: Key Metrics -->
+        <div id="scene2" class="scene">
+            <h2>Scene 2: Key Stylometric Metrics</h2>
+            <p>Stylometry uses various metrics to quantify these differences:</p>
+            <div class="bar-chart-container" id="metricChart">
+                <!-- Bars will be added by JS -->
+            </div>
+            <p>Common metrics include: word frequency, sentence length, punctuation usage, and use of specific function words (like "the", "a", "is").</p>
+        </div>
+
+        <!-- Scene 3: Algorithmic Analysis -->
+        <div id="scene3" class="scene">
+            <h2>Scene 3: How Algorithms Analyze Text</h2>
+            <p>Texts are converted into numerical data based on these metrics.</p>
+            <div style="display: flex; align-items: center; justify-content: space-around; width: 100%;">
+                <div class="text-sample" style="width: 30%;" id="algoTextSample">Text Sample</div>
+                <div style="font-size: 30px;">➡️</div>
+                <div class="algorithm-box" id="algoBox">
+                    <p><strong>Algorithm Processing</strong></p>
+                    <div id="algo-spinner" style="font-size:24px; margin:10px 0;">⚙️</div>
+                    <p>Machine learning models (e.g., SVM, Naive Bayes) are trained on known authors' texts to find patterns.</p>
+                </div>
+                <div style="font-size: 30px;">➡️</div>
+                <div class="text-sample" style="width: 30%;" id="algoResult">Author Profile / Classification</div>
+            </div>
+        </div>
+
+        <!-- Scene 4: Real-World Applications -->
+        <div id="scene4" class="scene">
+            <h2>Scene 4: Real-World Applications</h2>
+            <p>Stylometry has many practical uses:</p>
+            <div style="display: flex; justify-content: space-around; width: 100%; margin-top: 20px;">
+                <div>
+                    <div class="application-icon">✍️</div>
+                    <p>Identifying anonymous authors (e.g., "The Federalist Papers")</p>
+                </div>
+                <div>
+                    <div class="application-icon">⚖️</div>
+                    <p>Forensic linguistics (e.g., analyzing ransom notes, verifying witness statements)</p>
+                </div>
+                <div>
+                    <div class="application-icon">📚</div>
+                    <p>Literary studies (e.g., resolving disputed authorship)</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Scene 5: Conclusion -->
+        <div id="scene5" class="scene">
+            <h2>Stylometry: Unveiling the Author's Hand</h2>
+            <p>By statistically analyzing writing style, stylometry can reveal insights hidden within texts.</p>
+            <p>It's a powerful tool for understanding authorship and textual characteristics.</p>
+            <div id="final-animation-element" style="width:100px; height:100px; background-color: #28a745; border-radius:50%; margin-top:20px; display:flex; justify-content:center; align-items:center; color:white; font-size:20px;">Done!</div>
+        </div>
+
+        <div class="controls">
+            <button id="prevBtn" onclick="prevScene()">Previous</button>
+            <button id="nextBtn" onclick="nextScene()">Next</button>
+        </div>
+    </div>
+
+    <script>
+        let currentSceneIndex = 0;
+        const scenes = document.querySelectorAll('.scene');
+        const totalScenes = scenes.length;
+
+        const prevButton = document.getElementById('prevBtn');
+        const nextButton = document.getElementById('nextBtn');
+
+        function updateButtonStates() {
+            prevButton.disabled = currentSceneIndex === 0;
+            nextButton.disabled = currentSceneIndex === totalScenes - 1;
+        }
+
+        function showScene(index) {
+            scenes.forEach((scene, i) => {
+                if (i === index) {
+                    scene.classList.add('active');
+                    // Trigger scene-specific animation
+                    if (scene.id === 'scene1') animateScene1();
+                    if (scene.id === 'scene2') animateScene2();
+                    if (scene.id === 'scene3') animateScene3();
+                    if (scene.id === 'scene4') animateScene4();
+                    if (scene.id === 'scene5') animateScene5();
+                } else {
+                    scene.classList.remove('active');
+                }
+            });
+            updateButtonStates();
+        }
+
+        function nextScene() {
+            if (currentSceneIndex < totalScenes - 1) {
+                currentSceneIndex++;
+                showScene(currentSceneIndex);
+            }
+        }
+
+        function prevScene() {
+            if (currentSceneIndex > 0) {
+                currentSceneIndex--;
+                showScene(currentSceneIndex);
+            }
+        }
+
+        // Scene-specific animations
+        function animateScene1() {
+            console.log("Animating Scene 1");
+            const textA = document.getElementById('scene1-textA');
+            const textB = document.getElementById('scene1-textB');
+            const highlightsA = textA.querySelectorAll('.highlight');
+            const highlightsB = textB.querySelectorAll('.highlight');
+
+            textA.style.opacity = 0;
+            textB.style.opacity = 0;
+            textA.style.transform = 'translateX(-50px)';
+            textB.style.transform = 'translateX(50px)';
+
+            setTimeout(() => {
+                textA.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                textB.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                textA.style.opacity = 1;
+                textB.style.opacity = 1;
+                textA.style.transform = 'translateX(0)';
+                textB.style.transform = 'translateX(0)';
+            }, 100);
+
+            let delay = 500;
+            highlightsA.forEach(span => {
+                setTimeout(() => span.style.backgroundColor = 'rgba(255, 255, 0, 0.7)', delay);
+                delay += 200;
+            });
+            highlightsB.forEach(span => {
+                setTimeout(() => span.style.backgroundColor = 'rgba(255, 220, 0, 0.7)', delay); // Slightly different yellow for B
+                delay += 200;
+            });
+        }
+
+        function animateScene2() {
+            console.log("Animating Scene 2");
+            const chartContainer = document.getElementById('metricChart');
+            chartContainer.innerHTML = ''; // Clear previous bars
+
+            const metrics = [
+                { label: 'Word Freq.', value: Math.random() * 80 + 20 }, // Random height between 20 and 100
+                { label: 'Sentence Len.', value: Math.random() * 80 + 20 },
+                { label: 'Punctuation', value: Math.random() * 80 + 20 },
+                { label: 'Function Words', value: Math.random() * 80 + 20 }
+            ];
+
+            metrics.forEach(metric => {
+                const bar = document.createElement('div');
+                bar.classList.add('bar');
+                bar.style.height = '0px'; // Start with 0 height
+
+                const label = document.createElement('div');
+                label.classList.add('bar-label');
+                label.textContent = metric.label;
+                bar.appendChild(label);
+
+                chartContainer.appendChild(bar);
+
+                // Animate height
+                setTimeout(() => {
+                    bar.style.height = metric.value + '%';
+                }, 100); // Small delay for effect
+            });
+        }
+
+        function animateScene3() {
+            console.log("Animating Scene 3");
+            const textSample = document.getElementById('algoTextSample');
+            const algoBox = document.getElementById('algoBox');
+            const algoResult = document.getElementById('algoResult');
+            const spinner = document.getElementById('algo-spinner');
+
+            // Reset states
+            textSample.style.opacity = 0;
+            algoBox.style.opacity = 0;
+            algoResult.style.opacity = 0;
+            spinner.textContent = '⚙️';
+
+
+            // Animate in sequence
+            setTimeout(() => {
+                textSample.style.transition = 'opacity 0.5s';
+                textSample.style.opacity = 1;
+                textSample.textContent = "Author X's Text";
+            }, 100);
+
+            setTimeout(() => {
+                algoBox.style.transition = 'opacity 0.5s, transform 0.5s';
+                algoBox.style.opacity = 1;
+                algoBox.style.transform = 'scale(1)';
+            }, 600);
+            
+            let spinCount = 0;
+            const spinInterval = setInterval(() => {
+                const spinners = ['⚙️', '⚙️.', '⚙️..', '⚙️...'];
+                spinner.textContent = spinners[spinCount % spinners.length];
+                spinCount++;
+            }, 300);
+
+
+            setTimeout(() => {
+                clearInterval(spinInterval);
+                spinner.textContent = '✅';
+                algoResult.style.transition = 'opacity 0.5s';
+                algoResult.style.opacity = 1;
+                algoResult.textContent = "Likely Author A (85%)";
+            }, 2500); // Simulate processing time
+        }
+
+        function animateScene4() {
+            console.log("Animating Scene 4");
+            const icons = document.querySelectorAll('#scene4 .application-icon');
+            icons.forEach(icon => {
+                icon.style.transform = 'scale(0)';
+                icon.style.opacity = '0';
+            });
+
+            let delay = 100;
+            icons.forEach(icon => {
+                setTimeout(() => {
+                    icon.style.transition = 'transform 0.5s ease-out, opacity 0.5s ease-out';
+                    icon.style.transform = 'scale(1)';
+                    icon.style.opacity = '1';
+                }, delay);
+                delay += 300;
+            });
+        }
+
+        function animateScene5() {
+            console.log("Animating Scene 5");
+            const finalElement = document.getElementById('final-animation-element');
+            finalElement.style.transform = 'translateY(50px) scale(0.5)';
+            finalElement.style.opacity = '0';
+
+            setTimeout(() => {
+                finalElement.style.transition = 'transform 1s cubic-bezier(0.68, -0.55, 0.27, 1.55), opacity 1s ease';
+                finalElement.style.transform = 'translateY(0) scale(1)';
+                finalElement.style.opacity = '1';
+            }, 100);
+        }
+
+        // Initialize
+        showScene(currentSceneIndex);
+    </script>
+</body>
+</html>

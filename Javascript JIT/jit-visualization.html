@@ -1,0 +1,505 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JavaScript JIT Compilation Explained</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f9f9f9;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h2 {
+            color: #3498db;
+            margin-top: 30px;
+        }
+        
+        .visualization {
+            margin: 40px 0;
+            position: relative;
+            height: 400px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #f0f8ff;
+        }
+        
+        .code-example {
+            background-color: #f6f8fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            margin: 20px 0;
+            overflow-x: auto;
+        }
+        
+        .machine {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .stage {
+            flex: 1;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+            border-bottom: 1px dashed #ccc;
+        }
+        
+        .stage:last-child {
+            border-bottom: none;
+        }
+        
+        .stage-title {
+            position: absolute;
+            top: 5px;
+            left: 10px;
+            font-weight: bold;
+            color: #34495e;
+            z-index: 1;
+        }
+        
+        .code-block {
+            position: absolute;
+            background-color: white;
+            padding: 10px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: monospace;
+            font-size: 12px;
+            text-align: center;
+            opacity: 0;
+            transition: all 0.5s ease;
+        }
+        
+        .explanation {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #e8f4fc;
+            border-radius: 8px;
+        }
+        
+        .hot-cold-meter {
+            position: absolute;
+            right: 15px;
+            top: 15px;
+            width: 30px;
+            height: 200px;
+            background: linear-gradient(to bottom, #ff5252, #ffb142, #69db7c);
+            border-radius: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .meter-reading {
+            width: 36px;
+            height: 36px;
+            background-color: white;
+            border: 3px solid #333;
+            border-radius: 50%;
+            position: absolute;
+            right: -5px;
+            transform: translateY(100px);
+            transition: transform 1s ease;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin: 0 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+        
+        .progress-container {
+            margin-top: 10px;
+            width: 100%;
+            height: 10px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #2ecc71;
+            transition: width 0.3s ease;
+        }
+        
+        .instruction {
+            font-style: italic;
+            color: #7f8c8d;
+        }
+        
+        .highlight {
+            background-color: #ffffcc;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>JavaScript JIT Compilation: How It Works</h1>
+        
+        <p>JavaScript engines use <strong>Just-In-Time (JIT) compilation</strong> to make JavaScript run faster. Let's understand how this works with a simple animation.</p>
+        
+        <div class="code-example">
+            // Sample JavaScript code that will be processed
+            function calculateSum(n) {
+                let sum = 0;
+                for (let i = 0; i < n; i++) {
+                    sum += i;
+                }
+                return sum;
+            }
+            
+            // This function gets called many times
+            for (let j = 0; j < 1000; j++) {
+                calculateSum(100);
+            }
+        </div>
+        
+        <div class="controls">
+            <button id="startBtn">Start Animation</button>
+            <button id="nextBtn" disabled>Next Step</button>
+            <button id="resetBtn" disabled>Reset</button>
+            <div class="progress-container">
+                <div class="progress-bar" id="progressBar"></div>
+            </div>
+        </div>
+        
+        <div class="visualization">
+            <div class="machine">
+                <div class="stage" id="interpreter">
+                    <div class="stage-title">Interpreter</div>
+                </div>
+                <div class="stage" id="profiler">
+                    <div class="stage-title">Profiler (Monitors Code Execution)</div>
+                </div>
+                <div class="stage" id="compiler">
+                    <div class="stage-title">JIT Compiler</div>
+                </div>
+                <div class="stage" id="optimized">
+                    <div class="stage-title">Optimized Machine Code Execution</div>
+                </div>
+            </div>
+            <div class="hot-cold-meter">
+                <div class="meter-reading" id="heatMeter">0</div>
+            </div>
+        </div>
+        
+        <div class="explanation" id="explanation">
+            <p class="instruction">Click "Start Animation" to see how JavaScript JIT compilation works!</p>
+        </div>
+        
+        <h2>Understanding JavaScript JIT Compilation</h2>
+        
+        <p>JavaScript was traditionally an <strong>interpreted language</strong>, meaning the code was executed line-by-line at runtime. This is slower than compiled languages like C++ that are converted to machine code before execution.</p>
+        
+        <p>Modern JavaScript engines use <strong>JIT compilation</strong> to improve performance:</p>
+        
+        <ol>
+            <li><strong>Interpretation</strong>: First, JavaScript is interpreted line-by-line.</li>
+            <li><strong>Profiling</strong>: The engine monitors which code runs frequently (called "hot" code).</li>
+            <li><strong>Compilation</strong>: Hot code gets compiled to optimized machine code.</li>
+            <li><strong>Execution</strong>: The optimized machine code runs much faster than interpreted code.</li>
+            <li><strong>Deoptimization</strong>: If assumptions change (like variable types), the code may need to fall back to interpretation.</li>
+        </ol>
+        
+        <p>This approach gives JavaScript the flexibility of an interpreted language with much of the speed of a compiled language.</p>
+    </div>
+
+    <script>
+        const startBtn = document.getElementById('startBtn');
+        const nextBtn = document.getElementById('nextBtn');
+        const resetBtn = document.getElementById('resetBtn');
+        const progressBar = document.getElementById('progressBar');
+        const explanation = document.getElementById('explanation');
+        const heatMeter = document.getElementById('heatMeter');
+        
+        const stages = {
+            interpreter: document.getElementById('interpreter'),
+            profiler: document.getElementById('profiler'),
+            compiler: document.getElementById('compiler'),
+            optimized: document.getElementById('optimized')
+        };
+        
+        let currentStep = 0;
+        const totalSteps = 8;
+        
+        // Animation steps
+        const steps = [
+            // Step 1: JavaScript code enters the interpreter
+            function() {
+                createCodeBlock('interpreter', 'function calculateSum(n) {...}', '20%', '30%', '250px');
+                explanation.innerHTML = `
+                    <h3>Step 1: JavaScript Code Enters the Interpreter</h3>
+                    <p>When JavaScript code first runs, it's handled by the <span class="highlight">interpreter</span>. The interpreter reads the code line by line and executes it immediately.</p>
+                    <p>This is why JavaScript can run right away without a compilation step, but it's also slower than compiled languages.</p>
+                `;
+                updateMeter(0);
+            },
+            
+            // Step 2: Code is executed by the interpreter
+            function() {
+                moveCodeBlock('interpreter', '70%', '30%');
+                createCodeBlock('profiler', 'Monitoring execution...', '20%', '30%', '180px');
+                explanation.innerHTML = `
+                    <h3>Step 2: The Profiler Monitors Code Execution</h3>
+                    <p>As the code runs, the JavaScript engine's <span class="highlight">profiler</span> monitors which parts of code are executed frequently.</p>
+                    <p>The profiler keeps track of:</p>
+                    <ul>
+                        <li>How many times each function is called</li>
+                        <li>What types of data are used in variables</li>
+                        <li>Which loops are running many iterations</li>
+                    </ul>
+                `;
+                updateMeter(20);
+            },
+            
+            // Step 3: The code is run multiple times
+            function() {
+                createCodeBlock('interpreter', 'calculateSum(100) × 10', '30%', '50%', '200px');
+                moveCodeBlock('profiler', '50%', '30%');
+                explanation.innerHTML = `
+                    <h3>Step 3: The Function Is Called Multiple Times</h3>
+                    <p>Our <code>calculateSum()</code> function gets called multiple times in the loop.</p>
+                    <p>The profiler notices this repeated execution and marks this function as <span class="highlight">"warm" code</span> - code that might benefit from optimization.</p>
+                `;
+                updateMeter(40);
+            },
+            
+            // Step 4: The code becomes "hot"
+            function() {
+                createCodeBlock('interpreter', 'calculateSum(100) × 100', '40%', '50%', '200px');
+                moveCodeBlock('profiler', '70%', '30%');
+                explanation.innerHTML = `
+                    <h3>Step 4: The Function Becomes "Hot"</h3>
+                    <p>As the function continues to be called many times, the profiler marks it as <span class="highlight">"hot" code</span>.</p>
+                    <p>Hot code is a prime candidate for optimization through JIT compilation.</p>
+                    <p>The JavaScript engine decides it's worth spending time to optimize this function because the performance gains will outweigh the compilation cost.</p>
+                `;
+                updateMeter(70); 
+            },
+            
+            // Step 5: JIT compilation begins
+            function() {
+                moveCodeBlock('profiler', '80%', '60%', 0.5);
+                createCodeBlock('compiler', 'Compiling hot function...', '30%', '40%', '220px');
+                explanation.innerHTML = `
+                    <h3>Step 5: JIT Compilation Begins</h3>
+                    <p>The <span class="highlight">JIT compiler</span> takes the hot function and begins converting it to optimized machine code.</p>
+                    <p>During this process:</p>
+                    <ul>
+                        <li>The compiler analyzes the code's behavior and data types</li>
+                        <li>It makes assumptions based on past execution (like variable types staying consistent)</li>
+                        <li>It creates a highly optimized version of the code specifically for this use case</li>
+                    </ul>
+                `;
+                updateMeter(80);
+            },
+            
+            // Step 6: Optimized code is created
+            function() {
+                moveCodeBlock('compiler', '70%', '40%');
+                createCodeBlock('optimized', 'Machine code 01010101...', '30%', '40%', '220px');
+                explanation.innerHTML = `
+                    <h3>Step 6: Optimized Machine Code Is Created</h3>
+                    <p>The JIT compiler creates <span class="highlight">optimized machine code</span> that is much faster than interpreted code.</p>
+                    <p>This machine code is specially optimized for the observed patterns:</p>
+                    <ul>
+                        <li>It assumes input and variable types will be consistent</li>
+                        <li>It may remove unnecessary checks and operations</li>
+                        <li>It is tailored for your specific CPU architecture</li>
+                    </ul>
+                    <p>At this point, the engine has both the original code (for flexibility) and the optimized version (for speed).</p>
+                `;
+                updateMeter(90);
+            },
+            
+            // Step 7: Code execution switches to optimized version
+            function() {
+                moveCodeBlock('interpreter', '80%', '50%', 0.3);
+                moveCodeBlock('optimized', '70%', '40%');
+                explanation.innerHTML = `
+                    <h3>Step 7: Execution Switches to Optimized Code</h3>
+                    <p>Future calls to the <code>calculateSum()</code> function now use the <span class="highlight">optimized machine code</span> instead of being interpreted.</p>
+                    <p>This can make the code run <strong>10-100 times faster</strong> than the interpreted version!</p>
+                    <p>The JavaScript engine effectively replaced the slow path with a fast path for frequently used code.</p>
+                `;
+                updateMeter(100);
+            },
+            
+            // Step 8: Potential deoptimization
+            function() {
+                createCodeBlock('interpreter', 'calculateSum("100") // String!', '20%', '50%', '250px');
+                moveCodeBlock('optimized', '80%', '40%', 0.3);
+                createCodeBlock('compiler', 'Deoptimizing...', '30%', '40%', '150px');
+                explanation.innerHTML = `
+                    <h3>Step 8: Potential Deoptimization</h3>
+                    <p>If the function is called with different types of data than what was observed during profiling (like a string instead of a number), <span class="highlight">deoptimization</span> may occur.</p>
+                    <p>The engine must:</p>
+                    <ul>
+                        <li>Detect that its optimization assumptions are no longer valid</li>
+                        <li>Fall back to the interpreter for this new case</li>
+                        <li>Potentially create new optimized code if this new pattern becomes common</li>
+                    </ul>
+                    <p>This provides both performance and flexibility - JavaScript can still handle dynamic types while being fast for consistent code.</p>
+                `;
+                updateMeter(60);
+            }
+        ];
+        
+        // Create a code block element
+        function createCodeBlock(stageId, text, left, top, width) {
+            const codeBlock = document.createElement('div');
+            codeBlock.className = 'code-block';
+            codeBlock.textContent = text;
+            codeBlock.style.left = left;
+            codeBlock.style.top = top;
+            codeBlock.style.width = width || '150px';
+            
+            stages[stageId].appendChild(codeBlock);
+            
+            // Animate appearance
+            setTimeout(() => {
+                codeBlock.style.opacity = 1;
+            }, 50);
+            
+            return codeBlock;
+        }
+        
+        // Move a code block to a new position
+        function moveCodeBlock(stageId, left, top, opacity = 1) {
+            const codeBlocks = stages[stageId].querySelectorAll('.code-block');
+            if (codeBlocks.length > 0) {
+                const lastBlock = codeBlocks[codeBlocks.length - 1];
+                lastBlock.style.left = left;
+                lastBlock.style.top = top;
+                lastBlock.style.opacity = opacity;
+            }
+        }
+        
+        // Update the heat meter
+        function updateMeter(value) {
+            // Calculate position based on value (0-100)
+            // 0 = bottom, 100 = top
+            const position = 200 - (value * 2);
+            heatMeter.style.transform = `translateY(${position}px)`;
+            heatMeter.textContent = value;
+        }
+        
+        // Clear all code blocks
+        function clearCodeBlocks() {
+            Object.values(stages).forEach(stage => {
+                const codeBlocks = stage.querySelectorAll('.code-block');
+                codeBlocks.forEach(block => {
+                    block.remove();
+                });
+            });
+        }
+        
+        // Start the animation
+        startBtn.addEventListener('click', () => {
+            startBtn.disabled = true;
+            nextBtn.disabled = false;
+            resetBtn.disabled = false;
+            
+            // Run the first step
+            steps[currentStep]();
+            updateProgress();
+            
+            explanation.innerHTML = `
+                <h3>JavaScript JIT Compilation</h3>
+                <p>Click "Next Step" to advance through the animation and see how JIT compilation works.</p>
+            `;
+        });
+        
+        // Move to the next step
+        nextBtn.addEventListener('click', () => {
+            currentStep++;
+            
+            if (currentStep < steps.length) {
+                steps[currentStep]();
+                updateProgress();
+            }
+            
+            if (currentStep === steps.length - 1) {
+                nextBtn.disabled = true;
+            }
+        });
+        
+        // Reset the animation
+        resetBtn.addEventListener('click', () => {
+            currentStep = 0;
+            clearCodeBlocks();
+            startBtn.disabled = false;
+            nextBtn.disabled = true;
+            resetBtn.disabled = true;
+            progressBar.style.width = '0%';
+            updateMeter(0);
+            
+            explanation.innerHTML = `
+                <p class="instruction">Click "Start Animation" to see how JavaScript JIT compilation works!</p>
+            `;
+        });
+        
+        // Update the progress bar
+        function updateProgress() {
+            const progress = ((currentStep + 1) / totalSteps) * 100;
+            progressBar.style.width = `${progress}%`;
+        }
+    </script>
+</body>
+</html>

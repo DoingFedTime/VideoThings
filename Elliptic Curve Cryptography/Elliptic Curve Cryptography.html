@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elliptic Curve Cryptography - Visual Guide</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #0f172a;
+            color: #f1f5f9;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        
+        .gradient-text {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .svg-container {
+            background-color: #1e293b;
+            border-radius: 10px;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+        }
+        
+        .label-box {
+            background-color: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(4px);
+            border-left: 3px solid #4facfe;
+            padding: 0.5rem 0.75rem;
+            border-radius: 0 4px 4px 0;
+            position: absolute;
+            max-width: 200px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            transform: translateX(-10px);
+        }
+        
+        .label-box.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes drawLine {
+            from { stroke-dashoffset: 1000; }
+            to { stroke-dashoffset: 0; }
+        }
+        
+        @keyframes drawCurve {
+            from { stroke-dashoffset: 1000; }
+            to { stroke-dashoffset: 0; }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .grid-bg {
+            background-size: 30px 30px;
+            background-image:
+                linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+        }
+        
+        .point {
+            transition: transform 0.5s ease;
+        }
+        
+        .point:hover {
+            transform: scale(1.2);
+        }
+        
+        .button {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            transition: all 0.3s ease;
+        }
+        
+        .button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
+        }
+        
+        .card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <!-- Title Section -->
+    <section class="h-screen flex flex-col items-center justify-center px-4">
+        <div class="text-center max-w-3xl mx-auto">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6 gradient-text">Elliptic Curve Cryptography</h1>
+            <p class="text-xl text-gray-300">Securing digital communication with mathematical elegance</p>
+        </div>
+    </section>
+
+    <!-- What is ECC Section -->
+    <section class="min-h-screen py-20 px-4">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl font-bold mb-12 text-center gradient-text">What is Elliptic Curve Cryptography?</h2>
+            
+            <div class="svg-container relative h-96 mb-12 grid-bg" id="curve-container">
+                <!-- SVG will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="flex justify-center">
+                <button id="replay-curve" class="button px-6 py-3 rounded-full font-semibold text-gray-900 shadow-lg">
+                    Replay Animation
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Point Addition Section -->
+    <section class="min-h-screen py-20 px-4 bg-gray-900">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Point Addition</h2>
+            
+            <div class="svg-container relative h-96 mb-12 grid-bg" id="addition-container">
+                <!-- SVG will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="flex justify-center">
+                <button id="replay-addition" class="button px-6 py-3 rounded-full font-semibold text-gray-900 shadow-lg">
+                    Replay Animation
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Key Exchange Section -->
+    <section class="min-h-screen py-20 px-4">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Secure Key Exchange</h2>
+            
+            <div class="svg-container relative h-96 mb-12 grid-bg" id="exchange-container">
+                <!-- SVG will be inserted here by JavaScript -->
+            </div>
+            
+            <div class="flex justify-center">
+                <button id="replay-exchange" class="button px-6 py-3 rounded-full font-semibold text-gray-900 shadow-lg">
+                    Replay Animation
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why ECC Matters Section -->
+    <section class="min-h-screen py-20 px-4 bg-gray-900">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Why ECC Matters</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-12">
+                <div class="card bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <h3 class="text-2xl font-semibold mb-4 text-blue-300">ECC (256-bit)</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-400 mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Smaller key size (256-bit)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-400 mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Lower computational requirements</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-400 mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Less bandwidth usage</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-blue-400 mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Ideal for mobile and IoT devices</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="card bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <h3 class="text-2xl font-semibold mb-4 text-red-300">RSA (3072-bit)</h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-red-400 mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Larger key size (3072-bit) for equivalent security</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-red-400 mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Higher computational overhead</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-red-400 mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Greater bandwidth requirements</span>
+                        </li>
+                        <li class="flex items-start">
+                            <svg class="h-5 w-5 text-red-400 mr-2 mt-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                            </svg>
+                            <span>Less suitable for resource-constrained environments</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Applications Section -->
+    <section class="min-h-screen py-20 px-4">
+        <div class="max-w-5xl mx-auto">
+            <h2 class="text-4xl font-bold mb-12 text-center gradient-text">Real-World Applications</h2>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="card bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div class="text-4xl mb-4 text-center">🔒</div>
+                    <h3 class="text-xl font-semibold mb-3 text-center text-blue-300">TLS/SSL</h3>
+                    <p class="text-gray-300 text-center">Secures web browsing with ECDHE key exchange</p>
+                </div>
+                
+                <div class="card bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div class="text-4xl mb-4 text-center">💰</div>
+                    <h3 class="text-xl font-semibold mb-3 text-center text-blue-300">Cryptocurrencies</h3>
+                    <p class="text-gray-300 text-center">Bitcoin and Ethereum use ECC for digital signatures</p>
+                </div>
+                
+                <div class="card bg-gray-800 rounded-xl p-6 shadow-lg">
+                    <div class="text-4xl mb-4 text-center">📱</div>
+                    <h3 class="text-xl font-semibold mb-3 text-center text-blue-300">Secure Messaging</h3>
+                    <p class="text-gray-300 text-center">Signal, WhatsApp use ECDH for end-to-end encryption</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Utility functions
+        function createSVG(containerID, width = 800, height = 400) {
+            const container = document.getElementById(containerID);
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '100%');
+            svg.setAttribute('height', '100%');
+            svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
+            container.innerHTML = ''; // Clear container
+            container.appendChild(svg);
+            return svg;
+        }
+
+        function createSVGElement(type, attributes = {}) {
+            const element = document.createElementNS('http://www.w3.org/2000/svg', type);
+            for (const [key, value] of Object.entries(attributes)) {
+                element.setAttribute(key, value);
+            }
+            return element;
+        }
+
+        function createLabel(containerID, id, text, position) {
+            const container = document.getElementById(containerID);
+            const label = document.createElement('div');
+            label.id = id;
+            label.className = 'label-box';
+            label.textContent = text;
+            label.style.left = position.left;
+            label.style.top = position.top;
+            container.appendChild(label);
+            return label;
+        }
+
+        function showElement(element, delay = 0) {
+            setTimeout(() => {
+                element.classList.add('active');
+            }, delay);
+        }
+
+        function generateCurvePoints(a, b, xMin, xMax, step) {
+            const points = [];
+            for (let x = xMin; x <= xMax; x += step) {
+                const ySquared = x * x * x + a * x + b;
+                if (ySquared >= 0) {
+                    const y = Math.sqrt(ySquared);
+                    points.push({ x, y });
+                    points.push({ x, y: -y });
+                }
+            }
+            return points;
+        }
+
+        function mapPoint(point, width, height, scale) {
+            return {
+                x: width/2 + point.x * scale,
+                y: height/2 - point.y * scale
+            };
+        }
+
+        // What is ECC Animation
+        function initCurveAnimation() {
+            // Clear previous labels
+            document.querySelectorAll('#curve-container .label-box').forEach(el => el.remove());
+            
+            const width = 800;
+            const height = 400;
+            const svg = createSVG('curve-container', width, height);
+            
+            // Create labels
+            const equationLabel = createLabel('curve-container', 'equation-label', 'Curve Equation: y² = x³ + ax + b', { left: '20px', top: '20px' });
+            const pointsLabel = createLabel('curve-container', 'points-label', 'Points on this curve form a mathematical group', { left: '20px', top: '80px' });
+            const securityLabel = createLabel('curve-container', 'security-label', 'Security comes from the discrete logarithm problem', { left: '20px', top: '140px' });
+            
+            // Draw axes
+            const xAxis = createSVGElement('line', {
+                x1: '0',
+                y1: height/2,
+                x2: width,
+                y2: height/2,
+                stroke: '#64748b',
+                'stroke-width': '1'
+            });
+            
+            const yAxis = createSVGElement('line', {
+                x1: width/2,
+                y1: '0',
+                x2: width/2,
+                y2: height,
+                stroke: '#64748b',
+                'stroke-width': '1'
+            });
+            
+            svg.appendChild(xAxis);
+            svg.appendChild(yAxis);
+            
+            // Generate curve points
+            const a = -3;
+            const b = 3;
+            const scale = 40;
+            const curvePoints = generateCurvePoints(a, b, -8, 8, 0.05)
+                .map(p => mapPoint(p, width, height, scale));
+            
+            // Create curve path
+            let pathData = '';
+            let previousPoint = null;
+            
+            curvePoints.forEach(point => {
+                if (!previousPoint || 
+                    Math.abs(point.y - previousPoint.y) > height/2 || 
+                    Math.abs(point.x - previousPoint.x) > width/2) {
+                    pathData += `M ${point.x} ${point.y} `;
+                } else {
+                    pathData += `L ${point.x} ${point.y} `;
+                }
+                previousPoint = point;
+            });
+            
+            const curvePath = createSVGElement('path', {
+                d: pathData,
+                stroke: '#4facfe',
+                'stroke-width': '2.5',
+                fill: 'none',
+                'stroke-dasharray': '1000',
+                'stroke-dashoffset': '1000',
+                style: 'animation: drawCurve 2s forwards ease-out'
+            });
+            
+            svg.appendChild(curvePath);
+            
+            // Add sample points on the curve
+            const pointLocations = [
+                { x: width/2 + 100, y: height/2 - 80 },
+                { x: width/2 - 150, y: height/2 - 60 },
+                { x: width/2 + 200, y: height/2 + 100 }
+            ];
+            
+            // Animation sequence
+            setTimeout(() => {
+                showElement(equationLabel);
+                
+                setTimeout(() => {
+                    showElement(pointsLabel);
+                    
+                    // Add points with delay
+                    setTimeout(() => {
+                        pointLocations.forEach((loc, i) => {
+                            const point = createSVGElement('circle', {
+                                cx: loc.x,
+                                cy: loc.y,
+                                r: '6',
+                                fill: '#4facfe',
+                                stroke: '#ffffff',
+                                'stroke-width': '2',
+                                style: `opacity: 0; animation: fadeIn 0.5s forwards ${i * 0.3}s`
+                            });
+                            
+                            svg.appendChild(point);
+                        });
+                        
+                        // Show security label after points appear
+                        setTimeout(() => {
+                            showElement(securityLabel);
+                        }, 1500);
+                        
+                    }, 1000);
+                    
+                }, 1000);
+                
+            }, 1000);
+        }
+
+        // Point Addition Animation
+        function initPointAdditionAnimation() {
+            // Clear previous labels
+            document.querySelectorAll('#addition-container .label-box').forEach(el => el.remove());
+            
+            const width = 800;
+            const height = 400;
+            const svg = createSVG('addition-container', width, height);
+            
+            // Create labels
+            const connectLabel = createLabel('addition-container', 'connect-label', 'Draw line through points P and Q', { left: '20px', top: '20px' });
+            const intersectLabel = createLabel('addition-container', 'intersect-label', 'Find third intersection with curve', { left: '20px', top: '80px' });
+            const reflectLabel = createLabel('addition-container', 'reflect-label', 'Reflect point across x-axis to get R = P + Q', { left: '20px', top: '140px' });
+            const mathLabel = createLabel('addition-container', 'math-label', 'This geometric operation defines the group law for the curve', { right: '20px', bottom: '20px' });
+            
+            // Draw axes
+            const xAxis = createSVGElement('line', {
+                x1: '0',
+                y1: height/2,
+                x2: width,
+                y2: height/2,
+                stroke: '#64748b',
+                'stroke-width': '1'
+            });
+            
+            const yAxis = createSVGElement('line', {
+                x1: width/2,
+                y1: '0',
+                x2: width/2,
+                y2: height,
+                stroke: '#64748b',
+                'stroke-width': '1'
+            });
+            
+            svg.appendChild(xAxis);
+            svg.appendChild(yAxis);
+            
+            // Generate curve
+            const a = -3;
+            const b = 3;
+            const scale = 40;
+            const curvePoints = generateCurvePoints(a, b, -8, 8, 0.05)
+                .map(p => mapPoint(p, width, height, scale));
+            
+            // Create curve path
+            let pathData = '';
+            let previousPoint = null;
+            
+            curvePoints.forEach(point => {
+                if (!previousPoint || 
+                    Math.abs(point.y - previousPoint.y) > height/2 || 
+                    Math.abs(point.x - previousPoint.x) > width/2) {
+                    pathData += `M ${point.x} ${point.y} `;
+                } else {
+                    pathData += `L ${point.x} ${point.y} `;
+                }
+                previousPoint = point;
+            });
+            
+            const curvePath = createSVGElement('path', {
+                d: pathData,
+                stroke: '#4facfe',
+                'stroke-width': '2',
+                fill: 'none',
+                opacity: '0.5'
+            });
+            
+            svg.appendChild(curvePath);
+            
+            // Define points for addition
+            const pointP = { x: width/2 - 150, y: height/2 - 80 };
+            const pointQ = { x: width/2 + 120, y: height/2 - 60 };
+            
+            // Calculate line between P and Q
+            const slope = (pointQ.y - pointP.y) / (pointQ.x - pointP.x);
+            const yIntercept = pointP.y - slope * pointP.x;
+            
+            // Find a third point on the curve that's also on the line
+            // For simplicity in this demo, we'll just choose a position
+            const pointNegR = { x: width/2 - 50, y: slope * (width/2 - 50) + yIntercept };
+            
+            // The actual R is the reflection of -R across the x-axis
+            const pointR = { x: pointNegR.x, y: height - pointNegR.y + height/2 };
+            
+            // Animation sequence
+            setTimeout(() => {
+                // Step 1: Show points P and Q
+                showElement(connectLabel);
+                
+                const pointPCircle = createSVGElement('circle', {
+                    cx: pointP.x,
+                    cy: pointP.y,
+                    r: '6',
+                    fill: '#ffcc66',
+                    stroke: '#d9a356',
+                    'stroke-width': '2',
+                    opacity: '0',
+                    style: 'animation: fadeIn 0.5s forwards'
+                });
+                
+                const pointPLabel = createSVGElement('text', {
+                    x: pointP.x - 15,
+                    y: pointP.y - 15,
+                    fill: '#ffcc66',
+                    'font-size': '16px',
+                    opacity: '0',
+                    style: 'animation: fadeIn 0.5s forwards 0.2s'
+                });
+                pointPLabel.textContent = 'P';
+                
+                // Add point Q
+                const pointQCircle = createSVGElement('circle', {
+                    cx: pointQ.x,
+                    cy: pointQ.y,
+                    r: '6',
+                    fill: '#66ccff',
+                    stroke: '#56a3d9',
+                    'stroke-width': '2',
+                    opacity: '0',
+                    style: 'animation: fadeIn 0.5s forwards 0.5s'
+                });
+                
+                const pointQLabel = createSVGElement('text', {
+                    x: pointQ.x + 15,
+                    y: pointQ.y - 15,
+                    fill: '#66ccff',
+                    'font-size': '16px',
+                    opacity: '0',
+                    style: 'animation: fadeIn 0.5s forwards 0.7s'
+                });
+                pointQLabel.textContent = 'Q';
+                
+                svg.appendChild(pointPCircle);
+                svg.appendChild(pointPLabel);
+                svg.appendChild(pointQCircle);
+                svg.appendChild(pointQLabel);
+                
+                // Step 2: Draw line between P and Q
+                setTimeout(() => {
+                    showElement(intersectLabel);
+                    
+                    const line = createSVGElement('line', {
+                        x1: 0,
+                        y1: yIntercept,
+                        x2: width,
+                        y2: slope * width + yIntercept,
+                        stroke: '#a0aec0',
+                        'stroke-width': '1.5',
+                        'stroke-dasharray': '6, 3',
+                        opacity: '0',
+                        style: 'animation: fadeIn 0.8s forwards'
+                    });
+                    
+                    svg.appendChild(line);
+                    
+                    // Step 3: Show third intersection point
+                    setTimeout(() => {
+                        const negRCircle = createSVGElement('circle', {
+                            cx: pointNegR.x,
+                            cy: pointNegR.y,
+                            r: '6',
+                            fill: '#aaaaaa',
+                            stroke: '#888888',
+                            'stroke-width': '2',
+                            opacity: '0',
+                            style: 'animation: fadeIn 0.5s forwards'
+                        });
+                        
+                        const negRLabel = createSVGElement('text', {
+                            x: pointNegR.x - 25,
+                            y: pointNegR.y,
+                            fill: '#aaaaaa',
+                            'font-size': '16px',
+                            opacity: '0',
+                            style: 'animation: fadeIn 0.5s forwards 0.2s'
+                        });
+                        negRLabel.textContent = '-R';
+                        
+                        svg.appendChild(negRCircle);
+                        svg.appendChild(negRLabel);
+                        
+                        // Step 4: Show reflection
+                        setTimeout(() => {
+                            showElement(reflectLabel);
+                            
+                            // Draw vertical reflection line
+                            const reflectionLine = createSVGElement('line', {
+                                x1: pointNegR.x,
+                                y1: pointNegR.y,
+                                x2: pointR.x,
+                                y2: pointR.y,
+                                stroke: '#aaaaaa',
+                                'stroke-width': '1.5',
+                                'stroke-dasharray': '6, 3',
+                                opacity: '0',
+                                style: 'animation: fadeIn 0.5s forwards'
+                            });
+                            
+                            svg.appendChild(reflectionLine);
+                            
+                            // Step 5: Show result point R
+                            setTimeout(() => {
+                                const pointRCircle = createSVGElement('circle', {
+                                    cx: pointR.x,
+                                    cy: pointR.y,
+                                    r: '6',
+                                    fill: '#ff6680',
+                                    stroke: '#d95669',
+                                    'stroke-width': '2',
+                                    opacity: '0',
+                                    style: 'animation: fadeIn 0.5s forwards'
+                                });
+                                
+                                const pointRLabel = createSVGElement('text', {
+                                    x: pointR.x + 15,
+                                    y: pointR.y,
+                                    fill: '#ff6680',
+                                    'font-size': '16px',
+                                    opacity: '0',
+                                    style: 'animation: fadeIn 0.5s forwards 0.2s'
+                                });
+                                pointRLabel.textContent = 'R = P + Q';
+                                
+                                svg.appendChild(pointRCircle);
+                                svg.appendChild(pointRLabel);
+                                
+                                showElement(mathLabel, 500);
+                                
+                            }, 1000);
+                            
+                        }, 1000);
+                        
+                    }, 1000);
+                    
+                }, 1500);
+                
+            }, 500);
+        }
+
+        // Key Exchange Animation
+        function initKeyExchangeAnimation() {
+            // Clear previous labels
+            document.querySelectorAll('#exchange-container .label-box').forEach(el => el.remove());
+            
+            const width = 800;
+            const height = 400;
+            const svg = createSVG('exchange-container', width, height);
+            
+            // Create labels
+            const aliceLabel = createLabel('exchange-container', 'alice-label', 'Alice selects private key a', { left: '20px', top: '20px' });
+            const bobLabel = createLabel('exchange-container', 'bob-label', 'Bob selects private key b', { right: '20px', top: '20px' });
+            const publicALabel = createLabel('exchange-container', 'public-a-label', 'Alice computes A = aG', { left: '20px', top: '80px' });
+            const publicBLabel = createLabel('exchange-container', 'public-b-label', 'Bob computes B = bG', { right: '20px', top: '80px' });
+            const secretLabel = createLabel('exchange-container', 'secret-label', 'Shared secret: S = abG (Alice computes aB, Bob computes bA)', { left: '50%', bottom: '20px', transform: 'translateX(-50%)' });
+            
+            // Define entity positions
+            const aliceX = 200;
+            const bobX = 600;
+            const topY = 100;
+            const bottomY = 300;
+            
+            // Create entities
+            const aliceBox = createSVGElement('rect', {
+                x: aliceX - 60,
+                y: topY - 30,
+                width: 120,
+                height: 60,
+                rx: 10,
+                ry: 10,
+                fill: '#1e293b',
+                stroke: '#4facfe',
+                'stroke-width': '2',
+                opacity: '0',
+                style: 'animation: fadeIn 0.5s forwards'
+            });
+            
+            const aliceText = createSVGElement('text', {
+                x: aliceX,
+                y: topY + 5,
+                fill: 'white',
+                'text-anchor': 'middle',
+                'font-size': '16px',
+                opacity: '0',
+                style: 'animation: fadeIn 0.5s forwards 0.2s'
+            });
+            aliceText.textContent = 'Alice';
+            
+            const bobBox = createSVGElement('rect', {
+                x: bobX - 60,
+                y: topY - 30,
+                width: 120,
+                height: 60,
+                rx: 10,
+                ry: 10,
+                fill: '#1e293b',
+                stroke: '#4facfe',
+                'stroke-width': '2',
+                opacity: '0',
+                style: 'animation: fadeIn 0.5s forwards 0.5s'
+            });
+            
+            const bobText = createSVGElement('text', {
+                x: bobX,
+                y: topY + 5,
+                fill: 'white',
+                'text-anchor': 'middle',
+                'font-size': '16px',
+                opacity: '0',
+                style: 'animation: fadeIn 0.5s forwards 0.7s'
+            });
+            bobText.textContent = 'Bob';
+            
+            svg.appendChild(aliceBox);
+            svg.appendChild(aliceText);
+            svg.appendChild(bobBox);
+            svg.appendChild(bobText);
+            
+            // Animation sequence
+            setTimeout(() => {
+                showElement(aliceLabel);
+                showElement(bobLabel);
+                
+                // Private keys
+                setTimeout(() => {
+                    // Alice's private key
+                    const alicePrivateKey = createSVGElement('text', {
+                        x: aliceX,
+                        y: topY + 40,
+                        fill: '#ff6680',
+                        'text-anchor': 'middle',
+                        'font-size': '14px',
+                        opacity: '0',
+                        style: 'animation: fadeIn 0.5s forwards'
+                    });
+                    alicePrivateKey.textContent = 'Private key: a';
+                    
+                    // Bob's private key
+                    const bobPrivateKey = createSVGElement('text', {
+                        x: bobX,
+                        y: topY + 40,
+                        fill: '#ff6680',
+                        'text-anchor': 'middle',
+                        'font-size': '14px',
+                        opacity: '0',
+                        style: 'animation: fadeIn 0.5s forwards 0.3s'
+                    });
+                    bobPrivateKey.textContent = 'Private key: b';
+                    
+                    svg.appendChild(alicePrivateKey);
+                    svg.appendChild(bobPrivateKey);
+                    
+                    // Generator point
+                    const generatorPoint = createSVGElement('circle', {
+                        cx: width/2,
+                        cy: height/2 - 50,
+                        r: '6',
+                        fill: '#4facfe',
+                        stroke: '#ffffff',
+                        'stroke-width': '2',
+                        opacity: '0',
+                        style: 'animation: fadeIn 0.5s forwards 0.5s'
+                    });
+                    
+                    const generatorLabel = createSVGElement('text', {
+                        x: width/2,
+                        y: height/2 - 65,
+                        fill: '#4facfe',
+                        'text-anchor': 'middle',
+                        'font-size': '16px',
+                        opacity: '0',
+                        style: 'animation: fadeIn 0.5s forwards 0.7s'
+                    });
+                    generatorLabel.textContent = 'Generator Point G';
+                    
+                    svg.appendChild(generatorPoint);
+                    svg.appendChild(generatorLabel);
+                    
+                    // Public keys
+                    setTimeout(() => {
+                        showElement(publicALabel);
+                        showElement(publicBLabel);
+                        
+                        // Public key arrows from generator to public points
+                        const aliceArrow = createSVGElement('path', {
+                            d: `M ${width/2} ${height/2 - 50} Q ${width/2 - 50} ${height/2 + 50} ${aliceX} ${bottomY - 30}`,
+                            fill: 'none',
+                            stroke: '#4facfe',
+                            'stroke-width': '2',
+                            'stroke-dasharray': '6, 3',
+                            'marker-end': 'url(#arrowhead)',
+                            opacity: '0',
+                            style: 'animation: fadeIn 0.8s forwards'
+                        });
+                        
+                        const bobArrow = createSVGElement('path', {
+                            d: `M ${width/2} ${height/2 - 50} Q ${width/2 + 50} ${height/2 + 50} ${bobX} ${bottomY - 30}`,
+                            fill: 'none',
+                            stroke: '#4facfe',
+                            'stroke-width': '2',
+                            'stroke-dasharray': '6, 3',
+                            'marker-end': 'url(#arrowhead)',
+                            opacity: '0',
+                            style: 'animation: fadeIn 0.8s forwards 0.3s'
+                        });
+                        
+                        // Define arrowhead marker
+                        const defs = createSVGElement('defs');
+                        const marker = createSVGElement('marker', {
+                            id: 'arrowhead',
+                            markerWidth: '10',
+                            markerHeight: '7',
+                            refX: '9',
+                            refY: '3.5',
+                            orient: 'auto'
+                        });
+                        
+                        const polygon = createSVGElement('polygon', {
+                            points: '0 0, 10 3.5, 0 7',
+                            fill: '#4facfe'
+                        });
+                        
+                        marker.appendChild(polygon);
+                        defs.appendChild(marker);
+                        svg.appendChild(defs);
+                        svg.appendChild(aliceArrow);
+                        svg.appendChild(bobArrow);
+                        
+                        // Alice's public key
+                        const alicePublicPoint = createSVGElement('circle', {
+                            cx: aliceX,
+                            cy: bottomY,
+                            r: '6',
+                            fill: '#ffcc66',
+                            stroke: '#d9a356',
+                            'stroke-width': '2',
+                            opacity: '0',
+                            style: 'animation: fadeIn 0.5s forwards 1s'
+                        });
+                        
+                        const alicePublicLabel = createSVGElement('text', {
+                            x: aliceX,
+                            y: bottomY + 20,
+                            fill: '#ffcc66',
+                            'text-anchor': 'middle',
+                            'font-size': '14px',
+                            opacity: '0',
+                            style: 'animation: fadeIn 0.5s forwards 1.2s'
+                        });
+                        alicePublicLabel.textContent = 'Public key A = aG';
+                        
+                        // Bob's public key
+                        const bobPublicPoint = createSVGElement('circle', {
+                            cx: bobX,
+                            cy: bottomY,
+                            r: '6',
+                            fill: '#66ccff',
+                            stroke: '#56a3d9',
+                            'stroke-width': '2',
+                            opacity: '0',
+                            style: 'animation: fadeIn 0.5s forwards 1.4s'
+                        });
+                        
+                        const bobPublicLabel = createSVGElement('text', {
+                            x: bobX,
+                            y: bottomY + 20,
+                            fill: '#66ccff',
+                            'text-anchor': 'middle',
+                            'font-size': '14px',
+                            opacity: '0',
+                            style: 'animation: fadeIn 0.5s forwards 1.6s'
+                        });
+                        bobPublicLabel.textContent = 'Public key B = bG';
+                        
+                        svg.appendChild(alicePublicPoint);
+                        svg.appendChild(alicePublicLabel);
+                        svg.appendChild(bobPublicPoint);
+                        svg.appendChild(bobPublicLabel);
+                        
+                        // Exchange arrows
+                        setTimeout(() => {
+                            const aliceToBob = createSVGElement('path', {
+                                d: `M ${aliceX + 60} ${bottomY - 15} C ${aliceX + 100} ${bottomY - 60}, ${bobX - 100} ${bottomY - 60}, ${bobX - 60} ${bottomY - 15}`,
+                                fill: 'none',
+                                stroke: '#ffcc66',
+                                'stroke-width': '2',
+                                'marker-end': 'url(#arrowhead2)',
+                                opacity: '0',
+                                style: 'animation: fadeIn 0.8s forwards'
+                            });
+                            
+                            const bobToAlice = createSVGElement('path', {
+                                d: `M ${bobX - 60} ${bottomY + 15} C ${bobX - 100} ${bottomY + 60}, ${aliceX + 100} ${bottomY + 60}, ${aliceX + 60} ${bottomY + 15}`,
+                                fill: 'none',
+                                stroke: '#66ccff',
+                                'stroke-width': '2',
+                                'marker-end': 'url(#arrowhead3)',
+                                opacity: '0',
+                                style: 'animation: fadeIn 0.8s forwards 0.3s'
+                            });
+                            
+                            // Define another arrowhead marker with different color
+                            const marker2 = createSVGElement('marker', {
+                                id: 'arrowhead2',
+                                markerWidth: '10',
+                                markerHeight: '7',
+                                refX: '9',
+                                refY: '3.5',
+                                orient: 'auto'
+                            });
+                            
+                            const polygon2 = createSVGElement('polygon', {
+                                points: '0 0, 10 3.5, 0 7',
+                                fill: '#ffcc66'
+                            });
+                            
+                            marker2.appendChild(polygon2);
+                            
+                            const marker3 = createSVGElement('marker', {
+                                id: 'arrowhead3',
+                                markerWidth: '10',
+                                markerHeight: '7',
+                                refX: '9',
+                                refY: '3.5',
+                                orient: 'auto'
+                            });
+                            
+                            const polygon3 = createSVGElement('polygon', {
+                                points: '0 0, 10 3.5, 0 7',
+                                fill: '#66ccff'
+                            });
+                            
+                            marker3.appendChild(polygon3);
+                            
+                            defs.appendChild(marker2);
+                            defs.appendChild(marker3);
+                            svg.appendChild(aliceToBob);
+                            svg.appendChild(bobToAlice);
+                            
+                            // Show shared secret
+                            setTimeout(() => {
+                                showElement(secretLabel);
+                                
+                                // Shared secret
+                                const secretPoint = createSVGElement('circle', {
+                                    cx: width/2,
+                                    cy: bottomY + 50,
+                                    r: '8',
+                                    fill: '#50c878',
+                                    stroke: '#2e8b57',
+                                    'stroke-width': '2',
+                                    opacity: '0',
+                                    style: 'animation: fadeIn 0.5s forwards, pulse 2s infinite 1s'
+                                });
+                                
+                                const secretPointLabel = createSVGElement('text', {
+                                    x: width/2,
+                                    y: bottomY + 75,
+                                    fill: '#50c878',
+                                    'text-anchor': 'middle',
+                                    'font-size': '16px',
+                                    opacity: '0',
+                                    style: 'animation: fadeIn 0.5s forwards 0.3s'
+                                });
+                                secretPointLabel.textContent = 'Shared Secret S = abG';
+                                
+                                svg.appendChild(secretPoint);
+                                svg.appendChild(secretPointLabel);
+                                
+                                // Connect to shared secret
+                                const aliceToSecret = createSVGElement('path', {
+                                    d: `M ${aliceX + 30} ${bottomY + 15} Q ${aliceX + 80} ${bottomY + 40} ${width/2 - 10} ${bottomY + 50}`,
+                                    fill: 'none',
+                                    stroke: '#50c878',
+                                    'stroke-width': '1.5',
+                                    'stroke-dasharray': '4, 2',
+                                    opacity: '0',
+                                    style: 'animation: fadeIn 0.5s forwards 0.6s'
+                                });
+                                
+                                const bobToSecret = createSVGElement('path', {
+                                    d: `M ${bobX - 30} ${bottomY + 15} Q ${bobX - 80} ${bottomY + 40} ${width/2 + 10} ${bottomY + 50}`,
+                                    fill: 'none',
+                                    stroke: '#50c878',
+                                    'stroke-width': '1.5',
+                                    'stroke-dasharray': '4, 2',
+                                    opacity: '0',
+                                    style: 'animation: fadeIn 0.5s forwards 0.9s'
+                                });
+                                
+                                svg.appendChild(aliceToSecret);
+                                svg.appendChild(bobToSecret);
+                                
+                            }, 2000);
+                            
+                        }, 2000);
+                        
+                    }, 1500);
+                    
+                }, 1000);
+                
+            }, 500);
+        }
+
+        // Initialize animations when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            // Execute initial animations with delay to ensure DOM is ready
+            setTimeout(() => {
+                initCurveAnimation();
+            }, 500);
+
+            // Setup replay buttons
+            document.getElementById('replay-curve').addEventListener('click', initCurveAnimation);
+            document.getElementById('replay-addition').addEventListener('click', initPointAdditionAnimation);
+            document.getElementById('replay-exchange').addEventListener('click', initKeyExchangeAnimation);
+
+            // Setup intersection observers to trigger animations when sections come into view
+            const observerOptions = {
+                threshold: 0.3,
+                rootMargin: '0px 0px -100px 0px'
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const containerId = entry.target.id;
+                        
+                        if (containerId === 'curve-container') {
+                            initCurveAnimation();
+                        } else if (containerId === 'addition-container') {
+                            initPointAdditionAnimation();
+                        } else if (containerId === 'exchange-container') {
+                            initKeyExchangeAnimation();
+                        }
+                    }
+                });
+            }, observerOptions);
+
+            // Observe containers
+            document.querySelectorAll('.svg-container').forEach(container => {
+                observer.observe(container);
+            });
+        });
+    </script>
+</body>
+</html>

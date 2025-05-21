@@ -1,0 +1,899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lessons Learned: Military Approach to Cyber Threats</title>
+    <style>
+        :root {
+            --primary: #0a2540;
+            --secondary: #00b4d8;
+            --accent: #03fc73;
+            --danger: #ff4757;
+            --warning: #ffa502;
+            --text: #e2e8f0;
+            --dark: #0a0e17;
+            --grid: rgba(0, 180, 216, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            background-color: var(--dark);
+            color: var(--text);
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            perspective: 1000px;
+        }
+        
+        .container {
+            position: relative;
+            width: 900px;
+            height: 680px; /* Increased height */
+            background: linear-gradient(135deg, var(--primary) 0%, rgba(3, 8, 18, 0.95) 100%);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+        
+        .title-container {
+            position: absolute;
+            top: 20px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            z-index: 100;
+        }
+        
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--secondary);
+            text-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+            margin-bottom: 8px;
+        }
+        
+        h2 {
+            font-size: 18px;
+            font-weight: 400;
+            color: var(--text);
+            opacity: 0.8;
+        }
+
+        .lesson-container { /* MODIFIED for static positioning */
+            width: 80%;
+            max-width: 600px;
+            margin: 100px auto 0 auto; /* Positioned below title-container, 100px from top of .container */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0; /* Initial opacity for animation */
+            transition: opacity 1s, transform 0.5s; /* Added transform for JS animations */
+            text-align: center;
+            z-index: 50; /* Above grid, potentially below other fixed elements if any */
+        }
+        
+        .lesson-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            text-align: center;
+            text-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+        }
+        
+        .lesson-description {
+            font-size: 16px;
+            color: var(--text);
+            text-align: center;
+            line-height: 1.4;
+        }
+
+        .grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 40px 40px;
+            background-position: center center;
+            opacity: 0.4;
+        }
+        
+        .phase-container {
+            position: absolute;
+            bottom: 25px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80%;
+            height: 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+        }
+        
+        .phase-dot {
+            width: 12px;
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            cursor: default;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+        
+        .phase-dot.active {
+            background-color: var(--secondary);
+            transform: scale(1.4);
+            box-shadow: 0 0 10px var(--secondary);
+        }
+        
+        .phase-line {
+            flex-grow: 1;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.2);
+            margin: 0 5px;
+        }
+        
+        .phase-indicator {
+            position: absolute;
+            bottom: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--secondary);
+            text-shadow: 0 0 8px rgba(0, 180, 216, 0.6);
+            opacity: 0;
+            transition: opacity 0.5s;
+        }
+        
+        .dashboard { /* MODIFIED top position */
+            position: absolute;
+            width: 100%;
+            height: 420px; /* This height is for the scene elements */
+            top: 180px; /* Pushed down to make space for lesson-container */
+            display: flex;
+            justify-content: center;
+            perspective: 1000px;
+        }
+        
+        .scene {
+            position: relative;
+            width: 800px;
+            height: 100%;
+            transform-style: preserve-3d;
+        }
+        
+        .command-center {
+            position: absolute;
+            width: 300px;
+            height: 200px;
+            top: 50%;
+            left: 150px;
+            transform: translateY(-50%);
+            background-color: rgba(10, 37, 64, 0.7);
+            border: 1px solid var(--secondary);
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 0 15px rgba(0, 180, 216, 0.3);
+            opacity: 0;
+            transition: opacity 1s, transform 1s;
+        }
+        
+        .command-title {
+            font-size: 16px;
+            color: var(--secondary);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .commander {
+            width: 40px;
+            height: 40px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .commander:after {
+            content: "";
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary);
+            clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+        }
+        
+        .command-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text);
+        }
+        
+        .attack-vector {
+            position: absolute;
+            width: 250px;
+            height: 40px;
+            top: 120px;
+            right: 100px;
+            background-color: var(--danger);
+            clip-path: polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%);
+            opacity: 0;
+            transform: translateX(50px);
+            transition: transform 2s, opacity 1s;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 0 15px rgba(255, 71, 87, 0.5);
+        }
+        
+        .attack-wave {
+            position: absolute;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: transparent;
+            border: 2px solid var(--danger);
+            top: 115px;
+            right: 100px;
+            opacity: 0;
+            transform: scale(0.5);
+            box-shadow: 0 0 5px var(--danger);
+        }
+        
+        .defense-system {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            left: 400px;
+            top: 100px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transform: scale(0);
+            opacity: 0;
+            transition: transform 1s, opacity 1s, background-color 1s;
+            box-shadow: 0 0 15px rgba(0, 180, 216, 0.5);
+        }
+        
+        .shield {
+            position: absolute;
+            width: 100px;
+            height: 100px;
+            border: 3px solid var(--secondary);
+            border-radius: 50%;
+            left: 390px;
+            top: 90px;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 1s, transform 1s, border-color 1s;
+            box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+        }
+        
+        .analysis-panel {
+            position: absolute;
+            width: 300px;
+            height: 150px;
+            background-color: rgba(10, 37, 64, 0.7);
+            border: 1px solid var(--accent);
+            border-radius: 10px;
+            bottom: 50px; /* Relative to scene, which is 420px high */
+            right: 100px;
+            padding: 15px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s, transform 1s;
+            box-shadow: 0 0 15px rgba(3, 252, 115, 0.3);
+        }
+        
+        .analysis-title {
+            font-size: 16px;
+            color: var(--accent);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .analysis-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text);
+        }
+        
+        .data-point {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+            box-shadow: 0 0 8px var(--accent);
+        }
+        
+        .connector {
+            position: absolute;
+            height: 2px;
+            background-color: var(--accent);
+            transform-origin: left;
+            transform: scaleX(0);
+            transition: transform 1s;
+            box-shadow: 0 0 5px var(--accent);
+        }
+        
+        .implementation-panel {
+            position: absolute;
+            width: 300px;
+            height: 150px;
+            background-color: rgba(10, 37, 64, 0.7);
+            border: 1px solid var(--warning);
+            border-radius: 10px;
+            bottom: 50px; /* Relative to scene */
+            left: 100px;
+            padding: 15px;
+            opacity: 0;
+            transform: translateY(30px);
+            transition: opacity 1s, transform 1s;
+            box-shadow: 0 0 15px rgba(255, 165, 2, 0.3);
+        }
+        
+        .implementation-title {
+            font-size: 16px;
+            color: var(--warning);
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+        
+        .implementation-content {
+            font-size: 14px;
+            line-height: 1.5;
+            color: var(--text);
+        }
+        
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .code-snippet {
+            position: absolute;
+            color: var(--secondary);
+            font-family: monospace;
+            font-size: 12px;
+            opacity: 0.4;
+            pointer-events: none;
+            text-shadow: 0 0 5px var(--secondary);
+            white-space: nowrap;
+        }
+        
+        .continuous-cycle {
+            position: absolute;
+            width: 160px;
+            height: 160px;
+            border: 3px dashed var(--secondary);
+            border-radius: 50%;
+            top: 190px; /* Relative to scene */
+            left: 370px; /* Relative to scene */
+            opacity: 0;
+            transform: scale(0.5) rotate(0deg);
+            transition: opacity 1s, transform 1s;
+        }
+        
+        .cycle-node {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-color: var(--secondary);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: var(--primary);
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 0 10px rgba(0, 180, 216, 0.5);
+        }
+        
+        .cycle-label {
+            position: absolute;
+            color: var(--text);
+            font-size: 12px;
+            width: 80px;
+            text-align: center;
+            text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+        }
+        
+        @keyframes rotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 10px rgba(0, 180, 216, 0.5); }
+            50% { transform: scale(1.1); box-shadow: 0 0 15px rgba(0, 180, 216, 0.7); }
+            100% { transform: scale(1); box-shadow: 0 0 10px rgba(0, 180, 216, 0.5); }
+        }
+        
+        @keyframes ripple {
+            0% { transform: scale(1); opacity: 1; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        
+        .dataflow {
+            position: absolute;
+            height: 8px;
+            width: 8px;
+            background-color: var(--accent);
+            border-radius: 50%;
+            opacity: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="grid"></div>
+        
+        <div class="title-container">
+            <h1>LESSONS LEARNED: MILITARY APPROACH TO CYBER THREATS</h1>
+            <h2>A Systematic Process for Continuous Improvement in Cybersecurity</h2>
+        </div>
+
+        <!-- MODIFIED: lesson-container moved here -->
+        <div class="lesson-container" id="lesson-container">
+            <div class="lesson-title" id="lesson-title"></div>
+            <div class="lesson-description" id="lesson-description"></div>
+        </div>
+        
+        <div class="dashboard">
+            <div class="scene" id="scene">
+                <!-- Dynamic elements will be added here via JavaScript -->
+                <div class="command-center" id="command-center">
+                    <div class="command-title">COMMAND DIRECTIVE</div>
+                    <div class="commander"></div>
+                    <div class="command-content">
+                        Implement "Lessons Learned" protocol following detection of advanced persistent threat (APT). Begin systematic review and documentation of all operational data.
+                    </div>
+                </div>
+                
+                <div class="attack-vector" id="attack-vector">ADVANCED PERSISTENT THREAT</div>
+                <div class="attack-wave" id="attack-wave-1"></div>
+                <div class="attack-wave" id="attack-wave-2"></div>
+                <div class="attack-wave" id="attack-wave-3"></div>
+                
+                <div class="defense-system" id="defense-system"></div>
+                <div class="shield" id="shield"></div>
+                
+                <div class="analysis-panel" id="analysis-panel">
+                    <div class="analysis-title">CRITICAL ANALYSIS</div>
+                    <div class="analysis-content">
+                        Forensic review identifies lateral movement technique exploiting zero-day vulnerability in authentication system. Attack pattern shows advanced evasion tactics not previously documented.
+                    </div>
+                </div>
+                
+                <div class="implementation-panel" id="implementation-panel">
+                    <div class="implementation-title">TACTICAL IMPLEMENTATION</div>
+                    <div class="implementation-content">
+                        Deploying countermeasures based on identified TTPs. Updating IDS signatures, implementing enhanced monitoring, and developing detection rules for similar attack patterns.
+                    </div>
+                </div>
+                
+                <div class="continuous-cycle" id="continuous-cycle"></div>
+                
+                <!-- MODIFIED: lesson-container REMOVED from here -->
+            </div>
+        </div>
+        
+        <div class="phase-indicator" id="phase-indicator">PHASE 1: COLLECTION</div>
+        
+        <div class="phase-container">
+            <div class="phase-dot active" id="phase1"></div>
+            <div class="phase-line"></div>
+            <div class="phase-dot" id="phase2"></div>
+            <div class="phase-line"></div>
+            <div class="phase-dot" id="phase3"></div>
+            <div class="phase-line"></div>
+            <div class="phase-dot" id="phase4"></div>
+            <div class="phase-line"></div>
+            <div class="phase-dot" id="phase5"></div>
+        </div>
+    </div>
+
+    <script>
+        // Generate background elements
+        const scene = document.getElementById('scene');
+        
+        // Add code snippets
+        const codeSnippets = [
+            "if(threat.signature === lastKnownTTP) {",
+            "function analyzeAttackVector(data) {",
+            "class AdaptiveDefense extends BaseFramework {",
+            "const vulnerabilityData = await fetchHistorical();",
+            "export default new LessonsRepository();",
+            "async function implementCountermeasure() {",
+            "const threatIntel = new SharedKnowledgeBase();"
+        ];
+        
+        // Reduced number and opacity of code snippets
+        for (let i = 0; i < 5; i++) {
+            const snippet = document.createElement('div');
+            snippet.className = 'code-snippet';
+            snippet.style.top = `${Math.random() * 400 + 50}px`; // Relative to scene
+            snippet.style.left = `${Math.random() * 700 + 50}px`; // Relative to scene
+            snippet.style.opacity = Math.random() * 0.15 + 0.05; // Max opacity 0.2
+            snippet.textContent = codeSnippets[Math.floor(Math.random() * codeSnippets.length)];
+            scene.appendChild(snippet);
+        }
+        
+        // Create particles
+        for (let i = 0; i < 50; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.top = `${Math.random() * 680}px`; // Adjusted for new container height
+            particle.style.left = `${Math.random() * 900}px`;
+            particle.style.opacity = Math.random() * 0.5 + 0.1;
+            document.querySelector('.container').appendChild(particle);
+        }
+        
+        // Phase content
+        const phases = [
+            {
+                name: "PHASE 1: COLLECTION",
+                title: "Collection & Documentation",
+                description: "Systematically gathering all data related to the cyber incident"
+            },
+            {
+                name: "PHASE 2: ANALYSIS",
+                title: "Analysis & Identification",
+                description: "Critical assessment of what happened, how it happened, and why"
+            },
+            {
+                name: "PHASE 3: DEVELOPMENT",
+                title: "Development of Solutions",
+                description: "Creating actionable countermeasures based on analytical findings"
+            },
+            {
+                name: "PHASE 4: IMPLEMENTATION",
+                title: "Implementation & Testing",
+                description: "Deploying solutions and validating their effectiveness"
+            },
+            {
+                name: "PHASE 5: INTEGRATION",
+                title: "Integration & Dissemination",
+                description: "Ensuring lessons are shared across the entire security ecosystem"
+            }
+        ];
+        
+        // Elements
+        const phaseIndicator = document.getElementById('phase-indicator');
+        const phaseDots = [
+            document.getElementById('phase1'),
+            document.getElementById('phase2'),
+            document.getElementById('phase3'),
+            document.getElementById('phase4'),
+            document.getElementById('phase5')
+        ];
+        
+        const commandCenter = document.getElementById('command-center');
+        const attackVector = document.getElementById('attack-vector');
+        const attackWave1 = document.getElementById('attack-wave-1');
+        const attackWave2 = document.getElementById('attack-wave-2');
+        const attackWave3 = document.getElementById('attack-wave-3');
+        const defenseSystem = document.getElementById('defense-system');
+        const shield = document.getElementById('shield');
+        const analysisPanel = document.getElementById('analysis-panel');
+        const implementationPanel = document.getElementById('implementation-panel');
+        const continuousCycle = document.getElementById('continuous-cycle');
+        const lessonContainer = document.getElementById('lesson-container');
+        const lessonTitle = document.getElementById('lesson-title');
+        const lessonDescription = document.getElementById('lesson-description');
+        
+        // Update phase
+        function updatePhase(index) {
+            // Update indicator
+            phaseIndicator.style.opacity = 0;
+            
+            setTimeout(() => {
+                phaseIndicator.textContent = phases[index].name;
+                phaseIndicator.style.opacity = 1;
+                
+                // Update dots
+                phaseDots.forEach((dot, i) => {
+                    if (i === index) {
+                        dot.classList.add('active');
+                    } else {
+                        dot.classList.remove('active');
+                    }
+                });
+                
+                // Update lesson content
+                lessonTitle.textContent = phases[index].title;
+                lessonDescription.textContent = phases[index].description;
+            }, 500);
+        }
+        
+        // Create data points and connectors
+        function createDataVisualization() {
+            const dataPoints = [];
+            const connectors = [];
+            
+            // Create data points
+            for (let i = 0; i < 5; i++) {
+                const dataPoint = document.createElement('div');
+                dataPoint.className = 'data-point';
+                // Adjusted top position to be lower, avoiding central lessonContainer (now static)
+                // These are relative to the scene div.
+                dataPoint.style.top = `${Math.random() * 80 + 280}px`; // Range: 280px to 360px within scene
+                dataPoint.style.left = `${Math.random() * 200 + 500}px`; // Within scene
+                scene.appendChild(dataPoint);
+                dataPoints.push(dataPoint);
+            }
+            
+            // Create connectors between points and shield
+            dataPoints.forEach((point, index) => {
+                const connector = document.createElement('div');
+                connector.className = 'connector';
+                
+                const pointX = parseInt(point.style.left);
+                const pointY = parseInt(point.style.top);
+                
+                connector.style.top = `${pointY + 10}px`;
+                connector.style.left = `${pointX + 10}px`;
+                
+                const shieldCenterX = 390 + 50;  // shield left + radius (relative to scene)
+                const shieldCenterY = 90 + 50;   // shield top + radius (relative to scene)
+                
+                const dx = shieldCenterX - (pointX + 10);
+                const dy = shieldCenterY - (pointY + 10);
+                const length = Math.sqrt(dx * dx + dy * dy);
+                const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                
+                connector.style.width = `${length}px`;
+                connector.style.transform = `rotate(${angle}deg) scaleX(0)`;
+                
+                scene.appendChild(connector);
+                connectors.push(connector);
+            });
+            
+            return { dataPoints, connectors };
+        }
+        
+        // Create cycle visualization
+        function createCycleVisualization() {
+            const nodePositions = [
+                { x: 80, y: 0, label: "Collection", labelPos: { x: 0, y: -40 } },
+                { x: 150, y: 50, label: "Analysis", labelPos: { x: 40, y: 0 } },
+                { x: 80, y: 150, label: "Development", labelPos: { x: 0, y: 40 } },
+                { x: 0, y: 50, label: "Implementation", labelPos: { x: -90, y: 0 } }
+            ];
+            
+            nodePositions.forEach((pos, index) => {
+                const node = document.createElement('div');
+                node.className = 'cycle-node';
+                node.textContent = (index + 1);
+                node.style.top = `${pos.y}px`;
+                node.style.left = `${pos.x}px`;
+                continuousCycle.appendChild(node);
+                
+                const label = document.createElement('div');
+                label.className = 'cycle-label';
+                label.textContent = pos.label;
+                label.style.top = `${pos.y + pos.labelPos.y}px`;
+                label.style.left = `${pos.x + pos.labelPos.x}px`;
+                continuousCycle.appendChild(label);
+            });
+        }
+        
+        // Create dataflow animations
+        function createDataFlow(startX, startY, endX, endY, delay) {
+            return new Promise(resolve => {
+                const dataflow = document.createElement('div');
+                dataflow.className = 'dataflow';
+                dataflow.style.left = `${startX}px`;
+                dataflow.style.top = `${startY}px`;
+                scene.appendChild(dataflow);
+                
+                setTimeout(() => {
+                    dataflow.style.opacity = 1;
+                    dataflow.style.transition = 'left 1.5s, top 1.5s';
+                    dataflow.style.left = `${endX}px`;
+                    dataflow.style.top = `${endY}px`;
+                    
+                    setTimeout(() => {
+                        dataflow.style.opacity = 0;
+                        setTimeout(() => {
+                            dataflow.remove();
+                            resolve();
+                        }, 500);
+                    }, 1500);
+                }, delay);
+            });
+        }
+        
+        // Animation sequence
+        async function runAnimation() {
+            createCycleVisualization();
+            
+            updatePhase(0);
+            phaseIndicator.style.opacity = 1;
+            lessonContainer.style.opacity = 1; // Initial fade-in for the static lesson container
+            
+            setTimeout(() => { // Show command center
+                commandCenter.style.opacity = 1;
+                commandCenter.style.transform = 'translateY(-50%)';
+                lessonContainer.style.opacity = '0.4'; // MODIFIED JS transform
+                lessonContainer.style.transform = 'scale(0.9)'; // MODIFIED JS transform
+                
+                setTimeout(() => { // Show attack
+                    attackVector.style.opacity = 1;
+                    attackVector.style.transform = 'translateX(0)';
+                    
+                    setTimeout(() => { // Trigger attack waves
+                        attackWave1.style.opacity = 1;
+                        attackWave1.style.animation = 'ripple 2s forwards';
+                        
+                        setTimeout(() => {
+                            attackWave2.style.opacity = 1;
+                            attackWave2.style.animation = 'ripple 2s forwards';
+                            
+                            setTimeout(() => {
+                                attackWave3.style.opacity = 1;
+                                attackWave3.style.animation = 'ripple 2s forwards';
+                                
+                                setTimeout(() => { // Show defense system
+                                    defenseSystem.style.opacity = 1;
+                                    defenseSystem.style.transform = 'scale(1)';
+                                    shield.style.opacity = 1;
+                                    
+                                    setTimeout(() => { // Phase 2: Analysis
+                                        updatePhase(1);
+                                        
+                                        setTimeout(() => { // Show analysis panel
+                                            analysisPanel.style.opacity = 1;
+                                            analysisPanel.style.transform = 'translateY(0)';
+                                            lessonContainer.style.opacity = '0.4'; // MODIFIED JS transform
+                                            lessonContainer.style.transform = 'scale(0.9)'; // MODIFIED JS transform
+                                            
+                                            const { dataPoints, connectors } = createDataVisualization();
+                                            
+                                            setTimeout(() => { // Animate data points
+                                                dataPoints.forEach((point, index) => {
+                                                    setTimeout(() => { point.style.opacity = 1; }, index * 300);
+                                                });
+                                                
+                                                setTimeout(() => { // Animate connectors
+                                                    connectors.forEach((connector, index) => {
+                                                        setTimeout(() => { connector.style.transform = connector.style.transform.replace('scaleX(0)', 'scaleX(1)'); }, index * 300);
+                                                    });
+                                                    
+                                                    setTimeout(() => { // Phase 3: Development
+                                                        updatePhase(2);
+                                                        lessonContainer.style.opacity = '1'; // MODIFIED JS transform
+                                                        lessonContainer.style.transform = 'scale(1)'; // MODIFIED JS transform
+
+                                                        commandCenter.style.opacity = '0';
+                                                        commandCenter.style.transform = 'translateY(-50%) translateX(-200px)';
+                                                        attackVector.style.opacity = '0';
+                                                        attackVector.style.transform = 'translateX(200px)';
+                                                        
+                                                        setTimeout(() => { // Change defense color
+                                                            defenseSystem.style.backgroundColor = 'var(--accent)';
+                                                            shield.style.borderColor = 'var(--accent)';
+                                                            
+                                                            const flows = [];
+                                                            for (let i = 0; i < 5; i++) {
+                                                                flows.push(createDataFlow(450, 150, 350 + Math.random() * 100, 200 + Math.random() * 100, i * 300));
+                                                            }
+
+                                                            setTimeout(() => { // Hide Phase 2 analysis elements
+                                                                analysisPanel.style.opacity = '0';
+                                                                analysisPanel.style.transform = 'translateY(50px)';
+                                                                dataPoints.forEach(dp => { dp.style.opacity = '0'; });
+                                                                connectors.forEach(cn => { cn.style.opacity = '0'; });
+                                                            }, 1500);
+                                                            
+                                                            setTimeout(() => { // Phase 4: Implementation
+                                                                updatePhase(3);
+                                                                lessonContainer.style.opacity = '1'; // MODIFIED JS transform
+                                                                lessonContainer.style.transform = 'scale(1)'; // MODIFIED JS transform
+                                                                
+                                                                setTimeout(() => { // Show implementation panel
+                                                                    implementationPanel.style.opacity = 1;
+                                                                    implementationPanel.style.transform = 'translateY(0)';
+                                                                    lessonContainer.style.opacity = '0.4'; // MODIFIED JS transform
+                                                                    lessonContainer.style.transform = 'scale(0.9)'; // MODIFIED JS transform
+                                                                    
+                                                                    const implementationFlows = [];
+                                                                    for (let i = 0; i < 5; i++) {
+                                                                        implementationFlows.push(createDataFlow(100 + 150, 220 + 75, 400 + 40 + (Math.random() - 0.5) * 40, 100 + 40 + (Math.random() - 0.5) * 40, i * 400));
+                                                                    }
+                                                                    
+                                                                    setTimeout(() => { // For Phase 5 transition
+                                                                        defenseSystem.style.animation = 'pulse 2s infinite alternate';
+                                                                        shield.style.transform = 'scale(1.1)';
+                                                                        shield.style.borderColor = 'var(--warning)';
+
+                                                                        setTimeout(() => { // Phase 5: updatePhase(4)
+                                                                            updatePhase(4);
+                                                                            lessonContainer.style.opacity = '1'; // MODIFIED JS transform
+                                                                            lessonContainer.style.transform = 'scale(1)'; // MODIFIED JS transform
+
+                                                                            setTimeout(() => { // Show continuousCycle
+                                                                                continuousCycle.style.opacity = 1;
+                                                                                continuousCycle.style.transform = 'scale(1) rotate(0deg)';
+                                                                                lessonContainer.style.opacity = '0.7'; // MODIFIED JS transform
+                                                                                lessonContainer.style.transform = 'translateY(-20px) scale(0.95)'; // MODIFIED JS transform
+
+                                                                                setTimeout(() => { // Animate continuousCycle
+                                                                                    continuousCycle.style.animation = 'rotate 20s linear infinite alternate';
+                                                                                    
+                                                                                    const cmdCenterX = 150 + 150, cmdCenterY = 110 + 100; // Relative to scene
+                                                                                    const analysisCenterX = 400 + 150, analysisCenterY = 220 + 75; // Relative to scene
+                                                                                    const implCenterX = 100 + 150, implCenterY = 220 + 75; // Relative to scene
+                                                                                    const cycleCenterX = 370 + 80, cycleCenterY = 190 + 80; // Relative to scene
+
+                                                                                    createDataFlow(cmdCenterX, cmdCenterY, cycleCenterX, cycleCenterY, 500);
+                                                                                    createDataFlow(analysisCenterX, analysisCenterY, cycleCenterX, cycleCenterY, 1000);
+                                                                                    createDataFlow(implCenterX, implCenterY, cycleCenterX, cycleCenterY, 1500);
+                                                                                    
+                                                                                    setTimeout(() => { // Final message
+                                                                                        lessonContainer.style.opacity = '1'; // MODIFIED JS transform
+                                                                                        lessonContainer.style.transform = 'translateY(0) scale(1)'; // MODIFIED JS transform
+
+                                                                                        lessonTitle.textContent = "SYSTEM OPTIMIZED";
+                                                                                        lessonDescription.textContent = "Continuous Improvement Cycle Fully Integrated.";
+                                                                                        phaseDots.forEach(dot => dot.style.animation = 'pulse 1.5s infinite alternate');
+                                                                                        defenseSystem.style.animation = ''; 
+                                                                                        shield.style.transform = 'scale(1)';
+                                                                                        shield.style.borderColor = 'var(--secondary)';
+                                                                                    }, 4000);
+                                                                                }, 1500);
+                                                                            }, 1000);
+                                                                        }, 3000);
+                                                                    }, 3500);
+                                                                }, 1000);
+                                                            }, 3500);
+                                                        }, 1000);
+                                                    }, 3000);
+                                                }, 1000);
+                                            }, 1000);
+                                        }, 1000);
+                                    }, 3000);
+                                }, 1000);
+                            }, 500);
+                        }, 500);
+                    }, 1000);
+                }, 1000);
+            }, 500); 
+        }
+
+        window.addEventListener('load', () => {
+            setTimeout(runAnimation, 500); 
+        });
+    </script>
+</body>
+</html>

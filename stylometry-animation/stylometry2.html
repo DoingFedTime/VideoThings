@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Understanding Stylometry Through Animation</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.7.1/dist/chart.min.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: #333;
+            background-color: #f8f9fa;
+            overflow-x: hidden;
+        }
+        
+        .section {
+            min-height: 100vh;
+            padding: 2rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .highlight {
+            background-color: rgba(255, 215, 0, 0.3);
+            padding: 2px;
+            border-radius: 3px;
+        }
+
+        .text-sample {
+            line-height: 1.8;
+            padding: 1.5rem;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .text-analysis {
+            height: 300px;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        .author-fingerprint {
+            height: 200px;
+            width: 100%;
+            margin: 20px 0;
+        }
+
+        @keyframes highlightWord {
+            0% { background-color: transparent; }
+            50% { background-color: rgba(255, 215, 0, 0.5); }
+            100% { background-color: transparent; }
+        }
+
+        .word {
+            display: inline-block;
+            padding: 0 2px;
+            margin: 0 1px;
+            border-radius: 3px;
+            transition: background-color 0.3s;
+        }
+
+        .word.highlight {
+            animation: highlightWord 1.5s;
+        }
+
+        .metric-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+            margin: 2rem 0;
+        }
+
+        .metric-card {
+            width: 220px;
+            padding: 1rem;
+            margin: 0.5rem;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .metric-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .application-card {
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .analysis-step {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid #4299e1;
+            background-color: white;
+            border-radius: 0 8px 8px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            opacity: 0;
+            transform: translateX(-20px);
+            transition: all 0.5s ease-out;
+        }
+        
+        .analysis-step.visible {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Animation for the fingerprint visual */
+        @keyframes pulse {
+            0% { r: 3; }
+            50% { r: 5; }
+            100% { r: 3; }
+        }
+
+        circle.author-marker {
+            animation: pulse 2s infinite;
+        }
+
+        /* Progress bars */
+        .progress-container {
+            width: 100%;
+            height: 20px;
+            background-color: #e2e8f0;
+            border-radius: 10px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0%;
+            background-color: #4299e1;
+            border-radius: 10px;
+            transition: width 1.5s ease;
+        }
+        
+        /* Fixed height containers for better PDF export */
+        .fixed-height-container {
+            height: 400px;
+            position: relative;
+        }
+        
+        /* For the text comparison visual */
+        .text-comparison {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+        
+        .text-column {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        /* Feature extraction visualization */
+        .feature-extraction {
+            position: relative;
+            height: 250px;
+            overflow: visible;
+            margin: 2rem 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="bg-blue-700 text-white py-8 px-4 text-center">
+        <h1 class="text-4xl font-bold mb-4">Understanding Stylometry</h1>
+        <p class="text-xl">The statistical analysis of writing style to determine authorship</p>
+    </header>
+
+    <main>
+        <!-- Introduction Section -->
+        <section class="section bg-white">
+            <div class="container mx-auto max-w-4xl">
+                <h2 class="text-3xl font-bold mb-6 text-center text-blue-700">What is Stylometry?</h2>
+                
+                <div class="text-center mb-8">
+                    <div id="introduction-animation" class="w-full h-64 bg-gray-50 rounded-lg shadow-inner flex items-center justify-center">
+                        <!-- Animation will be inserted here by JS -->
+                    </div>
+                </div>
+                
+                <p class="text-lg text-center mb-6">
+                    Stylometry analyzes writing style to identify authors based on their unique linguistic "fingerprints"
+                </p>
+                
+                <div class="text-comparison">
+                    <div class="text-column" id="author1-text">
+                        <h3 class="text-xl font-bold text-blue-600 mb-2">Author A</h3>
+                        <p>The morning sun cast long shadows across the deserted street. He paused, lighting a cigarette, observing the quiet scene. It was always like this—peaceful, predictable, almost too perfect.</p>
+                    </div>
+                    <div class="text-column" id="author2-text">
+                        <h3 class="text-xl font-bold text-green-600 mb-2">Author B</h3>
+                        <p>Sunlight flooded the empty avenue at dawn. She stopped and watched, taking in the stillness and silence. This place—it never changed, remained constantly serene, eerily flawless.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Metrics Section -->
+        <section class="section bg-gray-50">
+            <div class="container mx-auto max-w-4xl">
+                <h2 class="text-3xl font-bold mb-8 text-center text-blue-700">Key Metrics in Stylometry</h2>
+                
+                <div class="metric-container">
+                    <div class="metric-card" id="word-length">
+                        <div class="text-3xl font-bold text-blue-600 mb-2">
+                            <i class="fas fa-text-width"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Word Length</h3>
+                        <p>Average word length and distribution of word sizes</p>
+                        <div class="progress-container mt-3">
+                            <div class="progress-bar" data-value="65"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card" id="sentence-length">
+                        <div class="text-3xl font-bold text-green-600 mb-2">
+                            <i class="fas fa-ruler-horizontal"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Sentence Length</h3>
+                        <p>Average sentences per paragraph and words per sentence</p>
+                        <div class="progress-container mt-3">
+                            <div class="progress-bar" data-value="78"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card" id="vocabulary-richness">
+                        <div class="text-3xl font-bold text-purple-600 mb-2">
+                            <i class="fas fa-book"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Vocabulary Richness</h3>
+                        <p>Type-token ratio and lexical diversity</p>
+                        <div class="progress-container mt-3">
+                            <div class="progress-bar" data-value="82"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="metric-card" id="function-words">
+                        <div class="text-3xl font-bold text-red-600 mb-2">
+                            <i class="fas fa-paperclip"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Function Words</h3>
+                        <p>Usage patterns of articles, pronouns, and prepositions</p>
+                        <div class="progress-container mt-3">
+                            <div class="progress-bar" data-value="91"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="fixed-height-container mt-8">
+                    <canvas id="metricsChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Pattern Analysis Section -->
+        <section class="section bg-white">
+            <div class="container mx-auto max-w-4xl">
+                <h2 class="text-3xl font-bold mb-8 text-center text-blue-700">How Algorithms Analyze Text</h2>
+                
+                <div class="text-sample" id="sample-text">
+                    <p>The old house creaked under the weight of years. <span class="word">She</span> walked <span class="word">slowly</span> through the <span class="word">rooms</span>, remembering <span class="word">childhood</span> summers and <span class="word">winter</span> evenings by the <span class="word">fireplace</span>. <span class="word">Every</span> <span class="word">corner</span> held a <span class="word">memory</span>, <span class="word">every</span> <span class="word">shadow</span> a <span class="word">story</span>. It <span class="word">was</span> <span class="word">strange</span> how <span class="word">time</span> could <span class="word">transform</span> a <span class="word">place</span> yet <span class="word">leave</span> it <span class="word">fundamentally</span> <span class="word">unchanged</span>.</p>
+                </div>
+                
+                <div class="feature-extraction" id="feature-extraction-visual">
+                    <!-- Feature extraction visualization will be inserted here -->
+                </div>
+                
+                <div class="analysis-steps mt-8">
+                    <h3 class="text-2xl font-semibold mb-4">The Analysis Process:</h3>
+                    <div class="analysis-step" id="step1">
+                        <h4 class="text-xl font-semibold text-blue-600">1. Text Preprocessing</h4>
+                        <p>Clean text by removing punctuation, converting to lowercase, and tokenizing into words and sentences</p>
+                    </div>
+                    <div class="analysis-step" id="step2">
+                        <h4 class="text-xl font-semibold text-blue-600">2. Feature Extraction</h4>
+                        <p>Identify and measure linguistic features like word frequencies, sentence structures, and grammatical patterns</p>
+                    </div>
+                    <div class="analysis-step" id="step3">
+                        <h4 class="text-xl font-semibold text-blue-600">3. Statistical Analysis</h4>
+                        <p>Apply statistical methods to quantify stylistic differences and similarities between texts</p>
+                    </div>
+                    <div class="analysis-step" id="step4">
+                        <h4 class="text-xl font-semibold text-blue-600">4. Machine Learning Classification</h4>
+                        <p>Train algorithms to recognize patterns and classify texts based on author-specific features</p>
+                    </div>
+                </div>
+                
+                <div class="text-analysis mt-8">
+                    <canvas id="analysisChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <!-- Author Fingerprinting Section -->
+        <section class="section bg-gray-50">
+            <div class="container mx-auto max-w-4xl">
+                <h2 class="text-3xl font-bold mb-8 text-center text-blue-700">Author Fingerprinting</h2>
+                
+                <p class="text-lg mb-6 text-center">Every author has a unique "fingerprint" based on their writing style</p>
+                
+                <div class="author-fingerprint" id="fingerprint-visual">
+                    <!-- SVG for author fingerprinting will be inserted here -->
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-blue-600 mb-3">Individual vs. Group</h3>
+                        <p>Algorithms can distinguish between individual authors and detect group writing patterns</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-green-600 mb-3">Evolution Over Time</h3>
+                        <p>Author styles can evolve, but core stylistic elements often remain detectable</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-purple-600 mb-3">Cross-Genre Analysis</h3>
+                        <p>Stylometric patterns persist even when authors write across different genres</p>
+                    </div>
+                    <div class="bg-white p-6 rounded-lg shadow">
+                        <h3 class="text-xl font-semibold text-red-600 mb-3">Confidence Levels</h3>
+                        <p>Modern algorithms provide statistical confidence measures for authorship attribution</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Real-world Applications Section -->
+        <section class="section bg-white">
+            <div class="container mx-auto max-w-4xl">
+                <h2 class="text-3xl font-bold mb-8 text-center text-blue-700">Real-World Applications</h2>
+                
+                <div class="application-card bg-blue-50">
+                    <h3 class="text-2xl font-semibold text-blue-700 mb-3">Literary Analysis</h3>
+                    <p class="mb-4">Identifying anonymous authors of historical texts and resolving disputed attributions</p>
+                    <div class="application-visual mb-4" id="literary-visual"></div>
+                    <p><strong>Example:</strong> Determining the true authors of The Federalist Papers</p>
+                </div>
+                
+                <div class="application-card bg-green-50">
+                    <h3 class="text-2xl font-semibold text-green-700 mb-3">Forensic Linguistics</h3>
+                    <p class="mb-4">Analyzing threatening letters, ransom notes, and suspicious communications</p>
+                    <div class="application-visual mb-4" id="forensic-visual"></div>
+                    <p><strong>Example:</strong> Identifying authors of anonymous threatening messages</p>
+                </div>
+                
+                <div class="application-card bg-purple-50">
+                    <h3 class="text-2xl font-semibold text-purple-700 mb-3">Plagiarism Detection</h3>
+                    <p class="mb-4">Identifying writing style inconsistencies that may indicate plagiarism</p>
+                    <div class="application-visual mb-4" id="plagiarism-visual"></div>
+                    <p><strong>Example:</strong> Detecting ghostwritten academic papers or books</p>
+                </div>
+                
+                <div class="application-card bg-red-50">
+                    <h3 class="text-2xl font-semibold text-red-700 mb-3">Online Security</h3>
+                    <p class="mb-4">Authenticating user identities through writing style analysis</p>
+                    <div class="application-visual mb-4" id="security-visual"></div>
+                    <p><strong>Example:</strong> Identifying fake accounts or impersonators on social media</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-gray-800 text-white py-6 px-4 text-center">
+        <p>© 2023 Understanding Stylometry | Educational Resource</p>
+    </footer>
+
+    <script>
+        // Animate the introduction
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize introduction animation
+            const introSvg = d3.select('#introduction-animation')
+                .append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .attr('viewBox', '0 0 800 200');
+            
+            // Create text nodes
+            const textData = [
+                { text: "Every author has a unique writing style", x: 400, y: 50 },
+                { text: "Stylometry analyzes these patterns", x: 400, y: 100 },
+                { text: "To identify who wrote a text", x: 400, y: 150 }
+            ];
+            
+            // Add texts with animation
+            introSvg.selectAll('.intro-text')
+                .data(textData)
+                .enter()
+                .append('text')
+                .attr('x', d => d.x)
+                .attr('y', d => d.y)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#3b82f6')
+                .attr('font-size', '20px')
+                .attr('font-weight', '600')
+                .attr('opacity', 0)
+                .text(d => d.text)
+                .transition()
+                .duration(1500)
+                .delay((d, i) => i * 800)
+                .attr('opacity', 1);
+            
+            // Add connecting lines
+            introSvg.append('path')
+                .attr('d', 'M400,60 C500,60 500,90 400,90')
+                .attr('stroke', '#3b82f6')
+                .attr('stroke-width', 2)
+                .attr('fill', 'none')
+                .attr('stroke-dasharray', 300)
+                .attr('stroke-dashoffset', 300)
+                .transition()
+                .delay(500)
+                .duration(1500)
+                .attr('stroke-dashoffset', 0);
+            
+            introSvg.append('path')
+                .attr('d', 'M400,110 C300,110 300,140 400,140')
+                .attr('stroke', '#3b82f6')
+                .attr('stroke-width', 2)
+                .attr('fill', 'none')
+                .attr('stroke-dasharray', 300)
+                .attr('stroke-dashoffset', 300)
+                .transition()
+                .delay(1500)
+                .duration(1500)
+                .attr('stroke-dashoffset', 0);
+            
+            // Animate progress bars
+            setTimeout(() => {
+                document.querySelectorAll('.progress-bar').forEach(bar => {
+                    const value = bar.getAttribute('data-value');
+                    bar.style.width = `${value}%`;
+                });
+            }, 500);
+            
+            // Word highlighting animation
+            let wordIndex = 0;
+            const words = document.querySelectorAll('.word');
+            
+            function highlightNextWord() {
+                // Remove highlight from all words
+                words.forEach(word => word.classList.remove('highlight'));
+                
+                // Highlight the next word
+                if (wordIndex < words.length) {
+                    words[wordIndex].classList.add('highlight');
+                    wordIndex = (wordIndex + 1) % words.length;
+                }
+                
+                // Call the function again after a delay
+                setTimeout(highlightNextWord, 800);
+            }
+            
+            // Start the word highlighting animation
+            setTimeout(highlightNextWord, 2000);
+            
+            // Animate analysis steps
+            const analysisSteps = document.querySelectorAll('.analysis-step');
+            
+            function showAnalysisSteps() {
+                analysisSteps.forEach((step, index) => {
+                    setTimeout(() => {
+                        step.classList.add('visible');
+                    }, 500 * (index + 1));
+                });
+            }
+            
+            // Use intersection observer to trigger animations when scrolled into view
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        if (entry.target.classList.contains('analysis-steps')) {
+                            showAnalysisSteps();
+                        }
+                    }
+                });
+            }, { threshold: 0.2 });
+            
+            observer.observe(document.querySelector('.analysis-steps'));
+            
+            // Create feature extraction visualization
+            const featureSvg = d3.select('#feature-extraction-visual')
+                .append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .attr('viewBox', '0 0 800 250');
+            
+            // Add text features flowing into categories
+            const features = [
+                { text: "the", x: 100, y: 50, category: "function" },
+                { text: "of", x: 150, y: 70, category: "function" },
+                { text: "and", x: 80, y: 90, category: "function" },
+                { text: "magnificent", x: 130, y: 110, category: "content" },
+                { text: "swiftly", x: 70, y: 130, category: "adverb" },
+                { text: "beautiful", x: 120, y: 150, category: "adjective" },
+                { text: "contemplated", x: 90, y: 170, category: "verb" }
+            ];
+            
+            const categories = [
+                { name: "Function Words", x: 400, y: 60, color: "#3b82f6" },
+                { name: "Content Words", x: 400, y: 120, color: "#10b981" },
+                { name: "Word Types", x: 400, y: 180, color: "#8b5cf6" }
+            ];
+            
+            // Add category boxes
+            featureSvg.selectAll('.category')
+                .data(categories)
+                .enter()
+                .append('rect')
+                .attr('x', d => d.x - 100)
+                .attr('y', d => d.y - 20)
+                .attr('width', 200)
+                .attr('height', 40)
+                .attr('rx', 5)
+                .attr('fill', d => d.color)
+                .attr('opacity', 0.8);
+            
+            // Add category text
+            featureSvg.selectAll('.category-text')
+                .data(categories)
+                .enter()
+                .append('text')
+                .attr('x', d => d.x)
+                .attr('y', d => d.y + 5)
+                .attr('text-anchor', 'middle')
+                .attr('fill', 'white')
+                .attr('font-weight', 'bold')
+                .text(d => d.name);
+            
+            // Add features text
+            featureSvg.selectAll('.feature')
+                .data(features)
+                .enter()
+                .append('text')
+                .attr('x', d => d.x)
+                .attr('y', d => d.y)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#4b5563')
+                .text(d => d.text)
+                .attr('opacity', 0)
+                .transition()
+                .duration(1000)
+                .delay((d, i) => i * 300)
+                .attr('opacity', 1);
+            
+            // Connect features to categories with animated lines
+            setTimeout(() => {
+                features.forEach((feature, i) => {
+                    let targetY;
+                    let targetColor;
+                    
+                    if (feature.category === "function") {
+                        targetY = categories[0].y;
+                        targetColor = categories[0].color;
+                    } else {
+                        targetY = categories[1].y;
+                        targetColor = categories[1].color;
+                    }
+                    
+                    if (feature.category === "adverb" || feature.category === "adjective" || feature.category === "verb") {
+                        targetY = categories[2].y;
+                        targetColor = categories[2].color;
+                    }
+                    
+                    featureSvg.append('path')
+                        .attr('d', `M${feature.x},${feature.y} C${feature.x + 100},${feature.y} ${300},${targetY} ${400 - 110},${targetY}`)
+                        .attr('stroke', targetColor)
+                        .attr('stroke-width', 1.5)
+                        .attr('fill', 'none')
+                        .attr('stroke-dasharray', 300)
+                        .attr('stroke-dashoffset', 300)
+                        .transition()
+                        .delay(i * 300 + 500)
+                        .duration(1000)
+                        .attr('stroke-dashoffset', 0);
+                });
+            }, 1000);
+            
+            // Add right side stats features
+            const stats = [
+                { name: "Statistical", x: 600, y: 50 },
+                { name: "Analysis", x: 600, y: 80 },
+                { name: "Machine", x: 600, y: 150 },
+                { name: "Learning", x: 600, y: 180 }
+            ];
+            
+            // Add stats text
+            featureSvg.selectAll('.stats')
+                .data(stats)
+                .enter()
+                .append('text')
+                .attr('x', d => d.x)
+                .attr('y', d => d.y)
+                .attr('text-anchor', 'middle')
+                .attr('fill', '#4b5563')
+                .attr('font-weight', 'bold')
+                .attr('font-size', '16px')
+                .text(d => d.name)
+                .attr('opacity', 0)
+                .transition()
+                .duration(1000)
+                .delay((d, i) => i * 300 + 2000)
+                .attr('opacity', 1);
+            
+            // Connect categories to stats
+            setTimeout(() => {
+                categories.forEach((category, i) => {
+                    const targetY = i === 1 ? stats[2].y : stats[0].y;
+                    
+                    featureSvg.append('path')
+                        .attr('d', `M${category.x + 100},${category.y} C${category.x + 150},${category.y} ${550},${targetY} ${stats[0].x - 50},${targetY}`)
+                        .attr('stroke', category.color)
+                        .attr('stroke-width', 1.5)
+                        .attr('fill', 'none')
+                        .attr('stroke-dasharray', 300)
+                        .attr('stroke-dashoffset', 300)
+                        .transition()
+                        .delay(i * 300 + 3000)
+                        .duration(1000)
+                        .attr('stroke-dashoffset', 0);
+                });
+            }, 2000);
+            
+            // Author fingerprint visualization
+            const fingerprintSvg = d3.select('#fingerprint-visual')
+                .append('svg')
+                .attr('width', '100%')
+                .attr('height', '100%')
+                .attr('viewBox', '0 0 800 200');
+            
+            // Create authors
+            const authors = [
+                { name: "Author A", color: "#3b82f6", x: 200, features: [0.8, 0.3, 0.9, 0.5, 0.7] },
+                { name: "Author B", color: "#10b981", x: 400, features: [0.3, 0.8, 0.4, 0.9, 0.2] },
+                { name: "Author C", color: "#8b5cf6", x: 600, features: [0.6, 0.6, 0.2, 0.7, 0.5] }
+            ];
+            
+            const featureLabels = ["Word Length", "Sentence Length", "Function Words", "Vocabulary", "Punctuation"];
+            
+            // Add feature lines
+            featureLabels.forEach((feature, i) => {
+                fingerprintSvg.append('line')
+                    .attr('x1', 100)
+                    .attr('y1', 30 + i * 30)
+                    .attr('x2', 700)
+                    .attr('y2', 30 + i * 30)
+                    .attr('stroke', '#e5e7eb')
+                    .attr('stroke-width', 1);
+                
+                fingerprintSvg.append('text')
+                    .attr('x', 100)
+                    .attr('y', 26 + i * 30)
+                    .attr('text-anchor', 'start')
+                    .attr('fill', '#4b5563')
+                    .attr('font-size', '12px')
+                    .text(feature);
+            });
+            
+            // Add author markers
+            authors.forEach(author => {
+                // Add author name
+                fingerprintSvg.append('text')
+                    .attr('x', author.x)
+                    .attr('y', 190)
+                    .attr('text-anchor', 'middle')
+                    .attr('fill', author.color)
+                    .attr('font-weight', 'bold')
+                    .text(author.name);
+                
+                // Add feature points
+                author.features.forEach((value, i) => {
+                    fingerprintSvg.append('circle')
+                        .attr('cx', author.x)
+                        .attr('cy', 30 + i * 30)
+                        .attr('r', 0)
+                        .attr('fill', author.color)
+                        .attr('class', 'author-marker')
+                        .transition()
+                        .duration(1000)
+                        .delay(i * 200)
+                        .attr('r', 4);
+                });
+                
+                // Connect the points
+                const lineGenerator = d3.line()
+                    .x(d => author.x)
+                    .y((d, i) => 30 + i * 30);
+                
+                fingerprintSvg.append('path')
+                    .attr('d', lineGenerator(author.features))
+                    .attr('stroke', author.color)
+                    .attr('stroke-width', 2)
+                    .attr('fill', 'none')
+                    .attr('opacity', 0.5)
+                    .attr('stroke-dasharray', 500)
+                    .attr('stroke-dashoffset', 500)
+                    .transition()
+                    .duration(1500)
+                    .delay(1000)
+                    .attr('stroke-dashoffset', 0);
+            });
+            
+            // Create metrics chart
+            const metricsCanvas = document.getElementById('metricsChart');
+            const metricsChart = new Chart(metricsCanvas, {
+                type: 'radar',
+                data: {
+                    labels: ['Word Length', 'Sentence Length', 'Vocabulary', 'Function Words', 'Punctuation', 'n-grams'],
+                    datasets: [
+                        {
+                            label: 'Author A',
+                            data: [65, 78, 82, 91, 56, 70],
+                            backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)'
+                        },
+                        {
+                            label: 'Author B',
+                            data: [54, 67, 92, 76, 85, 43],
+                            backgroundColor: 'rgba(16, 185, 129, 0.2)',
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            pointBackgroundColor: 'rgba(16, 185, 129, 1)'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Author Style Comparison',
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        }
+                    },
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 100
+                        }
+                    }
+                }
+            });
+            
+            // Create analysis chart
+            const analysisCanvas = document.getElementById('analysisChart');
+            const analysisChart = new Chart(analysisCanvas, {
+                type: 'bar',
+                data: {
+                    labels: ['Shakespeare', 'Marlowe', 'Bacon', 'Unknown Text'],
+                    datasets: [{
+                        label: 'Probability of Authorship',
+                        data: [0.15, 0.78, 0.07, 0],
+                        backgroundColor: [
+                            'rgba(59, 130, 246, 0.7)',
+                            'rgba(16, 185, 129, 0.7)',
+                            'rgba(139, 92, 246, 0.7)',
+                            'rgba(244, 114, 182, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgba(59, 130, 246, 1)',
+                            'rgba(16, 185, 129, 1)',
+                            'rgba(139, 92, 246, 1)',
+                            'rgba(244, 114, 182, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Authorship Attribution Analysis',
+                            font: { size: 16 }
+                        },
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            max: 1,
+                            title: {
+                                display: true,
+                                text: 'Probability'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Potential Authors'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            // Animate unknown text analysis after a delay
+            setTimeout(() => {
+                analysisChart.data.datasets[0].data[3] = 0.82;
+                analysisChart.update();
+            }, 4000);
+            
+            // Create application visuals
+            function createApplicationVisual(id, color) {
+                const svg = d3.select(`#${id}`)
+                    .append('svg')
+                    .attr('width', '100%')
+                    .attr('height', '80px')
+                    .attr('viewBox', '0 0 800 80');
+                
+                // Add flowing text effect
+                for (let i = 0; i < 20; i++) {
+                    svg.append('rect')
+                        .attr('x', i * 40)
+                        .attr('y', 20)
+                        .attr('width', Math.random() * 30 + 5)
+                        .attr('height', 8)
+                        .attr('rx', 3)
+                        .attr('fill', color)
+                        .attr('opacity', Math.random() * 0.5 + 0.3);
+                    
+                    if (i % 3 !== 0) {
+                        svg.append('rect')
+                            .attr('x', i * 40 + 10)
+                            .attr('y', 35)
+                            .attr('width', Math.random() * 20 + 5)
+                            .attr('height', 8)
+                            .attr('rx', 3)
+                            .attr('fill', color)
+                            .attr('opacity', Math.random() * 0.5 + 0.3);
+                    }
+                    
+                    if (i % 2 === 0) {
+                        svg.append('rect')
+                            .attr('x', i * 40 + 15)
+                            .attr('y', 50)
+                            .attr('width', Math.random() * 25 + 5)
+                            .attr('height', 8)
+                            .attr('rx', 3)
+                            .attr('fill', color)
+                            .attr('opacity', Math.random() * 0.5 + 0.3);
+                    }
+                }
+                
+                // Add floating analysis elements
+                for (let i = 0; i < 5; i++) {
+                    const x = 100 + i * 150;
+                    
+                    svg.append('circle')
+                        .attr('cx', x)
+                        .attr('cy', 30)
+                        .attr('r', 10)
+                        .attr('fill', 'white')
+                        .attr('stroke', color)
+                        .attr('stroke-width', 2);
+                    
+                    svg.append('text')
+                        .attr('x', x + 20)
+                        .attr('y', 35)
+                        .attr('fill', color)
+                        .attr('font-size', '12px')
+                        .text(() => {
+                            const options = ['Feature', 'Pattern', 'Style', 'Match', 'Analysis'];
+                            return options[i % options.length];
+                        });
+                    
+                    // Animate circle pulse
+                    svg.select(`circle:nth-of-type(${i + 1})`)
+                        .attr('opacity', 0.7)
+                        .transition()
+                        .duration(2000)
+                        .delay(i * 500)
+                        .attr('r', 12)
+                        .attr('opacity', 1)
+                        .transition()
+                        .duration(2000)
+                        .attr('r', 10)
+                        .attr('opacity', 0.7)
+                        .on('end', function repeat() {
+                            d3.select(this)
+                                .transition()
+                                .duration(2000)
+                                .attr('r', 12)
+                                .attr('opacity', 1)
+                                .transition()
+                                .duration(2000)
+                                .attr('r', 10)
+                                .attr('opacity', 0.7)
+                                .on('end', repeat);
+                        });
+                }
+            }
+            
+            // Create the application visuals
+            createApplicationVisual('literary-visual', '#3b82f6');
+            createApplicationVisual('forensic-visual', '#10b981');
+            createApplicationVisual('plagiarism-visual', '#8b5cf6');
+            createApplicationVisual('security-visual', '#ef4444');
+            
+            // Text comparison animation
+            function animateTextComparison() {
+                const author1Text = document.getElementById('author1-text').querySelector('p');
+                const author2Text = document.getElementById('author2-text').querySelector('p');
+                
+                // Split text into spans for animation
+                function wrapWordsInSpans(element) {
+                    const text = element.textContent;
+                    const words = text.split(' ');
+                    element.innerHTML = '';
+                    
+                    words.forEach((word, i) => {
+                        const span = document.createElement('span');
+                        span.textContent = word + ' ';
+                        span.className = 'word-item';
+                        span.style.transition = 'background-color 0.5s';
+                        element.appendChild(span);
+                    });
+                }
+                
+                wrapWordsInSpans(author1Text);
+                wrapWordsInSpans(author2Text);
+                
+                // Highlight similar patterns
+                function highlightPatterns() {
+                    const patterns = [
+                        { author1Index: 0, author2Index: 0, color: 'rgba(59, 130, 246, 0.3)' }, // "The/Sunlight"
+                        { author1Index: 2, author2Index: 3, color: 'rgba(16, 185, 129, 0.3)' }, // "cast/flooded"
+                        { author1Index: 7, author2Index: 6, color: 'rgba(139, 92, 246, 0.3)' }, // "street./avenue"
+                        { author1Index: 9, author2Index: 7, color: 'rgba(244, 114, 182, 0.3)' }, // "paused/stopped"
+                    ];
+                    
+                    const author1Spans = author1Text.querySelectorAll('.word-item');
+                    const author2Spans = author2Text.querySelectorAll('.word-item');
+                    
+                    patterns.forEach((pattern, i) => {
+                        setTimeout(() => {
+                            // Reset previous highlights
+                            author1Spans.forEach(span => span.style.backgroundColor = 'transparent');
+                            author2Spans.forEach(span => span.style.backgroundColor = 'transparent');
+                            
+                            // Add new highlights
+                            if (author1Spans[pattern.author1Index]) {
+                                author1Spans[pattern.author1Index].style.backgroundColor = pattern.color;
+                            }
+                            if (author2Spans[pattern.author2Index]) {
+                                author2Spans[pattern.author2Index].style.backgroundColor = pattern.color;
+                            }
+                        }, i * 1500);
+                    });
+                    
+                    // Reset all highlights at the end and restart
+                    setTimeout(() => {
+                        author1Spans.forEach(span => span.style.backgroundColor = 'transparent');
+                        author2Spans.forEach(span => span.style.backgroundColor = 'transparent');
+                        setTimeout(highlightPatterns, 1000);
+                    }, patterns.length * 1500 + 500);
+                }
+                
+                // Start pattern highlighting after a delay
+                setTimeout(highlightPatterns, 2000);
+            }
+            
+            // Start text comparison animation
+            animateTextComparison();
+        });
+    </script>
+</body>
+</html>
